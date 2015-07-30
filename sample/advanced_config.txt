@@ -1,0 +1,61 @@
+
+#############################################################
+#   Advanced configurations for the G. sulphuraria example  #
+#############################################################
+
+title=Galdieria sulphuraria          # title of the task
+
+# BLAST parameters #
+nRequests=4                          # run 4 http connections simultaneously
+dbBlast=nr                           # BLAST database
+delay=10                             # time delay (sec) between http requests
+nHit=100                             # return 100 hits per BLAST
+evalue=1e-10                         # E-value cutoff
+percIdent=0.6                        # percentage identity cutoff
+taxBlast=1                           # retrieve TaxBLAST reports
+seqBlast=1                           # retrieve hit sequences
+
+# post-BLAST modification #
+ignoreParalogs=1                     # ignore putative paralogs
+ignoreSeqRepeats=1                   # ignore repeated sequence domains
+ignoreSubspecies=1                   # ignore more than one subspecies/strain from the same species
+
+# phylogenetic analysis #
+realign=clustalw                     # realign sequences using ClustalW
+clustalw=clustalw                    # command for ClustalW
+trimSeq=gblocks                      # trim unreliable regions using Gblocks
+gblocks=Gblocks                      # command for Gblocks
+buildTree=raxml                      # build phylogenetic tree using RAxML
+raxml=raxmlHPC                       # command for RAxML
+aaModel=LG                           # amino acid substitution model
+bsTree=100                           # perform 100 fast bootstraps
+distance=1                           # compute phylogenetic distance matrix
+
+# Grouping scenario #
+selfGroup=83373                      # Galdieria
+closeGroup=2759                      # eucaryotes
+
+# Graphics #
+graphFp=1                            # graph fingerprint using R
+boxPlot=1                            # box plot
+histogram=1                          # histogram
+densityPlot=1                        # density plot
+scatterPlot=0                        # scatter plot (off)
+
+# Algorithm parameters #
+useDistance=1                        # use phylogenetic distance instead of bit score
+howCO=4                              # (default) perform kernel density estimation (KDE)
+globalCO=0.25                        # (default) global cutoff set as first quartile (25%)
+exOutlier=3                          # exclude outliers using the modified z-score method
+dipTest=0                            # perform Hartigan's dip test (for non-unimodality)
+dipSig=0.05                          # use global cutoff instead of KDE if p-value > 0.05
+toolKDE=1                            # perform KDE using R
+bwF=0.3                              # bandwidth selection factor for KDE
+toolExtrema=1                        # find local extrema using R
+modKCO=1                             # (default) cutoff is defined as the midpoint of the x-coordinates
+                                       # of the first peak and the first pit
+# Summary #
+POE=1                                # report putative ORFans or annotation errors
+outText=1                            # generate text report
+outHTML=1                            # generate HTML report
+outExcel=1                           # generate Excel report

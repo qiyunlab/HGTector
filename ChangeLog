@@ -1,0 +1,16 @@
+ChangeLog of HGTector
+
+== Version 0.1.9 (6/1/2015) ==
+
+New features:
+- Accepting pre-computed BLAST results (by BLAST, Blat, Usearch, etc).
+- Sending multiple query sequences per search, thus accelerating the batch BLAST task.
+- Looking up taxonomy from a GI-to-TaxID dictionary, thus accelerating the process.
+- Plotting reference gene set along with prediction results.
+- Percentage coverage cutoff (for BLAST search).
+
+Bug fixes:
+- Updated the BLAST server URL.
+- Improved efficiency of batch BLAST and result processing.
+- Allowed taxonomy of input genomes defined in config.txt. 
+- Multiple bug fixes in Perl code and in GUI.

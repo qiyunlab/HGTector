@@ -1,0 +1,22 @@
++----------------------+
+|  About this example  |
++----------------------+
+
+This example is to demonstrate the basic usage and predicting power of HGTector.
+
+The input dataset is 100 protein-coding genes from the genome of Galdieria sulphuraria (NCBI ID: 405), a unicellular red alga found in hot sulphur springs. The genome of G. sulphuraria and its HGT pattern was explored in this paper:
+
+Schönknecht, G. et al. Gene transfer from bacteria and archaea facilitated evolution of an extremophilic eukaryote. Science 339, 1207-10 (2013)
+
+You can use HGTector to analyze this dataset with basic settings, by executing the following command in the program folder:
+
+  perl HGTector.pl example
+
+If your system environment meets all requirements (see "Checklist" of "GUI.html" for details), you can also try advanced settings, by replacing "config.txt" with "advanced_config.txt" and then executing the above command.
+
+The program will guide you through the whole process. Typically, it will take approximately 1-2 hours to BLAST all 100 genes and retrieve the taxonomic information of all hits, then it will take dozens of seconds to complete the rest of the analysis.
+
+After the analysis is finished, you will find a "result" folder, in which the predicted HGT-derived genes are listed in "HGT/gsul.txt" and are summarized in "report.html". In our test, 9 genes were predicted to be HGT-derived, including two ArsB genes (EME29520 and EME26816), as described in Figure 3 of the above paper.
+
+We have tested this process, and packaged the result in the compressed file "example_output.zip". You can refer to the content of this file to see whether your analysis is correct and your result is reasonable. Note: the result is subject to change by time, since GenBank is being updated every minute!
+

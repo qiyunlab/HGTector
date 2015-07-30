@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>HGTector Quick Start Guide</title>
+		<style type="text/css" media=screen>
+			img{
+				margin-left:20px;
+				margin-right:20px;
+			}
+			textarea{
+				margin-left:20px;
+				margin-right:20px;
+			}
+			div.indent{
+				margin-left:20px;
+			}
+		</style>
+	</head>
+	<body style="width:800px; margin-left:auto; margin-right:auto; background-color:Linen; font-family:Sans">
+		<p><big><big><strong>HGTector ver 0.1.9 Quick Start Guide</strong></big></big></p>
+		<p>Qiyun Zhu, Katharina Dittmar</p>
+		<hr>
+		<p><big><strong>Index</strong></big></p>
+		<p><a href="#System_requirement">System requirements</a></p>
+		<hr>
+		<a name="System_requirement"></a>
+		<p><big><strong>System Requirements</strong></big></p>
+		<p><b>Operating system</b>: HGTector is cross-platform. It supports <b>Windows</b>, <b>Mac OS X</b> and <b>Linux</b> (and perhaps other Unix-like operating systems).</p>
+		<p><b>Perl</b>: HGTector is written in <a href="http://www.perl.org/">Perl</a>. It requires that you have a Perl interpreter installed in your system. The Perl interpreter is a standard component in most Mac OS X and Linux distributions. If you are a Windows user and you haven't installed it, you may download and install <a href="http://strawberryperl.com/">Strawberry Perl</a> or <a href="http://www.activestate.com/activeperl">ActivePerl</a>.
+		<p><b>R</b>: <u>Optionally</u>, HGTector calls R to perform some advanced statistics and graphics. If you want to use these functions, you may install <a href="http://www.r-project.org/">R</a>, as well as Perl package <a href="http://search.cpan.org/~fangly/Statistics-R-0.31/lib/Statistics/R.pm">Statistics::R</a>. Please refer to the <a href="manual.html">manual</a> for instructions.</p>
+		
+		<hr>
+		<p><strong>Working directory</strong></p>
+		<p>Choose a folder to hold all input, intermediate and output files. This folder is your <b>working directory</b>.</p>
+		<p>Prior to running HGTector, the working directory should contain a subfolder "<b>input</b>" to hold all input files, and a configuration file "<b>config.txt</b>" to specify the parameters for HGTector scripts.</p>
+		<p>Note: all folder names and file names, such "<b><u>i</u></b>nput", are case sensitive. Same below.</p>
+		<p><img src="images/wkdir.png" width="400" alt="Working directory"></p>
+		
+		<p><strong>Configuring HGTector</strong></p>
+		<p>The configuration file "<b>config.txt</b>" is a plain text file that may be manipulated using any text editor. A <a href="../config.txt">template</a> detailing all available parameters, their usages and their default values can be found in the program folder.</p>
+		<p>A parameter definition is written as "<code>parameter=value</code>". Leading and trailing spaces are acceptable. Contents following a "<code>#</code>" symbol are comments and will not be intepreted by the program. You just need to specify parameters with non-default values in your own configuration file.</p>
+		<p><img src="images/config.png" width="513" alt="Configuration file"></p>
+		
+		<p>The configuration file can be generated using the <a href="../GUI.html">GUI</a>, which provides options and explanations for most parameters.</p>
+		<p><img src="images/GUI.png" width="621" alt="GUI"></p>
+		
+		<hr>
+		<p><strong>Input files</strong></p>
+		<p>One or more input files may be placed in subfolder "<b>input</b>". One file is considered as one "<b>set</b>" of proteins (protein-coding genes). A protein set may contain the entire, or partial proteome of one organism of interest. Multiple input files may correspond to multiple related organisms.</p>
+		<p>These files should have simple and clear names. In the illustrated case, "Bh.txt" contains all protein entries of <i>Bartonella henselae</i> str. Houston-1. This protein set will be referred to as "<b>Bh</b>" in the program. The extension name ".txt" will be automatically trimmed.</p>
+		<p><img src="images/input.png" width="400" alt="Input files"></p>
+		<p>Two types of input protein sets are acceptable:</p>
+		
+		<hr>
+		<p><strong>1. NCBI protein entries</strong></p>
+		<p>This only applies to proteins that are already recorded in the NCBI database (also in the BLAST database). The proteins will be referred to by their NCBI accession numbers (e.g., <code>YP_033345</code>). Version numbers will be omitted. A simple list of accession numbers makes a valid input file:</p>
+	<p><textarea id="accn_list" rows="10" cols="72"  wrap="off">
+YP_033345
+YP_034258
+YP_034360
+YP_034359
+YP_034358
+YP_034357
+YP_034356
+YP_034355
+YP_034354
+YP_034353
+YP_034352
+YP_034351
+YP_034350
+YP_034349
+YP_034348
+...
+		</textarea></p>
+		
+		<p>HGTector supports multiple native NCBI formats to facilitate easy retrieval of input files, such as a list of summaries or a whole-genome annotation file in GenBank format (*.gb or *.gbk). Here are examples of quickly retrieving these files:</p>
+		<p>In the NCBI web interface, locate proteins of interest and download Summary or FASTA.</p>
+		<p><img src="images/NCBI_web_protein.png" alt="Download protein records from NCBI web interface" width="600"></p>
+		<p>Or, visit the <a href="ftp://ftp.ncbi.nih.gov/genomes/">NCBI FTP site</a>, find a genome of interest, and download the corresponding *.gbk files (GenBank format).
+		<p><img src="images/NCBI_FTP_genome.png" alt="Download genomes from NCBI database" width="600"></p>
+		
+		<hr>
+		<p><strong>2. User-defined protein sequences</strong></p>
+		<p>You may feed HGTector with protein sequences that do not correspond to NCBI records (e.g., your unpublished transcriptomic data). Simply create a FASTA file containing these sequences.</p>
+		<p>Note: The sequence titles should be reasonable, meaning: not containing the NCBI-style delimiter "<code>|</code>" or any other weird characters.</p>
+		<p><textarea id="user_fasta" rows="10" cols="72"  wrap="off">
+>Bh_prot00001
+MICRLSSKELMMKLPMIDQLEKLTGHYFKDKKKLKKALTHSSVQGSEQGNYERLEFLGDRVLGLLIAEMLYQLFPQASEGELSVRLNSLVNAQTCADIALEMELPVMIHVGFEMKNLKGRRLTNMYADVIEALIAVIYLDGGLESVRPFIQRYWQSRAKQMDAGRRDAKTQLQEWAHVQGGVQPHYRVVKRSGPDHDPVFMVEVSIPGFASEIGQGNSKRCAERMAAEKILRREGIWETMEKNNHE
+>Bh_prot00002
+MKRLINNKSKSKNSIVAIAATVTVFFMDTLVYAQTLDKAEKALGSLKKDLVEKIIPVAAVVILLCLAIGYAGRYIEKDTFIRWAIGVIIAGSATQLATMLFGTP
+>Bh_prot00003
+MDFSIEQKYQELLKIISSVSRETMQDLMHFESLIIQWNKHINLISSSTIPLLWTRHILDSAQIYPLHSDLLHWCDLGSGGGFPAIVIAIFMKEKKTGHIDLVESNGKKVAFLRTVIAQLDLPATVYHCRIEDVTQKIKNPEVITARGLACLDDLLRLIFPLLTQKTIALLQKGRDYSKEIKNASANWQFDLLKHKSKIDENSVILEISQVRSFRG
+>Bh_prot00004
+MSEMRIIAIANQKGGVGKTTTAINLATALAAIGENVLIMDIDPQGNASTGLGIDRNSRPLSSYDVMISGISVTKAALKTAVPNLSIVPSTLDLLGVEMEIASSQDRIQRLRKALYDDPKMAKKFSYILIDCPPSLNLLTLNAMGAADSVLVPMQCEFLALEGLSQLLETVKQVQSVLNPSLEIQGIVLTMYDGRNNLSNQVVEDVRSFMGDKVYRTVIPRNVRVSEAPSFGKPVLLYDLKCAGSQAYLRLASEVIQREKQAQAAA
+>Bh_prot00005
+MNDDQSKKRLGRGLAALIGDINLNNNPTRSTSAEKLSESSTVSTFSEKLVPLESILCNPHNPRRHFTEEELDNLAQSIRQHGIVQPIIVRPSRNHPHCFELIAGERRWRAAQRVHLSQLPVIVRDVDNKTALELAIIENVQRADLNPIEEAMGYEILLNEHGYTQADLAQVIGKSRSHVANTLRLLKLPSKVQKFLTDGQLSAGHARCLITVDNPLDLAEKIIREGLSVRQTEILVYEQANPKVKKRTSLEKDAETKSLEKLLADVIGMKVIIRHGKKGGDLKIHYSSLEQLDDICRRLQS
+>Bh_prot00006
+MLIEQFICREDNFGVLIHDETSGYTAAIDAPESNAIQNALKRRNWTLQTIFLTHHHHDHVEALAELKQIYKAIVIGPEAEKEKISHIDQTLKPDESFLFGTHTILALSTPGHTLGALSYYFPQENLLFAGDTLFSLGCGRLFEGTPAQMLNSLKKLRQLPDETLLYCGHEYTKSNALFALTLDPYNQKLQQRAEDVFLLRAKNAMTLPVTLGQEKKNNPFLRWDNRTLRKTLRMEKETDEEVFAEIRKRKDNF
+>Bh_prot00007
+MKKSFFEHNSYNNHDSKNINTNQKAPLSPTLKFLLEMGPLVIFFLANYKGEWLINNIEIFKRFNKPLFPATAIFMMAIIVALVLSWILARKIPIMPLISGIFVLVFGSLTLWLHNDTFIKMKPTIINSLFALVLFGGLFFKKPLLRYIFDSTFKLDDLGWKKLTYRWAFFFIFLAVLNEVIWRNFSDNFWTNFKVFAIMPITVFFMLTQMPLIMKHSKDLFKEEDKTNS
+>Bh_prot00008
+MTKPFIKKIFSFNKSKEQKIEQVSTPYENDRVDENKDKSEITKNDLSSIDRKTKEQTENQNIASAKYDEKNQPFESYSSKEHHSSKVIITDIISEKKIEEILPVSSVEQEKRAWFGRLKKGLALSSQRLSKSIGEVFVKEKLDKDKLQELEDILIQADLGVETATHITDTLASSRYKKNLSPDDVHSIIANEIEKVLKPVAIPLELDLNHKPHVILLVGVNGTGKTTTIGKLAAKLTKGGLKVMLAAGDTFRAAAIEQLHIWGERIGAPVISTK
+...
+		</textarea></p>
+
+		<p>Note: One or more input files, regardless of format, can be merged or split.</p>
+		
+		<hr>
+		<p><strong>Running HGTector</strong></p>
+		<p>Despite having a <a href="../GUI.html">GUI</a> to generate config.txt, the HGTector program <a href="../HGTector.pl">itself</a> is written in Perl and only runs in a <b>terminal</b> (aka. a command-line window). To launch a terminal, you should:<p>
+		<div class="indent">
+			<p><b>Windows</b> users: press Win+R, type "cmd", and click "OK".</p>
+			<p><b>Mac OS X</b> users: navigate to "Applications/Utilities", find "Terminal", and double-click on it.</p>
+			<p><b>Unix/Linux</b> users: you know what to do.</p>
+		</div>
+		<p>Navigate to HGTector's <a href="..">program directory</a> using command <code>cd</code>. For example, if the program folder "HGTector" is placed on your desktop, then you may sequentially enter these commands:</p>
+		<blockquote><code>cd Desktop<br>cd HGTector</code></blockquote>
+		<p>Run <a href="../HGTector.pl">HGTector</a> by typing:
+		<blockquote><code>perl HGTector.pl path/to/working/directory</code></blockquote>
+		<p>If you are not familiar with paths and directories, you may place the working directory (say, "mytask") in the HGTector folder, and simply type:
+		<blockquote><code>perl HGTector.pl mytask</code></blockquote>
+		<p>The program will now start to run through the whole process. There will be screen prompts to indicate any ongoing steps. You may keep pressing <code>Enter</code> (interactive mode) or simply wait (automatic mode) until you see the final result.</p>
+		<p><img src="images/run_HGTector.png" alt="Run HGTector" width=650></p>
+
+		<hr>
+		<p><strong>Running individual scripts</strong></p>
+		<p>The program is composed of multiple Perl scripts (in program subfolder "scripts", core scripts are in <b>bold</b> font, optional scripts are in regular font):</p>
+		<ul>
+			<li><b>Blaster</b>: performs batch BLAST.</li>
+			<li>Validator: check the integrity of BLAST results, deleting incomplete reports and invalid hits.</li>
+			<li>Taxonomer: retrieve taxonomic information for existing BLAST reports.</li>
+			<li>Filterer: filter existing BLAST reports, labeling redundant or insignificant hits.</li>
+			<li>Treer: a complete phylogenetics pipeline, automatically builds trees for each gene based on BLAST hits.</li>
+			<li><b>Analyzer</b>: the core component of the HGTector method, analyzes BLAST results and predict HGT events.</li>
+			<li>BBH: performs reverse BLAST, as part of the conventional bidirectional best hit method.</li>
+			<li>Orthologer: identifies orthology among input genes based on BLAST results.</li>
+			<li><b>Summarizer</b>: summarizes HGT prediction results, generating reports.</li>
+		</ul>
+		<p>Alternative to running the master script (HGTector.pl) directly, you may execute individual scripts (e.g., Blaster) by typing:</p>
+		<blockquote><code>perl scripts/blaster.pl path/to/working/directory</code></blockquote>
+		<p>This allows a more flexible and controllable way of conducting the analysis.</p>
+		
+		<hr>
+		<p id="blaster"><strong>Batch BLAST</strong></p>
+		<p>This step performs all-vs-all BLASTP of all input proteins against an external database. It is the data collection stage of the analysis, a significantly time-consuming step.</p>
+		<p>To save time, the recommended usage of HGTector is to spend some time in running Blaster with relatively relaxed parameters, keep all retrieve BLAST results, then analyze the data for multiple times with different combinations of stringent parameters.</p>
+		
+		<p></p>
+		<p>You may either perform BLAST via http connection to the NCBI BLAST server (by default), or use standalone BLAST program on local BLAST databases, in which case, you need to download and install them. Please refer to this <a href="http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download">page</a> for instructions.</p>
+		<p>The most important parameter at this step is the "number of hits to return" (<code>nHit</code>). It should allow sufficient sampling of BLAST hits for the genes. For single cellular eukaryotes, 100 hits may be enough; for most bacteria and archaea, 250-500 hits are recommended; for bacteria whose sister groups have been extensively sequenced (e.g., 500 <i>E. coli</i> genomes...), you may need more hits.</p>
+		<p>When the task starts, the status of individual BLAST searches will be displayed on screen. If multiple Blaster instances are running simultaneously, the ongoing Blaster instances and the number of completed BLASTs will be updated every ten minutes.</p>
+		<p><img src="images/qs_07.png" alt="Blaster screen output" width="402.7" height="270"></p>
+		<p>A "blast" folder will be created in the working directory. The folder will contain subfolders representing individual protein sets, and log files recording the status of individual BLAST searches. The BLAST results of individual proteins will be stored in the subfolders.</p>
+		<p><img src="images/qs_08.png" alt="Blaster results" width="472" height="507.3"></p>
+		<p>The BLAST results are saved in a <a href="http://en.wikipedia.org/wiki/Nexus_file">NEXUS</a>-like format (*.bla). It contains a basic information section, and a BLAST hit table section.</p>
+		<p>If you have switched on the "TaxBLAST" option (<code>taxBlast=1</code>), there will be an additional section, displaying the taxonomic tree of hits in an easy-to-read manner:</p>
+		<p><textarea id="output" rows="10" cols="72"  wrap="off">
+BEGIN LINEAGE;
+Bacteria            [bacteria]
+. Alphaproteobacteria [a-proteobacteria]
+. . Rhizobiales         [a-proteobacteria]
+. . . Bartonella          [a-proteobacteria]
+. . . . Bartonella clarridgeiae 73 --------------------- 1276 2 hits [a-proteobacteria]
+. . . . Bartonella sp. AR 15-3 ......................... 1170 1 hit  [a-proteobacteria]
+. . . . Bartonella sp. 1-1C ............................ 1168 1 hit  [a-proteobacteria]
+. . . . Bartonella rochalimae ATCC BAA-1498 ............ 1165 1 hit  [a-proteobacteria]
+. . . . Bartonella bacilliformis KC583 ................. 1096 3 hits [a-proteobacteria]
+. . . . Bartonella bacilliformis INS ................... 1096 2 hits [a-proteobacteria]
+. . . . Bartonella washoensis 085-0475 ................. 1093 2 hits [a-proteobacteria]
+. . . . Bartonella washoensis Sb944nv .................. 1092 2 hits [a-proteobacteria]
+. . . . Bartonella alsatica IBS 382 .................... 1092 2 hits [a-proteobacteria]
+. . . . Bartonella vinsonii subsp. arupensis Pm136co ... 1089 2 hits [a-proteobacteria]
+. . . . Bartonella vinsonii subsp. arupensis OK-94-513 . 1088 2 hits [a-proteobacteria]
+. . . . Bartonella elizabethae Re6043vi ................ 1086 2 hits [a-proteobacteria]
+. . . . Bartonella elizabethae F9251 ................... 1086 2 hits [a-proteobacteria]
+. . . . Bartonella tribocorum CIP 105476 ............... 1083 3 hits [a-proteobacteria]
+. . . . Bartonella schoenbuchensis R1 .................. 1082 1 hit  [a-proteobacteria]
+. . . . Bartonella doshiae NCTC 12862 .................. 1080 2 hits [a-proteobacteria]
+. . . . Bartonella quintana str. Toulouse .............. 1077 3 hits [a-proteobacteria]
+. . . . Bartonella birtlesii LL-WM9 .................... 1076 2 hits [a-proteobacteria]
+. . . . Bartonella quintana RM-11 ...................... 1075 2 hits [a-proteobacteria]
+...
+END;
+		</textarea></p>
+		<p>If you have switched on the "Retrieve sequences" (<code>seqBlast=1</code>) or "Retrieve multiple sequence alignments" (<code>alnBlast=1</code>) option, an additional section will store the sequences of hits in NEXUS format. Therefore, the whole file can be directly opened by sequence-editing programs, such as <a href="http://pbil.univ-lyon1.fr/software/seaview.html">SeaView</a>.</p>
+		<p><img src="images/qs_09.png" alt="Sequences of hits" width="528" height="352.7"></p>
+		<p>Be prepared that the BLAST results may consume a considerable amount of disk space (typically hundreds of MB to several GB).
+		<p>The batch BLASTP process may take hours to days, depending on the size of input protein sets. It can be halted at any time (accidentally or intentionally). A halted task can be resumed at any time by re-executing this step.</p>
+
+
+		<hr>
+		<p><strong>Step 2: Taxonomer</strong></p>
+		<p>This step retrieves taxonomic information of all BLAST matches from the NCBI server. The information includes names and TaxIDs of designated taxonomic ranks. The process typically lasts for several to dozens of minutes.</p>
+		<p><img src="images/qs_10.png" alt="Running taxonomer" width="402.7" height="270"></p>
+		<p>The result will be saved as three files: "taxa.db", "ranks.db" and "self.info" in a folder named "taxonomy" in the working directory.</p>
+		
+		
+		<hr>
+		<p><strong>Step 3: Purifier</strong></p>
+		<p>This step is optional. It performs post-BLAST modifications to the BLAST reports. It includes a complete phylogenetics pipeline, which allows you to automatically build trees based on BLAST hits for each protein.</p>
+		<p><img src="images/qs_11.png" alt="Running purifier" width="402.7" height="270"></p>
+		<p>The resulting trees will be attached to each BLAST report in NEXUS format, too. Tip labels will be automatically translated into organism names. Therefore, the whole file can be directly viewed by tree-viewing programs, such as <a href="http://tree.bio.ed.ac.uk/software/figtree/">FigTree</a>.</p>
+		<p><img src="images/qs_12.png" alt="Tree of hits" width="513" height="398.5"></p>
+		<p>The amount of time this step takes varies, from 0 (if you skip this step) to weeks (if you want to build 10,000 deliberate maximum likelihood trees).</p>
+		<p>The sequence alignments and trees will not be used for subsequent analyses. They are just for you to verify prediction results, either by eyeballing the trees or by conducting further analyses of your preference.</p>
+
+
+		<hr>
+		<p><strong>Step 4: Analyzer</strong></p>
+		<p>This is the most important step of HGTector. It does all statistical tricks to find out which genes may be HGT-derived. All the intermediate and final results will be saved in folder "result".</p>
+		<p>You may run this step for several times with different parameters until you get a satisfying result. (You don't have to re-run the previous three steps.)</p>
+		<p>First, you need to specify a grouping scenario, which defines the <b><i>self</b></i>, <b><i>close</b></i> and <b><i>distal</b></i> groups of organisms.<p>
+		<p><img src="images/qs_13.png" alt="Input grouping scenario" width="548.7" height="188"></p>
+		<p>In brief, the <i>self</i> group contains all input genomes, and their immediate sister organisms. The <i>close</i> group contains sister groups of the <i>self</i> group, representing its vertical inheritance history. The <i>distal</i> group contains all other organisms, which are phylogenetically distant from the <i>self</i> group.</p>
+		<p>For example, if you are studying several human genomes, you may consider defining the <i>self</i> group as all humans (genus <i>Homo</i>, TaxID = 9605), the <i>close</i> group as all great apes (family Hominidae, TaxID = 9604) (except for humans), and the <i>distal</i> group as everything else.</p>
+		<p>Only gene flows from the <i>distal</i> group organisms to input genomes will be considered as putative HGT events.</p>
+		<p><img src="images/qs_14.png" alt="Analyze grouping scenario" width="402.7" height="270"></p>
+		<p>With a grouping scenario, the program will calculate the weight of BLAST hits of each group for each gene. For the whole genome(s), you will get three weight populations. They are defined as a "<b>fingerprint</b>" of the genome(s).</p>
+		<p><img src="images/qs_15.png" alt="Read BLAST reports" width="402.7" height="270"></p>
+		<p>The raw data (including three weights per gene) are saved as "rawdata.txt" in "result/statistics/". If you are familiar with statistics, you are encouraged to play with the data by yourself.</p>
+		<p><textarea id="output" rows="10" cols="72"  wrap="off">
+Query	Set	Length	Hits	Self	Close	Distal
+YP_004159187	Bc	129	197	24.367	133.208	6.204
+YP_004159238	Bc	608	198	21.790	78.819	7.964
+YP_004159099	Bc	301	196	21.191	87.224	2.834
+YP_004159114	Bc	460	193	22.314	83.640	8.415
+YP_004158607	Bc	464	181	22.712	44.007	30.600
+YP_004158998	Bc	205	126	22.833	39.721	0.349
+YP_004158476	Bc	444	198	22.531	76.073	10.906
+YP_004158389	Bc	188	199	13.223	49.661	5.983
+YP_004158852	Bc	278	199	22.080	96.884	17.001
+YP_004158342	Bc	144	172	19.046	32.000	23.660
+YP_004159301	Bc	247	200	19.789	69.501	5.034
+YP_004158379	Bc	215	200	20.377	72.729	13.112
+YP_004159246	Bc	305	200	18.159	50.171	2.885
+YP_004158455	Bc	348	197	21.159	71.121	28.829
+YP_004158436	Bc	137	140	24.658	69.071	0.000
+YP_004159567	Bc	244	199	20.894	71.272	5.132
+YP_004158625	Bc	351	200	22.606	90.002	23.118
+YP_004158984	Bc	206	199	20.057	88.571	19.206		
+		</textarea></p>
+		<p>If you have R installed, you may choose to graph the fingerprint (<code>graphFp=1</code>) as boxplot, histogram, density plot, and/or scatter plot. Here is an example:</p>
+		<p><img src="images/qs_16.png" alt="Graphing fingerprints" width="531" height="269"></p>
+		<p>Based on the fingerprint, the program will conduct cluster analyses to isolate a subset of genes that are significantly more likely to be horizontally acquired, comparing to the rest of the genome(s).</p>
+		<p><img src="images/qs_17.png" alt="Cluster analyses" width="548.7" height="256"></p>
+		<p>The results will be saved as tab-delimited text files in "result/detail/". Genes predicted to be HGT-derived will have a "1" in the "HGT" column.</p>
+		<p>As an alternative to this proposed new method, you may also conduct the conventional "bidirectional best match" method to predict HGT events, by switch on option <code>BBH=1</code>.</p>
+		<p>The whole step typically spends several minutes only.</p>
+		
+		
+		<hr>
+		<p><strong>Step 5: Summarizer</strong></p>
+		<p>Now that you have the prediction results, it is time to summarize them in a human-readable manner. This step does the job. It generates reports in your choice of plain text, web page (HTML) and/or Excel spreadsheet formats.</p>
+		<p><img src="images/qs_18.png" alt="HTML report" width="539.3" height="506.7"></p>
+		<p>You have options to have the program summarize HGT-derived genes in three contexts: by putative donor group, by functional annotation, or by gene orthology.</p>
+		<p><img src="images/qs_19.png" alt="Excel report" width="526" height="329.5"></p>
+		
+		<hr>
+		<p>Please email us (<a href="qiyunzhu@gmail.com">qiyunzhu@gmail.com</a>, <a href="katharinad@gmail.com">katharinad@gmail.com</a>) if you have any questions.</p>
+		<p>Last update: Jun. 1, 2015<p>
+  </body>
+</html>
