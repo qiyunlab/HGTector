@@ -10,7 +10,7 @@ nRequests=4                          # run 4 http connections simultaneously
 delay=5                              # time delay (sec) between http requests
 nHit=100                             # return 100 hits per BLAST
 evalue=1e-10                         # E-value cutoff
-percIdent=0.6                        # percentage identity cutoff
+identity=0.6                         # percentage identity cutoff
 
 # Filtering parameter #
 ignoreSubspecies=1                   # ignore more than one subspecies/strain from the same species

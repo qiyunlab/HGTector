@@ -142,6 +142,7 @@ for ($i=0; $i<=$#queries; $i++){
 	print OUT $queries[$i]{'set'}."\t".$queries[$i]{'id'}."\t".$queries[$i]{'accn1'}."\t".$queries[$i]{'taxid1'}."\t".$queries[$i]{'accn2'}."\t".$queries[$i]{'taxid2'}."\t$isBBH\n";	close OUT;
 	print " $isBBH.\n";
 }
+unlink "$wkDir/blast.seq";
 print "Reversal BLAST is completed.\n";
 
 exit 0;
@@ -164,9 +165,9 @@ sub blast (){
 			last if ($b[0] eq $query or $b[0] =~/^$query\.\d+$/);
 		}
 		my $length = $b[2];
-		open TMP, ">blast.seq"; print TMP $b[4]; close TMP;
+		open TMP, ">$wkDir/blast.seq"; print TMP $b[4]; close TMP;
 		# the report contains: subject accessions (all), E-value, bit score, aligned part of subject sequence
-		@out = `$blastp -query blast.seq -db $dbBlast -entrez_query \"$eqText\" -remote -outfmt \"6 sallacc evalue bitscore\"`;
+		@out = `$blastp -query $wkDir/blast.seq -db $dbBlast -entrez_query \"$eqText\" -remote -outfmt \"6 sallacc evalue bitscore\"`;
 		@a = split (/\t/, $out[0]);
 		my @accns = split (/;/, $a[0]);
 		foreach (@accns){

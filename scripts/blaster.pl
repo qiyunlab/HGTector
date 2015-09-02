@@ -185,6 +185,7 @@ if (-e "$wkDir/config.txt"){
 	}
 	close IN;
 }
+$maxHits = $nHits unless $maxHits;
 my %selfTaxids = ();
 if ($selfTax){
 	@a = split (/,/, $selfTax);
@@ -641,7 +642,7 @@ if ($blastMode or $nRequests == 1){
 		open LOG, ">>$wkDir/blast/$set.log";
 		print LOG "Program ended at $s.\n";
 		close LOG;
-		unlink "blast.seq";
+		unlink "$wkDir/blast.seq";
 		print "Batch BLAST of $set (".(scalar @{$ins{$set}{'pts'}})." queries) completed.\n";
 	}
 }else{
@@ -763,7 +764,7 @@ sub local_blast {
 	$s = "  BLASTing ";
 	$s = "  Importing " if ($preBlast and exists $ins{$set}{'pre'});
 	print $s.join(",", @queries)."...";
-	unlink "blast.seq" if -e "blast.seq";
+	unlink "$wkDir/blast.seq" if -e "$wkDir/blast.seq";
 	my %lengths = ();
 	foreach my $query (@queries){
 		open (OUT, ">$wkDir/blast/$set/$query.bla");
@@ -771,7 +772,7 @@ sub local_blast {
 		if ($isInSeq){
 			$lengths{$query} = length($inSeqs{$query});
 			print OUT "\tName=$query;\n\tLength=$lengths{$query};\n\tProduct=na;\n\tOrganism=".$ins{$set}{'organism'}.";\nEND;\n\n";
-			open TMP, ">>blast.seq"; print TMP ">".$query."\n".$inSeqs{$query}."\n"; close TMP;
+			open TMP, ">>$wkDir/blast.seq"; print TMP ">".$query."\n".$inSeqs{$query}."\n"; close TMP;
 		}else{ # look up query
 		
 			##### BAD MOVE #####
@@ -785,7 +786,7 @@ sub local_blast {
 			$s = join (" ", @b[5..$#b]);
 			$s =~ /^\s*(.+\S)\s*\[(.+)\]$/; ##### may need error treatment
 			print OUT "\tProduct=$1;\n\tOrganism=$2;\nEND;\n\n";
-			open TMP, ">>blast.seq"; print TMP ">".$query."\n".$b[4]."\n"; close TMP;
+			open TMP, ">>$wkDir/blast.seq"; print TMP ">".$query."\n".$b[4]."\n"; close TMP;
 		}
 		close OUT;
 	}
@@ -824,10 +825,10 @@ sub local_blast {
 	}else{
 
 		# run local BLASTP #
-		$s = "$blastp -query blast.seq -db $dbBlast -evalue $evalue -max_target_seqs $nHits -outfmt \"6 qseqid sallgi sallacc evalue bitscore pident qstart qend sseq\"";
+		$s = "$blastp -query $wkDir/blast.seq -db $dbBlast -evalue $evalue -max_target_seqs $nHits -outfmt \"6 qseqid sallgi sallacc evalue bitscore pident qstart qend sseq\"";
 		$s .= " -num_threads $nThreads" if ($nThreads > 1);
 		my @out = `$s`;
-		unlink "blast.seq";
+		unlink "$wkDir/blast.seq";
 		foreach (@out){
 			s/\s+$//; @a = split (/\t/);
 			next if ($identity and $identity > $a[5]); # % identity cutoff
@@ -857,13 +858,13 @@ sub local_blast {
 		}
 	}
 	if ((scalar keys %accn2taxid) < (scalar keys %gi2accn)){
-		open TMP, ">gis.txt";
+		open TMP, ">$wkDir/gis.txt";
 		foreach my $gi (keys %gi2accn){
 			next if exists $accn2taxid{$gi2accn{$gi}};
 			print TMP "gi|$gi\n";
 		}
 		close TMP;
-		my @out2 = `$blastdbcmd -dbtype=prot -db $dbBlast -entry_batch gis.txt -target_only -outfmt \"%g %a %T\"`;
+		my @out2 = `$blastdbcmd -dbtype=prot -db $dbBlast -entry_batch $wkDir/gis.txt -target_only -outfmt \"%g %a %T\"`;
 		foreach (@out2){
 			s/\s+$//; next unless $_;
 			@a = split (/\s+/); next if $#a < 2;
@@ -872,7 +873,7 @@ sub local_blast {
 			$a[1] =~ s/\.\d+$//;
 			$accn2taxid{$a[1]} = $a[2];
 		}
-		unlink "gis.txt";
+		unlink "$wkDir/gis.txt";
 	}
 	
 	# ignore invalid organism names
@@ -1439,7 +1440,7 @@ sub self_blast {
 	$length = length($inSeqs{$query}) if ($isInSeq);
 	if ($blastMode){ # local mode
 		if ($isInSeq){
-			open TMP, ">blast.seq"; print TMP ">$query\n".$inSeqs{$query}."\n"; close TMP;
+			open TMP, ">$wkDir/blast.seq"; print TMP ">$query\n".$inSeqs{$query}."\n"; close TMP;
 		}else{
 			##### BAD MOVE #####
 			my @out = `blastdbcmd -db $dbBlast -entry $query -outfmt \"%f\"`;
@@ -1450,9 +1451,9 @@ sub self_blast {
 				$queryseq .= $_;
 			}
 			$length = length($queryseq);
-			open TMP, ">blast.seq"; print TMP ">$query\n$queryseq\n"; close TMP;
+			open TMP, ">$wkDir/blast.seq"; print TMP ">$query\n$queryseq\n"; close TMP;
 		}
-		my @out = `$blastp -query blast.seq -subject blast.seq -outfmt \"6 evalue bitscore pident\"`;
+		my @out = `$blastp -query $wkDir/blast.seq -subject $wkDir/blast.seq -outfmt \"6 evalue bitscore pident\"`;
 		@a = split (/\t/, $out[0]);
 		return (0,0,0,0) if ($#a < 2);
 		$a[2] =~ s/\s+$//;

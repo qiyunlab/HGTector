@@ -1,16 +1,33 @@
 <!DOCTYPE HTML>
 <html>
 	<!--
-		This web page is a graphical user interface (GUI) of HGTector 0.1.9
+		This web page is a graphical user interface (GUI) of HGTector v0.1.9
 	-->
 	<head>
-		<title>HGTector 0.1.9 GUI</title>
+		<title>HGTector v0.1.9 GUI</title>
 		<style type="text/css" media=screen>
 			body{
+				color:#3D3C3A;
+				background-color:#F7F8F8;
 				font-family:Arial,Helvetica,sans-serif;
 			}
-			fieldset {
+			fieldset{
 				padding:1px;
+			}
+			a:link{
+				color:#1A47D1;
+			}
+			a:visited{
+				color:#A826D4;
+			}
+			div.subsection{
+				margin-left:20px;
+			}
+			div.toolbox{
+				border:1px solid black;
+				background-color:#D9FDFD;
+				padding-left:15px;
+				padding-right:15px;
 			}
 			p.header{
 				font-weight:bold;
@@ -21,16 +38,24 @@
 				/*font-family:arial;*/
 				/*font-size:36pt;*/
 			}
-			div.subsection{
-				margin-left:20px;
-			}
 			p.tooltip{
 				font-size:smaller;
 				border:1px dashed lightgrey;
 				background-color:lightyellow;
 				margin-left:20px;
 				margin-right:20px;
+				padding:4px;
 			}
+			p.indent{
+				margin-left:20px;
+			}
+			input.expand{
+				width:20px;
+				height:20px;
+				padding:0;
+				line-height:0;
+			}
+			
 		</style>
 		<script type="text/javascript">
 			function show_hide_section(section){
@@ -68,14 +93,15 @@
 				val = document.getElementById('eSearchServer').value; if (val != "http://www.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"){ out.value += 'eSearchServer='+val+'\n'; }
 				val = document.getElementById('eFetchServer').value; if (val != "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"){ out.value += 'eFetchServer='+val+'\n'; }
 				val = document.getElementById('eSummaryServer').value; if (val != "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"){ out.value += 'eSummaryServer='+val+'\n'; }
-				val = document.getElementById('blastp').value; if (val != ""){ out.value += 'blastp='+val+'\n'; }
-				val = document.getElementById('blastdbcmd').value; if (val != ""){ out.value += 'blastdbcmd='+val+'\n'; }
+				val = document.getElementById('blastp').value; if (val != "" && val != "blastp"){ out.value += 'blastp='+val+'\n'; }
+				val = document.getElementById('blastdbcmd').value; if (val != "" && val != "blastdbcmd"){ out.value += 'blastdbcmd='+val+'\n'; }
 				val = document.getElementById('taxdump').value; if (val != ""){ out.value += 'taxdump='+val+'\n'; }
+				else if (document.getElementById('blastMode').value == 1){ alert("Warning: A local taxonomy database is required for local BLAST.") }
 				val = document.getElementById('gi2taxid').value; if (val != ""){ out.value += 'gi2taxid='+val+'\n'; }
-				val = document.getElementById('clustalw').value; if (val != ""){ out.value += 'clustalw='+val+'\n'; }
-				val = document.getElementById('mafft').value; if (val != ""){ out.value += 'mafft='+val+'\n'; }
-				val = document.getElementById('gblocks').value; if (val != ""){ out.value += 'gblocks='+val+'\n'; }
-				val = document.getElementById('raxml').value; if (val != ""){ out.value += 'raxml='+val+'\n'; }
+				val = document.getElementById('clustalw').value; if (val != "" && val != "clustalw"){ out.value += 'clustalw='+val+'\n'; }
+				val = document.getElementById('mafft').value; if (val != "" && val != "mafft"){ out.value += 'mafft='+val+'\n'; }
+				val = document.getElementById('gblocks').value; if (val != "" && val != "Gblocks"){ out.value += 'gblocks='+val+'\n'; }
+				val = document.getElementById('raxml').value; if (val != "" && val != "raxmlHPC"){ out.value += 'raxml='+val+'\n'; }
 				val = document.getElementById('selfTax').value; if (val != ""){ out.value += 'selfTax='+val+'\n'; }
 				val = document.getElementById('blastMode').value; if (val != 0){
 					out.value += 'blastMode='+val+'\n';
@@ -86,8 +112,7 @@
 					val = document.getElementById('nRequests').value; if (val > 1){ out.value += 'nRequests='+val+'\n'; }
 					val = document.getElementById('delay').value; if (val != 5){ out.value += 'delay='+val+'\n'; }
 					val = document.getElementById('nRetry').value; if (val != 5){ out.value += 'nRetry='+val+'\n'; }
-					val = document.getElementById('taxBlast').value; if (val == 1){ out.value += 'taxBlast=1\n'; }
-					val = document.getElementById('alnBlast').value; if (val == 1){ out.value += 'alnBlast=1\n'; }
+					if (document.getElementById('taxBlast').checked){ out.value += 'taxBlast=1\n'; }
 				}
 				val = document.getElementById('dbBlast').value; if (val != "nr"){ out.value += 'dbBlast='+val+'\n'; }
 				val = document.getElementById('evalue').value; if (val != "1e-5"){ out.value += 'evalue='+val+'\n'; }
@@ -95,7 +120,8 @@
 				val = document.getElementById('coverage').value; if (val != ""){ out.value += 'coverage='+val+'\n'; }
 				val = document.getElementById('nHit').value; if (val != "500"){ out.value += 'nHit='+val+'\n'; }
 				val = document.getElementById('maxHits').value; if (val != ""){ out.value += 'maxHits='+val+'\n'; }
-				val = document.getElementById('seqBlast').value; if (val == 1){ out.value += 'seqBlast=1\n'; }
+				if (document.getElementById('seqBlast').checked){ out.value += 'seqBlast=1\n'; }
+				if (document.getElementById('alnBlast').checked){ out.value += 'alnBlast=1\n'; }
 				if (document.getElementById('blastMode').value != 2){
 					if (document.getElementById('isEqText').checked){
 						val = document.getElementById('eqText').value; if (val != ""){ out.value += 'eqText='+val+'\n'; }
@@ -201,10 +227,10 @@
 	</head>
 	
 	<body style="width:800px; margin-left:auto; margin-right:auto;">
-		<p><h3>HGTector 0.1.9 configuration file generator</h3></p>
+		<p><h3>HGTector v0.1.9 Configuration File Generator</h3></p>
 		<p>Qiyun Zhu, Katharina Dittmar</p>
 		<hr>
-		<p>Welcome! This page will guide you through the process of building an effective configuration file for HGTector. You may refer to <a href="docs/quickstart.html">Quick Start Guide</a> or <a href="docs/manual.html">User Manual</a> for further instructions.</p>
+		<p>Welcome! This page will guide you through the process of building an effective configuration file for HGTector.</p>
 		<p>Title of the task: <input type="text" id="title" size=30> Program mode: <select id="interactive"><option value=0>automatic</option><option value=1 selected="selected">interactive</option></select></p>
 		<hr>
 		<p></p>
@@ -212,64 +238,96 @@
 		<!--Checklist-->
 		<p class="header"><input type="button" id="btnCheck" value="Show" onclick="show_hide_section('Check')"> Checklist</p>
 		<div id="divCheck" style="display:none">
-			<p><i>HGTector's minimum requirement is but <a href="http://www.perl.org/">Perl</a>, a standard component of many systems. However, if you have some of the following tools and databases equipped in the system, you will have more options.</i><p>
-			<p><input type="checkbox" id="chkHttp" onchange="show_hide_subsection('Http');"> Network connection to BLAST servers and remote databases. By default, HGTector works with the <a href="http://www.ncbi.nlm.nih.gov/">NCBI server</a>. All you need is a solid Internet connection.<p>
+			<p><i>HGTector's minimum requirement is but <a href="http://www.perl.org/">Perl</a>, a standard component of many systems. However, more functionalities will be unlocked if some of the following tools and databases are already deployed in the system.</i><p>
+			<p><input type="checkbox" id="chkHttp" onchange="show_hide_subsection('Http');"> Network connection to a BLAST server and a remote database. By default, HGTector works with the <a href="http://www.ncbi.nlm.nih.gov/">NCBI server</a>. All you need is a solid Internet connection.<p>
 			<div class="subsection" id="divHttp" style="display:none">
-				<p>BLAST server: <input type="text" id="blastServer" size=50 value="http://blast.ncbi.nlm.nih.gov/Blast.cgi"></p>
-				<p>Align 2 sequences server: <input type="text" id="blastAlignServer" size=50 value="http://blast.ncbi.nlm.nih.gov/BlastAlign.cgi"></p>
-				<p>Entrez search server: <input type="text" id="eSearchServer" size=50 value="http://www.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"><br>Entrez fetch server: <input type="text" id="eFetchServer" size=50 value="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"><br>Entrez search server: <input type="text" id="eSummaryServer" size=50 value="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"><br></p>
+				<p>Remote BLAST database: <input type="text" id="dbBlast" size=40 value="nr"> [<a href="javascript:show_hide_tooltip('RemoteBlastDB')">?</a>]</p>
+				<p class="tooltip" id="tipRemoteBlastDB" style="display:none">Multiple databases are available at the NCBI BLAST server, including <code>nr</code> (default), <code>env_nr</code>, <code>refseq_protein</code>, <code>swissprot</code>, <code>pdb</code>, etc. See <a href="ftp://ftp.ncbi.nlm.nih.gov/blast/db"><b>here</b></a> for a list of available resources.</p>
+				<fieldset>
+					<legend>Edit the server URLs if necessary:</legend>
+					<p class="indent">BLAST: <input type="text" id="blastServer" size=50 value="http://blast.ncbi.nlm.nih.gov/Blast.cgi"><br>Align 2 Sequences: <input type="text" id="blastAlignServer" size=50 value="http://blast.ncbi.nlm.nih.gov/BlastAlign.cgi"><br>Entrez Search: <input type="text" id="eSearchServer" size=50 value="http://www.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"><br>Entrez Fetch: <input type="text" id="eFetchServer" size=50 value="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"><br>Entrez Summary: <input type="text" id="eSummaryServer" size=50 value="http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"><br></p>
+				</fieldset>
 			</div>
 			<p><input type="checkbox" id="chkNcbiBlast" onchange="show_hide_subsection('NcbiBlast')"> Local BLAST program (<a href="http://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download">NCBI BLAST+</a> or any alternatives that have compatible input/output) and local databases.</p>
 			<div class="subsection" id="divNcbiBlast" style="display:none">
-				<p>Executables of the BLAST program. Leave blank if they can be launched without their paths specified (the most common situation, same below).</p>
-				<p><b>blastp</b>: <input type="file" id="blastp" size="40"><br><b>blastdbcmd</b>: <input type="file" id="blastdbcmd" size="40"></p>
-				<p>Local BLAST database(s). You can either download from the <a href="ftp://ftp.ncbi.nlm.nih.gov/blast/db/">NCBI FTP site</a>, or build one for your own. Please refer to the official <a href="http://www.ncbi.nlm.nih.gov/books/NBK1763/">NCBI BLAST manual</a> for instructions.</p>
-				<p>Local taxonomy database. Please download it from the <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdmp.zip">NCBI FTP site</a>, extract the contents to a local directory, and specify the directory below: [<a href="javascript:show_hide_tooltip('Taxdump')">?</a>]<br><input type="text" id="taxdump" size="50"></p>
-				<p class="tooltip" id="tipTaxdump" style="display:none">All you need are two files: <b>names.dmp</b> and <b>nodes.dmp</b>. For example, type "/home/you/db/taxdump/" if they can be found under this directory. Tip: the taxonomy database should be equally or more up-to-date than the BLAST database(s).</p>
+				<p>Paths to the BLAST program executables (if necessary) [<a href="javascript:show_hide_tooltip('Blastp')">?</a>].</p>
+				<p class="tooltip" id="tipBlastp" style="display:none">If the programs are already defined in the environment variables, i.e., if you can launch the program by simply typing "<code>blastp</code>" in a terminal, you may leave the boxes as is. Same below.</p>
+				<p><b>blastp</b>: <input type="text" id="blastp" value="blastp" size=50>
+				<br><b>blastdbcmd</b>: <input type="text" id="blastdbcmd" value="blastdbcmd" size=50></p>
+				<p>Local BLAST database [<a href="javascript:show_hide_tooltip('LocalBlastDB')">?</a>]:<br><input type="text" id="dbLocalBlast" size=50 value="nr"></p>
+				<p class="tooltip" id="tipLocalBlastDB" style="display:none">Enter the name or the path/to/the/database. You may either download one from the <a href="ftp://ftp.ncbi.nlm.nih.gov/blast/db/">NCBI FTP site</a>, or build one for your own (<a href="#" onclick="if(document.getElementById('boxCustomBlastDB').style.display=='none'){document.getElementById('boxCustomBlastDB').style.display='block'}else{document.getElementById('boxCustomBlastDB').style.display='none'};return false;">see how</a>).</p>
+				<div class="toolbox" id="boxCustomBlastDB" style="display:none">
+					<p><b>Advanced topic: Customize your own BLAST database</b></p>
+					<p>Despite being sophiscated to set up, using a customized BLAST database is the preferred way for HGT detection, based on the following rationales:</p>
+					<p>1) As the size of the nr database continues to grow, BLAST search against it has become a computationally expensive operation. For a single proteome the wall-clock time can be hours to days.</p>
+					<p>2) The distribution of taxonomic groups in the standard database (such as nr) may be highly uneven. For example, there are a ton of <i>E. coli</i> strains AND only one giant panda. This causes potential bias in BLAST result clustering. A work-around is to check the "<b>ignore subspecies</b>" option (see the "Analyzer" section) to suppress redundant BLAST hits.</p>
+					<p>3) You may want to study gene flows among a certain set of genomes only. They may or may not be part of the GenBank.</p>
+					<p>The instruction for creating customized BLAST database can be found in the official <a href="http://www.ncbi.nlm.nih.gov/books/NBK279688/">NCBI BLAST manual</a>.</p>
+					<p>Please check out our new program <a href="https://github.com/JCVI-metagenomics/SubDBer"><b>SubDBer</b></a>. This program subsamples a large database at designated level and generates a smaller BLAST database in which taxonomic groups are evenly represented.</p>
+				</div>
+				<p>Local taxonomy database [<a href="javascript:show_hide_tooltip('Taxdump')">?</a>]:<br><input type="text" id="taxdump" size="50"></p>
+				<p class="tooltip" id="tipTaxdump" style="display:none">By default you should use the NCBI taxonomy database. Please download it from the <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdmp.zip">NCBI FTP site</a>, extract the contents to a local directory, and enter its path here. Among the multiple files in the archive, all you need are two files: <b>names.dmp</b> and <b>nodes.dmp</b>. Tip: the taxonomy database should be equally or more up-to-date than the BLAST database.<br><br>You may also consider building your own taxonomy database (<a href="#" onclick="if(document.getElementById('boxCustomTaxDB').style.display=='none'){document.getElementById('boxCustomTaxDB').style.display='block'}else{document.getElementById('boxCustomTaxDB').style.display='none'};return false;">see how</a>), if you are mainly studying customized sequence data.</p>
+				<div class="toolbox" id="boxCustomTaxDB" style="display:none">
+					<p><b>Advanced topic: Customize your own taxonomy database</b></p>
+					<p>The structure of the NCBI taxonomy database (<b>nodes.dmp</b> and <b>names.dmp</b>) is straightforward. Take a look at them and you may figure out how to create your own.</p>
+					<p>HGTector only needs a small proportion of the information in these files. For nodes.dmp, only the first three columns (ID, parent ID, and rank) are necessary. For names.dmp, only the first two columns (ID and name) are necessary, plus there should be the key word "scientific name" in any of the later columns. Therefore, you can create the files like this:</p>
+					<p>nodes.dmp:<br><code>1 | 1 | no rank<br>123 | 1 | genus<br>12345 | 123 | species<br>13254 | 123 | species<br>15423 | 123 | species<br>...</code></p>
+					<p>names.dmp:<br><code>1 | root | scientific name<br>123 | myGenus | scientific name<br>12345 | mySpeciesA | scientific name<br>13254 | mySpeciesB | scientific name<br>15423 | mySpeciesC | scientific name<br>...</code></p>
+				</div>
 				<p>Local GI-to-TaxID dictionary (optional): [<a href="javascript:show_hide_tooltip('GI2TaxID')">?</a>]<br><input type="text" id="gi2taxid" size="50"></p>
-				<p class="tooltip" id="tipGI2TaxID" style="display:none">By default, HGTector queries the BLAST database for TaxIDs of BLAST hits. This process is computationally inefficient, and may not work if the non-standard database does not contain TaxIDs. You may consider using a translation table (format: <code>GI&#60;tab&#62;TaxID</code>) instead.<br><br>The most comprehensive dictionary can be downloaded from the <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.zip">NCBI FTP site</a>. However, please be aware that it will consume dozens of GB of memory when loaded by the program.</p>
+				<p class="tooltip" id="tipGI2TaxID" style="display:none">By default, HGTector queries the BLAST database for TaxIDs of BLAST hits. This process is computationally inefficient, and may not work if a non-standard BLAST database does not contain TaxIDs (keep this in mind if you want to customize a BLAST database). You may consider using a translation table (format: <code>GI&#60;tab&#62;TaxID</code>) instead.<br><br>The most comprehensive dictionary can be downloaded from the <a href="ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/gi_taxid_prot.zip">NCBI FTP site</a>. It contains all NCBI protein entries. However, please be aware that it will consume dozens of GB of memory when loaded.</p>
 			</div>
-			<p><input type="checkbox" id="chkR" onchange="show_hide_subsection('R');"> <a href="http://www.r-project.org/">R</a>. HGTector calls R to perform some advanced statistical computing and graphics. To enable the communication between Perl and R, you also need to install Perl package <b>Statistics::R</b>.<p>
+			<p><input type="checkbox" id="chkR" onchange="show_hide_subsection('R');document.getElementById('chkGraph').checked=this.checked;document.getElementById('chkGraph').onchange()"> <b><a href="http://www.r-project.org/">R</a></b>. HGTector calls R to perform some advanced statistical computing and graphics. To enable the communication between Perl and R, you also need to install Perl package <b>Statistics::R</b>.<p>
 			<div class="subsection" id="divR" style="display:none">
 				<p><input type="checkbox" id="diptest"> R package <b>diptest</b> performs Hartigan's dip test to assess the significance of non-unimodality of weight distributions.</p>
 				<p><input type="checkbox" id="pastecs"> R package <b>pastecs</b> identifies local extrema of a kernel density function, in order to determine cutoffs.</p>
 				<p><input type="checkbox" id="rgl"> R package <b>rgl</b> creates interactive 3D scatter plots to visualize your data.</p>
-			</div>
-			<p><input type="checkbox" id="writeExcel"> Perl package <b>Spreadsheet::WriteExcel</b>. It allows the program to generate reports in Excel spreadsheet format.</p>
-			<p><input type="checkbox" id="chkPhyloWare" onchange="show_hide_subsection('PhyloWare')"> Programs for multiple sequence alignment and phylogenetic tree reconstruction.</p>
-			<div class="subsection" id="divPhyloWare" style="display:none">
-				<p>The following programs can be put together to establish an automated phylogenetics pipeline. You may need some of them if you want to build trees of the results.</p>
-				<p>Check one if you have it, and type the command (path to the executable, and any additional arguments you like). Leave blank if not necessary.
-				<p><input type="checkbox" id="isClustalw" onchange="document.getElementById('clustalw').disabled=!this.checked;"> <b>ClustalW</b>: <input type="text" id="clustalw" size="50" disabled=true>
-				<br><input type="checkbox" id="isMafft" onchange="document.getElementById('mafft').disabled=!this.checked;"> <b>MAFFT</b>: <input type="text" id="mafft" size="50" disabled=true>
-				<br><input type="checkbox" id="isMuscle" onchange="document.getElementById('muscle').disabled=!this.checked;"> <b>Muscle</b>: <input type="text" id="muscle" size="50" disabled=true>
-				<br><input type="checkbox" id="isGblocks" onchange="document.getElementById('gblocks').disabled=!this.checked;"> <b>Gblocks</b>: <input type="text" id="gblocks" size="50" disabled=true>
-				<br><input type="checkbox" id="isRaxml" onchange="document.getElementById('raxml').disabled=!this.checked;"> <b>RAxML</b>: <input type="text" id="raxml" size="50" disabled=true>
-				<br><input type="checkbox" id="isPhyml" onchange="document.getElementById('phyml').disabled=!this.checked;"> <b>PhyML</b>: <input type="text" id="phyml" size="50" disabled=true>
-				<br><input type="checkbox" id="isFasttree" onchange="document.getElementById('fasttree').disabled=!this.checked;"> <b>FastTree</b>: <input type="text" id="fasttree" size="50" disabled=true></p>
+				<p>Here are instructions for installing <a href="http://www.cpan.org/modules/INSTALL.html">Perl modules</a> and <a href="http://www.r-bloggers.com/installing-r-packages/">R packages</a>.</p>
 			</div>
 		</div>
 
 		<!--Input files-->
-		<p class="header"><input type="button" id="btnInput" value="Show" onclick="show_hide_section('Input')"> Input sequences</p>
+		<p class="header"><input type="button" id="btnInput" value="Show" onclick="show_hide_section('Input')"> Input files</p>
 		<div id="divInput" style="display:none">
-			<p><i>HGTector takes one or more <b>protein sets</b> (from one or more, complete or incomplete, in-database or freshly-sequenced genomes) as input. Multiple formats are acceptable and can be mixed:</i></p>
-			</p>1. Sequences that are already logged in the NCBI GenBank:
-			<br><ul>
-				<li>GenBank flat file for the genome (*.gbk, *.gb). Examples <a href="http://www.ncbi.nlm.nih.gov/nuccore/254778738?report=genbank">1</a> and <a href="ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Helicobacter_pylori_B38_uid59415/NC_012973.gbk">2</a>.
-				<li>NCBI FASTA file for the proteome (*.seq, *.faa). Example <a href="ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Helicobacter_pylori_B38_uid59415/NC_012973.faa">1</a>.
-				<li>List of protein accession numbers. [<a href="javascript:show_hide_tooltip('AccnList')">?</a>]
-				<p class="tooltip" id="tipAccnList" style="display:none">One entry per line. Lines starting with numbers are omitted. Contents after "#", space or tab are omitted.</p>
-			</ul></p>
-			</li>
-			<p>2. User-defined sequences (without GenBank entries):
-			<br><ul>
-				<li>Simply use the multiple FASTA format. [<a href="javascript:show_hide_tooltip('UserFasta')">?</a>]
-				<p class="tooltip" id="tipUserFasta" style="display:none">Sequence names should be unique, and should not contain the NCBI delimiter "|".</p>
-			</ul></p>
-			<p>Name the protein sets with short and clear file names (e.g., "MRSA.fasta". HGTector will take the stem name "MRSA" as the name of this protein set). Place them under the "input" folder in the working directory.</p>
-			<p>Each protein set should be given an <a href="http://www.ncbi.nlm.nih.gov/taxonomy">NCBI TaxID</a> to best describe its taxonomic position (even if it's a new organism). HGTector is able to retrieve the TaxIDs of in-GenBank proteins. For user-defined sequences, you may enter their TaxIDs below:</p>
-			<p><input type="text" id="selfTax" size=50><br>Format example: <code>Dmel:7227,Dsim:7240,Dvir:7244</code></p>
+			<p><i>HGTector takes one or more <b>protein sets</b> (from one or more, complete or incomplete, in-database or freshly-sequenced genomes) as input.</i></p>
+			<p>Multiple formats are acceptable and can be mixed: <input type="button" class="expand" value="+" onclick="if(this.value=='+'){document.getElementById('divFormats').style.display='block';this.value='-'}else{document.getElementById('divFormats').style.display='none';this.value='+'}"></p>
+			<div id="divFormats" class="subsection" style="display:none">
+				<p>1. Sequences that are already included in the BLAST database (e.g., GenBank):
+				<br><ul>
+					<li>GenBank flat file for the genome (*.gbk, *.gb). Examples <a href="http://www.ncbi.nlm.nih.gov/nuccore/254778738?report=genbank">1</a> and <a href="ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Helicobacter_pylori_B38_uid59415/NC_012973.gbk">2</a>.
+					<li>NCBI FASTA file for the proteome (*.seq, *.faa). Example <a href="ftp://ftp.ncbi.nlm.nih.gov/genomes/Bacteria/Helicobacter_pylori_B38_uid59415/NC_012973.faa">1</a>.
+					<li>List of protein accession numbers. [<a href="javascript:show_hide_tooltip('AccnList')">?</a>]
+					<p class="tooltip" id="tipAccnList" style="display:none">One entry per line. Lines starting with numbers are omitted. Contents after "#", space or tab are omitted.</p>
+				</ul></p>
+				</li>
+				<p>2. User-defined sequences (without GenBank entries):
+				<br><ul>
+					<li>Simply use the multi-FASTA format. [<a href="javascript:show_hide_tooltip('UserFasta')">?</a>]
+					<p class="tooltip" id="tipUserFasta" style="display:none">Sequence names should be unique, and should not contain the NCBI delimiter "|" or end with ".number".</p>
+				</ul></p>
+			</div>
+			<p>Name the protein sets with short and clear file names (e.g., <code>MRSA.fasta</code>). HGTector will take the stem name (<code>MRSA</code>) as the name of this sample.</p>
+			<p>Place one or more protein sets under the <code>input</code> folder in the working directory. <input type="button" class="expand" value="+" onclick="if(this.value=='+'){document.getElementById('divSampleOrder').style.display='block';this.value='-'}else{document.getElementById('divSampleOrder').style.display='none';this.value='+'}"></p>
+			<div id="divSampleOrder" class="subsection" style="display:none">
+				<p>If one wants to include only a subset of samples in the current analysis, or if one wants the sample names to be displayed in a particular order in the report, enter sample names below in order:<br><input type="text" id="inSets" size=60><br>Example: <code>ETEC,EAEC,EPEC</code></p>
+			</div>
+			<p>Each protein set should be given an <a href="http://www.ncbi.nlm.nih.gov/taxonomy">NCBI TaxID</a> to best describe its taxonomic position (even if it's a new organism).</p>
+			<div class="subsection">
+				<p>HGTector is able to retrieve the TaxIDs of in-GenBank proteins. For samples composed of user-defined sequences, you may enter their TaxIDs below:<br><input type="text" id="selfTax" size=60><br>Example: <code>Dmel:7227,Dsim:7240,Dvir:7244</code></p>
+			</div>
+			<fieldset id="pre_blast">
+				<legend><input type="checkbox" id="chkPreBlast" onchange="show_hide_subsection('PreBlast')"> Pre-computed BLAST results</legend>
+				<div id="divPreBlast" class="subsection" style="display:none">
+					<p><i>Instead of having HGTector run batch BLAST (a time-consuming step), you may provide HGTector with pre-computed BLAST results.</i></p>
+					<p>The BLAST results should be in the standard tabular <a href="http://www.ncbi.nlm.nih.gov/books/NBK279675/">format</a> (<code>-outfmt 6 </code>or<code> 7</code>) [<a href="javascript:show_hide_tooltip('BlastFormat')">?</a>], one file per protein set. Name them using the same stem file names (e.g., the protein sets are <code>HIV.faa</code> and <code>HPV.faa</code>, then the corresponding pre-computed BLAST results may be <code>HIV.txt</code> and <code>HPV.txt</code>). </p>
+					<p class="tooltip" id="tipBlastFormat" style="display:none">Actually, HGTector only considers field 1 (query id), 2 (subject id), 3 (percentage identity), 11 (E-value) and 12 (bit score). It is okay if the rest fields are filled with unrelated information.</p>
+					<p>Directory where BLAST results can be found:<br><input type="text" id="preBlast" size=50></p>
+					<p>Alternatives to BLAST, such as <a href="https://genome.ucsc.edu/FAQ/FAQblat.html"><b>Blat</b></a> (<code>-out=blast8</code>), and <a href="http://www.drive5.com/usearch/"><b>USEARCH</b></a> (<code>-blast6out</code>), may be used instead, given the output format is compatible.</p>
+					<p>Ideally, the BLAST results should contain the self-BLAST result of each protein. Otherwise, HGTector will perform self-BLAST (using NCBI-BLAST+) when importing the results.</p>
+					<p>Note: This function is only available when local BLAST is enabled (<code>blastMode=1</code>).</p>
+				</div>
+			</fieldset>
+			<p>Note: All file and directory names are case-sensitive.</p>
 		</div>
 
 		<!--Step 1: Blaster-->
@@ -278,8 +336,8 @@
 			<p><i>Blaster performs all-against-all BLASTP of input proteins in batch mode.</i><p>
 			<p>BLAST mode:
 				<select id="blastMode" onchange="if(this.value==1){document.getElementById('http_blast').style.display='none';document.getElementById('pre_blast').style.display='block';document.getElementById('standalone_blast').style.display='block';document.getElementById('fieldEntrez').style.display='none';document.getElementById('divTaxBlast').style.display='none';}else{document.getElementById('http_blast').style.display='block';document.getElementById('pre_blast').style.display='none';document.getElementById('standalone_blast').style.display='none';document.getElementById('fieldEntrez').style.display='block';document.getElementById('divTaxBlast').style.display='block';}">
-					<option value=0 selected="selected">(default) establish http connection to a BLAST server</option>
-					<option value=1>use a standalone BLAST program to query a local database</option>
+					<option value=0 selected="selected">Establish http connection to a BLAST server</option>
+					<option value=1>Use a standalone BLAST program to query a local database</option>
 				</select>
 			</p>
 			<fieldset id="http_blast">
@@ -291,17 +349,6 @@
 						Time delay (sec) between requests: <input type="text" id="delay" size=4 value="5">
 						Number of retries on failed connection: <input type="text" id="nRetry" size=4 value="5">
 					</p>
-				</div>
-			</fieldset>
-			<fieldset id="pre_blast" style="display:none">
-				<legend><input type="checkbox" id="chkPreBlast" onchange="show_hide_subsection('PreBlast')"> Pre-computed BLAST results</legend>
-				<div id="divPreBlast" class="subsection" style="display:none">
-					<p>Instead of having HGTector run batch BLAST (a time-consuming step), you may provide HGTector with pre-computed BLAST results.</p>
-					<p>The BLAST results should be in the standard tabular <a href="http://www.ncbi.nlm.nih.gov/books/NBK279675/">format</a> (<code>-outfmt 6 </code>or<code> 7</code>), one file per protein set [<a href="javascript:show_hide_tooltip('BlastFormat')">?</a>].</p>
-					<p class="tooltip" id="tipBlastFormat" style="display:none">Actually, HGTector only considers field 1 (query id), 2 (subject id), 3 (percentage identity), 11 (E-value) and 12 (bit score). It is okay if the rest fields are filled with unrelated information.</p>
-					<p>Alternatives to BLAST, such as <a href="https://genome.ucsc.edu/FAQ/FAQblat.html"><b>Blat</b></a> (<code>-out=blast8</code>), and <a href="http://www.drive5.com/usearch/"><b>USEARCH</b></a> (<code>-blast6out</code>), may be used instead, given the output format is compatible.</p>
-					<p>Directory where BLAST results can be found:<br><input type="text" id="preBlast" size=50></p>
-					<p>Note: Ideally, the BLAST results should contain the self-BLAST result of each protein. Otherwise, HGTector will conduct self-BLAST when importing the results.</p>
 				</div>
 			</fieldset>
 			<p></p>
@@ -319,12 +366,8 @@
 			<br>
 			<fieldset>
 				<legend>BLAST parameters [<a href="javascript:show_hide_tooltip('Parameters')">?</a>] </legend>
-				<p class="tooltip" id="tipParameters" style="display:none">These settings are for both <b>Blaster</b> and <b>Analyzer</b>. Tip: you may run Blaster with relaxed parameters, and then run several rounds of Analyzer with a series of more stringent parameters, to see which combination is suitable for you.</p>
+				<p class="tooltip" id="tipParameters" style="display:none">These settings are for both <b>Blaster</b> and <b>Analyzer</b>. Tip: you may run Blaster with relaxed parameters, and then run several rounds of Analyzer with a series of more stringent parameters, to see which combination is suitable for you. Typically, within a reasonable range, the more stringent the parameters are, the more significant the clustering pattern of genes will be, and the more likely the "typical" and "atypical" portions of genes will be separated.</p>
 				<div class="subsection">
-					<p>
-						Database: <input type="text" id="dbBlast" size=40 value="nr"> [<a href="javascript:show_hide_tooltip('BlastDB')">?</a>]
-					</p>
-					<p class="tooltip" id="tipBlastDB" style="display:none">This should be the name of a remote or local BLAST database. In the latter case, the path/to/the/database may be included, if it's not in the environmental path.<br><br>Because BLAST search against a large database (such as NCBI nr) is a time-consuming step, and because the standard database may have uneven distribution of taxonomic groups (e.g., a ton of <i>E. coli</i> strains AND one giant panda have been sequenced), please don't forget to check the "ignore subspecies" box below in most cases. You may also consider creating a small and even user-defined BLAST database. Please check out our new program <a href="https://github.com/JCVI-metagenomics/SubDBer"><b>SubDBer</b></a> for this purpose.</p>
 					<p>
 						E-value cutoff: <input type="text" id="evalue" size=4 value="1e-5">
 						Percent identity cutoff: <input type="text" id="identity" size=4>
@@ -396,9 +439,7 @@
 			<fieldset>
 				<legend>Grouping scenario</legend>
 				<div id="divGroup" class="subsection">
-					<p>Include the following protein sets in the analysis, in a desired order: [<a href="javascript:show_hide_tooltip('InSets')">?</a>]<br><input type="text" id="inSets" size=60></p>
-					<p class="tooltip" id="tipInSets" style="display:none">Separate multiple sets with comma. The order is only for display purpose. It does not interfere with the prediction. If the box is left blank, all sets will be analyzed.</p>
-					<p>All taxa are divided into three groups: <b>self</b>, <b>close</b> and <b>distal</b>.</p>
+					<p>Taxa are divided into three groups: <b>self</b>, <b>close</b> and <b>distal</b>, based on their evolutionary distance to the input genomes.</p>
 					<p><input type="radio" name="grouping" onclick="change_grouping()"> Let the program generate a grouping scenario.</p>
 					<div id="divAutoGroup" class="subsection" style="display:none">
 						<p>Define the <b>self</b> group on this rank: <select id="selfRank"><option checked value=""></option><option value="species">species</option><option value="genus">genus</option><option value="family">family</option><option value="order">order</option><option value="class">class</option><option value="phylum">phylum</option></select> [<a href="javascript:show_hide_tooltip('AutoGroup')">?</a>]</p>
@@ -430,22 +471,24 @@
 					<p><input type="checkbox" id="unite" checked> One global fingerprint for all protein sets. (Alternatively, each set has its own fingerprint.)</p>
 					<!--p><input type="checkbox" id="useWeight" checked> Use weight (sum of scores) instead of number of hits (recommended).</p-->
 					<!--p><input type="checkbox" id="normalize" checked> Normalize bit scores as subject divided by query (recommended).</p-->
-					<p><input type="checkbox" id="useDistance"> Use phylogenetic distance (if available) instead of BLAST bit score to compute weight.</p>
+					<p><input type="checkbox" id="useDistance"> Use phylogenetic distance (if available) instead of BLAST bit score to compute weight. [<a href="javascript:show_hide_tooltip('UseDistance')">?</a>]</p>
+					<p class="tooltip" id="tipUseDistance" style="display:none">This function is experimental. Please expand "Extra Step: Treer", check "Build phylogenetic tree", then check "Compute and record phylogenetic distance matrix" to enable this function.</p>
 				</div>
 			</fieldset>
 			<br>
 			<fieldset>
 				<legend><input type="checkbox" id="chkGraph" onchange="show_hide_subsection('Graph')"> Graphing (requires R) </legend>
 				<div id="divGraph" class="subsection" style="display:none">
-					<p><input type="checkbox" id="boxplot" checked> Box plot <input type="checkbox" id="histogram" checked> Histogram <input type="checkbox" id="densityPlot" checked> Density plot <input type="checkbox" id="scatterPlot" checked> Scatter plot <input type="checkbox" id="plot3D"> 3D Scatter plot (requires "rgl")</p>
+					<p><input type="checkbox" id="boxPlot" checked> Box plot <input type="checkbox" id="histogram" checked> Histogram <input type="checkbox" id="densityPlot" checked> Density plot <input type="checkbox" id="scatterPlot" checked> Scatter plot <input type="checkbox" id="plot3D"> 3D Scatter plot (requires "rgl")</p>
 					<p><input type="checkbox" id="histDensity" onchange="document.getElementById('merge3Groups').disabled=!this.checked"> Overlap histogram and density plot <input type="checkbox" id="merge3Groups" onchange="document.getElementById('histDensity').disabled=!this.checked"> Overlap three groups in density plot</p>
-					<p>Highlight certain proteins defined in: <input type="file" id="plotRef" size="30"></p>
+					<p>Highlight a subset of proteins defined in this file (one protein per line):<br><input type="text" id="plotRef" size=50></p>
 				</div>
 			</fieldset>
 			<br>
 			<fieldset>
 				<legend>Cutoffs</legend>
 				<div id="divCutoff" class="subsection">
+					<p><i>The program will attempt to divide a weight population into "typical" and "atypical" parts, using a cutoff determined as below:</i></p>
 					<p>Specify a global cutoff (quantile): <input type="text" id="globalCO" size=4 value="0.25"> (in case the specified approach below fails to work)</p>
 					<p>How to determine cutoffs: <select id="howCO" onchange="
 						if (this.value==1){ document.getElementById('divUserCO').style.display='block'; }
@@ -526,7 +569,7 @@
 			<div class="subsection" id="divOrthology" style="display:none">
 				<p><input type="radio" name="orthologing" onclick="change_orthologing()"> Refer to an external gene orthology scheme file:</p>
 				<div id="divOutOrthologing" class="subsection" style="display:none">
-					<p><input type="file" id="smOrthology" size=40> [<a href="javascript:show_hide_tooltip('OutOrthologing')">?</a>]</p>
+					<p><input type="text" id="smOrthology" size=50> [<a href="javascript:show_hide_tooltip('OutOrthologing')">?</a>]</p>
 					<p class="tooltip" id="tipOutOrthologing" style="display:none">You can use external programs such as <a href="http://www.orthomcl.org/orthomcl/">OrthoMCL</a> and <a href="http://www.ncbi.nlm.nih.gov/Web/Newsltr/Spring04/blastlab.html">blastclust</a> to infer a gene orthology scheme. The result can be directly read by this program. If this box is left blank, the program will try to locate the default orthology scheme file, taxonomy/orthology.db, which might be generated in a previous run. If it is absent, the program will compute one using the built-in function (see below).</p>
 				</div>
 				<p><input type="radio" name="orthologing" onclick="change_orthologing()"> Let the program infer gene orthology using its built-in function.</p>
@@ -555,13 +598,14 @@
 				<p><input type="checkbox" id="nameOGs" checked> Name orthologous groups if necessary (use the shortest name of all members).</p>
 				<p><input type="checkbox" id="exORFan" checked> Exclude ORFans (genes that only occur once in all genomes)</p>
 			</div>
-			<p>Generate report in: <input type="checkbox" id="outText" checked> Plain text <input type="checkbox" id="outHTML" checked> Web page (HTML) <input type="checkbox" id="outExcel"> Excel spreadsheet</p>
+			<p>Generate report in: <input type="checkbox" id="outText" checked> Plain text <input type="checkbox" id="outHTML" checked> Web page (HTML) <input type="checkbox" id="outExcel" onchange="if(this.checked){document.getElementById('tipWriteExcel').style.display='block'}else{document.getElementById('tipWriteExcel').style.display='none'};"> Excel spreadsheet</p>
+			<p class="tooltip" id="tipWriteExcel" style="display:none">Make sure you have Perl package <b>Spreadsheet::WriteExcel</b> installed.</p>
 		</div>
 		
 		<!--Extra step: Treer-->
 		<p class="header"><input type="button" id="btnTreer" value="Show" onclick="show_hide_section('Treer')"> Extra step: Treer</p>
 		<div id="divTreer" style="display:none">
-			<p><i>Treer builds phylogenetic tree based on BLAST-sampled sequences, using external programs. Resulting trees will be appended to BLAST reports.</i></p>
+			<p><i>Treer builds phylogenetic trees based on BLAST-sampled sequences, using external programs. Resulting trees will be appended to BLAST reports (*.bla) in NEXUS format. They may be directly displayed in external tree viewers such as <a href="http://tree.bio.ed.ac.uk/software/figtree/">FigTree</a>.</i></p>
 			<p><input type="checkbox" onchange="document.getElementById('realign').disabled=!this.checked"> Realign sequences, using: 
 				<select id="realign" disabled=true">
 					<option value='ClustalW'>ClustalW</option>
@@ -581,13 +625,23 @@
 					<option value='raxml'>RAxML (Maximum Likelihood)</option>
 					<option value='phyml'>PhyML (Maximum Likelihood)</option>
 					<option value='fasttree'>FastTree (Maximum Likelihood, with SH test)</option>
-				</select> [<a href="javascript:show_hide_tooltip('Tree')">?</a>]
+				</select>
 			</p>
-			<p class="tooltip" id="tipTree" style="display:none">The tree will be appended to the BLAST report in NEXUS format. You can directly open the file to watch the tree using programs like FigTree.</p>			
 			<div id="divTreeOption" class="subsection" style="display:none">
 				<p>AA substitution model: <input type="text" id="aaModel" size=6> Number of bootstrap replicates: <input type="text" id="bsTree" size=6></p>
 				<p><input type="checkbox" id="distance"> Compute and record phylogenetic distance matrix [<a href="javascript:show_hide_tooltip('Distance')">?</a>]</p>
 				<p class="tooltip" id="tipDistance" style="display:none">Check it if you consider using phylogenetic distances instead of BLAST bit scores for the subsequent prediction.</p>
+			</div>
+			<p><input type="button" class="expand" value="+" onclick="if(this.value=='+'){document.getElementById('divPhyloWare').style.display='block';this.value='-'}else{document.getElementById('divPhyloWare').style.display='none';this.value='+'}"> External phylogenetics programs:</p>
+			<div class="subsection" id="divPhyloWare" style="display:none">
+				<p>Paths to the program executables, and any preferred arguments (if necessary):
+				<p><input type="checkbox" id="isClustalw" onchange="document.getElementById('clustalw').disabled=!this.checked;"> <b>ClustalW</b>: <input type="text" id="clustalw" value="clustalw" size=50 disabled=true>
+				<br><input type="checkbox" id="isMafft" onchange="document.getElementById('mafft').disabled=!this.checked;"> <b>MAFFT</b>: <input type="text" id="mafft" value="mafft" size=50 disabled=true>
+				<br><input type="checkbox" id="isMuscle" onchange="document.getElementById('muscle').disabled=!this.checked;"> <b>Muscle</b>: <input type="text" id="muscle" value="muscle" size=50 disabled=true>
+				<br><input type="checkbox" id="isGblocks" onchange="document.getElementById('gblocks').disabled=!this.checked;"> <b>Gblocks</b>: <input type="text" id="gblocks" value="Gblocks" size=50 disabled=true>
+				<br><input type="checkbox" id="isRaxml" onchange="document.getElementById('raxml').disabled=!this.checked;"> <b>RAxML</b>: <input type="text" id="raxml" value="raxmlHPC" size=50 disabled=true>
+				<br><input type="checkbox" id="isPhyml" onchange="document.getElementById('phyml').disabled=!this.checked;"> <b>PhyML</b>: <input type="text" id="phyml" value="phyml" size=50 disabled=true>
+				<br><input type="checkbox" id="isFasttree" onchange="document.getElementById('fasttree').disabled=!this.checked;"> <b>FastTree</b>: <input type="text" id="fasttree" value="fasttree" size=50 disabled=true></p>
 			</div>
 		</div>
 
@@ -595,11 +649,21 @@
 		<p><input type="button" id="btnOK" value="Generate configuration file!" onclick="generate_config()"></p>
 		<div id="divOutput" style="display:none">
 			<p>Task completed!</p>
-			<p>Please create a text file named "config.txt" in the working directory, then copy & paste the content below to that file.</p>
+			<p>Please create a text file named <code>config.txt</code> in the working directory, then copy & paste the content below to that file.</p>
 			<p><textarea id="output" rows="20" cols="80"></textarea></p>
-			<p>Then, you can open a terminal, navigate into the program directory (where there's HGTector.pl), and execute this command:</p>
+			<p>Then, you can open a terminal, navigate into the program directory (where there's <code>HGTector.pl</code>), and execute this command:</p>
 			<blockquote><code>perl HGTector.pl /path/to/working/directory</code></blockquote>
 			<p>And see how the program rolls!</p>
+			<p>Alternatively, you may: <input type="button" class="expand" value="+" onclick="if(this.value=='+'){document.getElementById('divByStep').style.display='block';this.value='-'}else{document.getElementById('divByStep').style.display='none';this.value='+'}"></p>
+			<div class="subsection" id="divByStep" style="display:none">
+				<p>It is recommended to execute the three components of the HGTector pipeline separetely.</p>
+				<p>Get the most intensive computation done on a super cluster:</p>
+				<blockquote><code>perl scripts/<b>blaster.pl</b> /path/to/working/directory</code></blockquote>
+				<p>Save the result and move to a local workstation, play around with the parameters and run:</p>
+				<blockquote><code>perl scripts/<b>analyzer.pl</b> /path/to/working/directory</code></blockquote>
+				<p>for a few times until you are satisfied with the result. Then run:</p>
+				<blockquote><code>perl scripts/<b>summarizer.pl</b> /path/to/working/directory</code></blockquote>
+			</div>
 		</div>
 		<hr>
 		<p><br><br><br><br><br><br><br><br></p>

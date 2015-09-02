@@ -15,9 +15,18 @@
 				margin-left:20px;
 			}
 		</style>
+		<script type="text/javascript">
+			function show_hide_section(section){
+				if (document.getElementById(section).style.display == "none"){
+					document.getElementById(section).style.display = "block";
+				}else{
+					document.getElementById(section).style.display = "none";
+				}
+			}
+		</script>
 	</head>
-	<body style="width:800px; margin-left:auto; margin-right:auto; background-color:Linen; font-family:Sans">
-		<p><big><big><strong>HGTector ver 0.1.9 Quick Start Guide</strong></big></big></p>
+	<body style="width:800px; margin-left:auto; margin-right:auto; color:#3D3C3A; background-color:#FDF9F5; font-family:Arial,Helvetica,sans-serif">
+		<p><big><big><strong>HGTector v0.1.9 Quick Start Guide</strong></big></big></p>
 		<p>Qiyun Zhu, Katharina Dittmar</p>
 		<hr>
 		<p><big><strong>Index</strong></big></p>
@@ -28,7 +37,7 @@
 		<p><b>Operating system</b>: HGTector is cross-platform. It supports <b>Windows</b>, <b>Mac OS X</b> and <b>Linux</b> (and perhaps other Unix-like operating systems).</p>
 		<p><b>Perl</b>: HGTector is written in <a href="http://www.perl.org/">Perl</a>. It requires that you have a Perl interpreter installed in your system. The Perl interpreter is a standard component in most Mac OS X and Linux distributions. If you are a Windows user and you haven't installed it, you may download and install <a href="http://strawberryperl.com/">Strawberry Perl</a> or <a href="http://www.activestate.com/activeperl">ActivePerl</a>.
 		<p><b>R</b>: <u>Optionally</u>, HGTector calls R to perform some advanced statistics and graphics. If you want to use these functions, you may install <a href="http://www.r-project.org/">R</a>, as well as Perl package <a href="http://search.cpan.org/~fangly/Statistics-R-0.31/lib/Statistics/R.pm">Statistics::R</a>. Please refer to the <a href="manual.html">manual</a> for instructions.</p>
-		
+
 		<hr>
 		<p><strong>Working directory</strong></p>
 		<p>Choose a folder to hold all input, intermediate and output files. This folder is your <b>working directory</b>.</p>
