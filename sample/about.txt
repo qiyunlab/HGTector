@@ -12,7 +12,7 @@ You can use HGTector to analyze this dataset with basic settings, by executing t
 
   perl HGTector.pl example
 
-If your system environment meets all requirements (see "Checklist" of "GUI.html" for details), you can also try advanced settings, by replacing "config.txt" with "advanced_config.txt" and then executing the above command.
+If your system environment meets all requirements (see "GUI.html" for details), you can also try advanced settings, by replacing "config.txt" with "advanced_config.txt" and then executing the above command.
 
 The program will guide you through the whole process. Typically, it will take approximately 1-2 hours to BLAST all 100 genes and retrieve the taxonomic information of all hits, then it will take dozens of seconds to complete the rest of the analysis.
 

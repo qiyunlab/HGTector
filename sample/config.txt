@@ -4,13 +4,15 @@
 ##########################################################
 
 title=Galdieria sulphuraria          # title of the task
+selfTax=gsul:130081                  # TaxID of sample
 
 # BLAST parameters #
-nRequests=4                          # run 4 http connections simultaneously
-delay=5                              # time delay (sec) between http requests
-nHit=100                             # return 100 hits per BLAST
+searchTool=BLAST                     # use BLAST to perform search
+httpBlast=1                          # use the NCBI BLAST server
+httpDb=nr                            # use the NCBI nr database
+nHits=100                            # return 100 hits per protein
 evalue=1e-10                         # E-value cutoff
-identity=0.6                         # percentage identity cutoff
+identity=30                          # percentage identity cutoff
 
 # Filtering parameter #
 ignoreSubspecies=1                   # ignore more than one subspecies/strain from the same species

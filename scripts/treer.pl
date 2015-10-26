@@ -5,21 +5,18 @@ use strict;
 $| = 1;
 
 print "
+-> Treer: Automated phylogenetics pipeline. <-
+";
 
-This script is a complete phylogenetics pipeline. It performs multiple sequence alignment,
-alignment clean-up, tree reconstruction, and distance matrix generation.
+print "
 
 Usage:
   perl treer.pl <working directory>
 
 Output:
-  Will be appended to each BLAST report file (*.bla).
+  Will be appended to each search result file.
 
 " and exit unless @ARGV;
-
-print "
--> Treer: Automated phylogenetic reconstruction pipeline. <-
-";
 
 
 ## global variables ##
@@ -93,13 +90,13 @@ if (-e "$wkDir/config.txt"){
 ## read protein sets ##
 
 print "\nReading protein sets...";
-opendir (DIR, "$wkDir/blast") or die "Blast folder not exist.\n";
+opendir (DIR, "$wkDir/search") or die "Blast folder not exist.\n";
 @a = readdir(DIR);
 close DIR;
 
 foreach (@a){
 	next if (/^\./);
-	push @sets, $_ if -d "$wkDir/blast/$_";
+	push @sets, $_ if -d "$wkDir/search/$_";
 }
 print "done. ";
 die "No protein sets detected.\n" unless @sets;
@@ -108,9 +105,9 @@ print @sets." protein sets detected.\n";
 print "\n0-------------25-------------50------------75------------100%\n";
 
 foreach my $set (@sets){
-	my $dir = "$wkDir/blast/$set";
+	my $dir = "$wkDir/search/$set";
 	opendir (DIR, "$dir") or next;
-	my @files = grep (/\.bla$/, readdir(DIR));
+	my @files = grep (/\.txt$/, readdir(DIR));
 	close DIR;
 	next unless @files;
 	

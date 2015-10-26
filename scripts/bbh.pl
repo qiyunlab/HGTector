@@ -6,7 +6,7 @@ $| = 1;
 
 print "
 
-This script performs reversal BLAST, as part of the bidirectional best hit approach.
+Performs reversal BLAST, as part of the bidirectional best hit approach.
 
 Usage:
   perl bbh.pl <working directory>
@@ -50,19 +50,19 @@ sub retry ();
 
 my $wkDir = $ARGV[0];
 
-my $blastMode = 0;									# BLAST mode (0: http, 1: local, 2: remote)
+my $httpBlast = 0;									# BLAST mode (0: http, 1: local, 2: remote)
 my $maxHits = 0;									# maximum number of valid hits to preserve. if 0 then = nHit
 
-my $nRetry = 10;									# maximum number of retries
+my $retries = 10;									# maximum number of retries
 my $nHit = 100;										# number of hits to return
 my $evalue = 0.01;									# maximum E-value cutoff
 
 my $blastServer = "http://blast.ncbi.nlm.nih.gov/Blast.cgi";
-my $dbBlast = "nr";
+my $protdb = "nr";
 
 my $blastdbcmd = "blastdbcmd";
 my $blastp = "blastp";
-my $nThreads = 1;									# Multiple threads for local BLAST program
+my $threads = 1;									# Multiple threads for local BLAST program
 
 ## read configurations ##
 
@@ -70,17 +70,17 @@ if (-e "$wkDir/config.txt"){
 	open IN, "<$wkDir/config.txt";
 	while (<IN>){
 		s/#.*$//; s/\s+$//g; s/^\s+//g; next unless $_;
-		$blastMode = $1 if /^blastMode=(\d)$/;
+		$httpBlast = $1 if /^httpBlast=(\d)$/;
 		$nHit = $1 if /^nHit=(\d+)$/;
 		$evalue = $1 if /^evalue=(.+)$/;
-		$nRetry = $1 if /^nRetry=(\d+)$/;
+		$retries = $1 if /^retries=(\d+)$/;
 		$maxHits = $1 if /^maxHits=(\d+)$/;
 		$dbBlast = $1 if /^dbBlast=(.+)$/;
 		$eqText = $1 if /^eqText=(.+)$/;
 		$blastServer = $1 if /^blastServer=(.+)$/;
 		$blastdbcmd = $1 if /^blastdbcmd=(.+)$/;
 		$blastp = $1 if /^blastp=(.+)$/;
-		$nThreads = $1 if /^nThreads=(\d+)$/;
+		$threads = $1 if /^threads=(\d+)$/;
 	}
 	close IN;
 }
@@ -156,7 +156,7 @@ sub blast (){
 
 	## BLAST using standalone ncbi-blast+ program ##
 
-	if ($blastMode){
+	if ($httpBlast){
 		my @hits;
 		# the report contains: accession, gi, length, taxid, sequence, title
 		my @out = `$blastdbcmd -db $dbBlast -entry $query -outfmt \"%a %g %l %T %s %t\"`;
@@ -225,7 +225,7 @@ sub blast (){
 ## retry BLAST ##
 
 sub retry (){
-	if ($iRetry < $nRetry){ # retry
+	if ($iRetry < $retries){ # retry
 		print ".";
 		$iRetry ++;
 		sleep 10;

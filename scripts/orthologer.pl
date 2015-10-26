@@ -5,14 +5,10 @@ use strict;
 $| = 1;
 
 print "
+-> Orthologer: Identify orthologous groups based on homology search results. <-
+";
 
-This script identifies orthologous groups (OGs) of genes from query genomes
-based on BLAST results. It considers proteins occurred in one BLAST result below a
-certain E-value cutoff as homologs (both orthologs and paralogs).
-
-It figures out a short name and a long name to describe each OG. Finally it reads
-detection results in \"result\" directory and generates a report with events
-mapped to OGs.
+print "
 
 Usage:
   perl orthologer.pl <working directory>
@@ -21,10 +17,6 @@ Output:
   taxonomy/orthology.db
 
 " and exit unless @ARGV;
-
-print "
--> Orthologer: Identify orthologous groups based on BLAST results. <-
-";
 
 
 ## Global variables ##
@@ -67,12 +59,12 @@ if (-e "$wkDir/config.txt"){
 }
 
 unless (@sets){
-	opendir (DIR, "$wkDir/blast");
+	opendir (DIR, "$wkDir/search");
 	@a = readdir(DIR);
 	close DIR;
 	foreach (@a){
 		next if /^\./;
-		next unless -d "$wkDir/blast/$_";
+		next unless -d "$wkDir/search/$_";
 		push @sets, $_;
 	}
 }
@@ -82,12 +74,12 @@ unless (@sets){
 print "Identifying orthologous groups (OGs)...\n";
 print "  Reading input proteins... ";
 foreach my $set (@sets){
-	next unless -d "$wkDir/blast/$set";
-	opendir (DIR, "$wkDir/blast/$set");
-	my @blasts = grep(/\.bla$/,readdir(DIR));
+	next unless -d "$wkDir/search/$set";
+	opendir (DIR, "$wkDir/search/$set");
+	my @blasts = grep(/\.txt$/,readdir(DIR));
 	close DIR;
 	foreach (@blasts){
-		/^(.+)\.bla$/;
+		/^(.+)\.txt$/;
 		%h = ('set', $set, 'id', "");
 		$proteins{$1} = {%h};	
 	}
@@ -110,18 +102,18 @@ close IN;
 
 print "  Parsing BLAST results...\n    ";
 foreach my $set (@sets){
-	next unless -d "$wkDir/blast/$set";
-	opendir (DIR, "$wkDir/blast/$set");
-	my @blasts = grep(/\.bla$/,readdir(DIR));
+	next unless -d "$wkDir/search/$set";
+	opendir (DIR, "$wkDir/search/$set");
+	my @blasts = grep(/\.txt$/,readdir(DIR));
 	close DIR;
 	my $myTaxon = $taxa{$set};
 	print "$set ";
 	foreach (@blasts){
-		/^(.+)\.bla$/;
+		/^(.+)\.txt$/;
 		my $id; # array id of OGs
 		my $myAccn = $1;
 		next unless exists $proteins{$myAccn};
-		open IN, "<$wkDir/blast/$set/$_" or next;
+		open IN, "<$wkDir/search/$set/$_" or next;
 		my $product;
 		my $reading = 0;
 		@b = (); # all accns occurred in this report
@@ -166,7 +158,7 @@ foreach my $set (@sets){
 			$product = "";
 			$reading = 0;
 			my $found = 0; # the source gene is found in the reverse Blast report
-			open IN, "<$wkDir/blast/$proteins{$accn}{'set'}/$accn.bla" or next;
+			open IN, "<$wkDir/search/$proteins{$accn}{'set'}/$accn.txt" or next;
 			while (<IN>){
 				s/\s+$//; next unless $_;
 				last if $reading and /^;/;

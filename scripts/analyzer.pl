@@ -5,13 +5,17 @@ use strict;
 $| = 1;
 
 print "
+-> Analyzer: Identify putative HGT-derived genes based on search results. <-
+";
 
-This program analyzes BLAST results of proteins from each genome
+print "
+
+This program analyzes search results of proteins from each genome
 and identify ones that may have undergone horizontal gene transfer
 events and their donor and/or recipients, as well as any potential
 gene origination and loss events.
 
-Every subfolder in blast/ is considerd as protein set. The result
+Every subfolder in search/ is considerd as protein set. The result
 is saved as a tab-delimited file, which can be visualized by programs
 such as Excel.
 
@@ -23,9 +27,6 @@ Output:
 
 " and exit unless @ARGV;
 
-print "
--> Analyzer: Identify putative HGT-derived genes based on BLAST results. <-
-";
 
 
 ## all-purpose variables ##
@@ -60,21 +61,21 @@ my %selfinfo = ();								# self.info
 
 my %proteins = ();								# accn -> name (identified by COG)
 
-my @files;										# blast report files for each protein set
+my @files;										# search report files for each protein set
 
 ## the master table storing everything. It's an array of hashes. Each row is a record.
 my %results = ();
 
 ## the phyletic pattern of the whole genome, aka "fingerprint"
-my %fpN = ();									# number of hits per blast
+my %fpN = ();									# number of hits per protein
 
 ## program parameters ##
 
 my $wkDir = $ARGV[0];							# working directory
 my $interactive = 1;							# interactive or automatic mode
 
-my $minHits = 0;								# minimal number of hits a valid blast report should contain
-my $maxHits = 0;								# maximal number of hits to retain from one blast, 0 means infinite
+my $minHits = 0;								# minimal number of hits a valid search result should contain
+my $maxHits = 0;								# maximal number of hits to retain for one protein, 0 means infinite
 my $minSize = 0;								# minimal size (aa) of a valid protein (0 means infinite)
 my $evalue = 1e-5;								# E-value cutoff
 my $identity = 0;								# percent identity cutoff
@@ -85,9 +86,9 @@ my $smOrthology;								# file containing scheme of orthology
 # algorithm
 my $selfRank = 0;								# taxonomic rank(s) on which the program analyzes
 my $normalize = 1;								# use relative bit score (bit score of subject / bit score of query)
-my $unite = 1;									# Blast pattern (0: each genome has own pattern, 1: one pattern for all genomes)
+my $unite = 1;									# hit pattern (0: each genome has own pattern, 1: one pattern for all genomes)
 
-my $useDistance = 0;							# use phylogenetic distance instead of BLAST bit scores
+my $useDistance = 0;							# use phylogenetic distance instead of bit scores
 my $useWeight = 1;								# use weight (sum of scores) instead of number of hits
 
 # fingerprints
@@ -277,8 +278,8 @@ open IN, "<$wkDir/taxonomy/self.info";
 while (<IN>){
 	s/\s+$//; next if /^#/; next unless $_;
 	@a = split /\t/;
-	next if ($#a < 3);
-	%h = ('accn',$a[1],'taxid',$a[2],'name',$a[3]);
+	next if (scalar(@a) < 3);
+	%h = ('taxid',$a[1],'name',$a[2]);
 	$selfinfo{$a[0]} = {%h};
 }
 close IN;
@@ -422,28 +423,28 @@ if ($plotRef){
 ## Read protein sets ##
 
 print "Reading protein sets...";
-opendir (DIR, "$wkDir/blast");
+opendir (DIR, "$wkDir/search");
 @a = readdir(DIR);
 close DIR;
 foreach (@a){
 	next if (/^\./);
-	push @sets, $_ if -d "$wkDir/blast/$_";
+	push @sets, $_ if -d "$wkDir/search/$_";
 }
 print "done. ";
 die "No genome detected.\n" unless @sets;
 print @sets." sets detected.\n";
 
 
-# Summarize blast reports ##
+# Summarize search reports ##
 
-print "Analyzing Blast results...\n";
+print "Analyzing search results...\n";
 print "0-------------25-------------50------------75------------100%\n";
 
 foreach my $set (@sets){
 	if (@inSets){ $i = 0; foreach (@inSets){ if ($set eq $_){ $i = 1; last; } } next unless $i; }
 	if (@exSets){ $i = 0; foreach (@exSets){ if ($set eq $_){ $i = 1; last; } } next if $i; }
-	opendir (DIR, "$wkDir/blast/$set");
-	@files = grep(/\.bla$/,readdir(DIR));
+	opendir (DIR, "$wkDir/search/$set");
+	@files = grep(/\.txt$/,readdir(DIR));
 	close DIR;
 	print "No protein found in $set\n" and next unless @files;
 
@@ -464,7 +465,7 @@ foreach my $set (@sets){
 	foreach my $file (@files){
 		$iProtein ++;
 		
-		my %result = ();				# a record to store everything about this blast search										
+		my %result = ();				# a record to store everything about this search										
 		my %scores = ();				# scores of each hit by category, as a buffer for computing the statistics above
 		my @hits;						# parameters of the hits. one hit contains:
 										#accn, organism, group, taxid, genus, score
@@ -478,13 +479,13 @@ foreach my $set (@sets){
 		}
 
 		my $nHits = 0;					# total number of hits. just for convenience
-		my $nScore = 0;					# total blast score
+		my $nScore = 0;					# total score
 		my $lastHit = "";				# store the last hit in the organism table, for the identification of duplicated taxa
 		my $selfScore = 0;
 
 		# read hit table #
 		
-		open IN, "<$wkDir/blast/$set/$file" or next;
+		open IN, "<$wkDir/search/$set/$file" or next;
 		my $reading = 0;
 		my ($hasCoverage, $hasDistance) = (0, 0);
 		while (<IN>) {
@@ -561,13 +562,14 @@ foreach my $set (@sets){
 		close IN;
 		next unless @hits;
 		# next if ($minSize and ($result{'length'} < $minSize));
-		unless (exists $result{'query'} and exists $result{'length'} and exists $result{'product'}){
-			print "\nIncomplete BLAST report $file of $set.\n" ;
+		unless (exists $result{'query'} and exists $result{'length'}){
+			print "\nIncomplete search result: $set/$file.\n" ;
 			if ($interactive){
 				print "Press Enter to continue, or Ctrl+C to exit:";
 				$s = <STDIN>;
 			}
 		}
+		$result{'product'} = '' unless exists $result{'product'};
 
 		# discard hypothetical proteins
 		if ($deHypo == 1 and $result{'product'}){
@@ -824,6 +826,7 @@ if ($graphFp){
 	print " done.\n";
 	print "Graphs are saved in result/statistics/.\n";
 	if ($interactive){
+		print "You may take a look at the graphs before proceeding.\n";
 		print "Press Enter to continue, or Ctrl+C to exit:";
 		$s = <STDIN>;
 	}
@@ -866,6 +869,12 @@ foreach my $set (keys %fpN){
 		$fpN{$set}{$key}{'mad'} = mad(@a);
 		($fpN{$set}{$key}{'q1'}, $fpN{$set}{$key}{'q3'}) = quantiles(@a);
 		
+		if ($key eq '0' and not $selfLow){
+			$fpN{$set}{$key}{'cutoff'} = 0;
+			print "      Skipped.\n";
+			next;
+		}
+		
 		# determine cutoff using global cutoff
 
 		$i = $fpN{$set}{$key}{'n'}*$globalCO;
@@ -907,10 +916,16 @@ foreach my $set (keys %fpN){
 			$R->send("x<-c(".join (",", @a).")");
 			$R->send("dip.test(x)");
 			$s = $R->read;
-			if ($s =~ /D = \S+, p-value [<=] (\S+)\n/){
+			open OUT, ">$key.out";
+			print OUT join(' ', @a);
+			close OUT;
+			
+			
+			if ($s =~ /D = (\S+), p-value [<=] (\S+)\n/){
 				print " done.\n";
+				print "      D = $1, p-value = $2\n";
 				if ($dipSig){
-					if ($1 >= $dipSig){
+					if ($2 >= $dipSig){
 						print "      The weight distribution is NOT significantly non-unimodal.\n";
 						if ($howCO >= 3){
 							if ($interactive){
@@ -924,7 +939,7 @@ foreach my $set (keys %fpN){
 							}else{ $use_global = 1; }
 						}
 					}else{ print "      The weight distribution is significantly non-unimodal.\n"; }
-				}else{ print "      The weight distribution is ". ("NOT " x ($1 >= 0.05)). "significantly non-unimodal.\n"; }
+				}else{ print "      The weight distribution is ". ("NOT " x ($2 >= 0.05)). "significantly non-unimodal.\n"; }
 			}else{ print " failed.\n"; }
 		}
 
@@ -1271,7 +1286,8 @@ if ($BBH == 2){
 			}
 		}
 	}
-	system "perl scripts/bbh.pl $wkDir";
+	$s = $0; $s =~ s/analyzer\.pl$/bbh.pl/;
+	system "$^X $s $wkDir";
 	unlink "$wkDir/result/bbh_input.txt";
 	open IN, "<$wkDir/result/bbh.txt";
 	while (<IN>){
@@ -1325,7 +1341,7 @@ foreach my $set (keys %results){
 
 		if (0){ # not available in this version
 			## predict gene origination event ##
-			# detection won't work for saturated blast report.
+			# detection won't work for saturated search result.
 			if ($maxHits and ($res{'N0'}+$res{'N1'}+$res{'N2'}) < $maxHits){	
 				# if every hit is self, then must be origination.
 				unless ($res{'N1'}+$res{'N2'}){	

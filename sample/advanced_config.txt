@@ -3,53 +3,38 @@
 #   Advanced configurations for the G. sulphuraria example  #
 #############################################################
 
-title=Galdieria sulphuraria          # title of the task
+# Search tool #
+searchTool=BLAST                     # Use NCBI-BLAST+ for search
+blastp=blastp
+blastdbcmd=blastdbcmd
 
-# External resources #
-dbBlast=/path/to/nr                  # local BLAST database
+# Databases #
+protdb=/path/to/stdb                 # local BLAST database
 taxdump=/path/to/taxdump             # local taxonomy database
-gi2taxid=/path/to/gi_taxid_prot.dmp  # GI-to-TaxID dictionary
+prot2taxid=/path/to/gi2taxid.dmp     # GI-to-TaxID dictionary
 
 # BLAST parameters #
-blastMode=1                          # local BLAST
-nThreads=8                           # Use 8 CPU cores for BLAST
-nQueries=100                         # Send 100 query sequences per BLAST run
-nHit=1000                            # return 1000 hits per query sequence
+threads=0                            # Use all CPU cores for BLAST
+queries=0                            # Query all sequences per BLAST run
+nHits=1000                           # return 1000 hits per query sequence
 maxHits=100                          # retain up to 100 non-redundant hits
 evalue=1e-20                         # E-value cutoff
-identity=60                          # percent identity cutoff
+identity=30                          # percent identity cutoff
 coverage=50                          # percent coverage cutoff
-seqBlast=1                           # retrieve original sequences for hits
-
-# Filtering BLAST hits #
-ignoreParalogs=1                     # ignore putative paralogs
-ignoreSeqRepeats=1                   # ignore repeated sequence domains
-ignoreSubspecies=1                   # ignore more than one subspecies/strain from the same species
-
-# phylogenetic analysis #
-realign=clustalw                     # realign sequences using ClustalW
-clustalw=path/to/clustalw            # command for ClustalW
-trimSeq=gblocks                      # trim unreliable regions using Gblocks
-gblocks=/path/to/Gblocks             # command for Gblocks
-buildTree=raxml                      # build phylogenetic tree using RAxML
-raxml=/path/to/raxmlHPC              # command for RAxML
-aaModel=LG                           # amino acid substitution model
-bsTree=100                           # perform 100 fast bootstraps
-distance=1                           # compute phylogenetic distance matrix
+getAln=1                             # retrieve aligned part for hits
 
 # Grouping scenario #
 selfGroup=83373                      # Galdieria
 closeGroup=2759                      # eucaryotes
 
 # Graphics #
-graphFp=1                            # graph fingerprint using R
+graphFp=1                            # plot fingerprint using R
 boxPlot=1                            # box plot
 histogram=1                          # histogram
 densityPlot=1                        # density plot
 scatterPlot=0                        # scatter plot (off)
 
 # Algorithm parameters #
-useDistance=1                        # use phylogenetic distance instead of bit score
 howCO=4                              # (default) perform kernel density estimation (KDE)
 globalCO=0.25                        # (default) global cutoff set as first quartile (25%)
 exOutlier=3                          # exclude outliers using the modified z-score method
@@ -61,6 +46,7 @@ toolExtrema=1                        # find local extrema using R
 modKCO=1                             # (default) cutoff is defined as the midpoint of the x-coordinates
                                        # of the first peak and the first pit
 # Summary #
+title=Galdieria sulphuraria          # title of the task
 POE=1                                # report putative ORFans or annotation errors
 outText=1                            # generate text report
 outHTML=1                            # generate HTML report

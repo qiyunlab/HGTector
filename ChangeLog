@@ -1,12 +1,37 @@
 ChangeLog of HGTector
 
+== Version 0.2.0 (major upgrade) (10/25/2015) ==
+
+Note:
+- Major modification of the entire pipeline.
+
+Structural change:
+- Renamed blaster and summarizer as searcher and reporter, respectively.
+- Removed filterer, taxonomer and validator
+- Renamed input / output files and directories.
+- Re-wrote searcher.
+- Re-wrote the main program.
+- Re-wrote the GUI.
+
+New features:
+- New script databaser.py to create a customized, taxonomically balanced BLAST database, which
+significantly improves the efficiency and accuracy of HGT discovery, comparing to the
+original nr.
+- Added native support for non-BLAST search tools, including RAPSearch2 and DIAMOND.
+- Allowed one protein to correspond to multiple TaxIDs. This further balances the taxonomic
+distribution of reference proteins.
+
+Bug fixes:
+- Many bug fixes.
+
+
 == Same version number (9/1/2015) ==
 
 New features:
-- Re-written the GUI
+- Re-wrote the GUI.
 
 Bug fixes:
-- Several bug fixes
+- Several bug fixes.
 
 
 == Version 0.1.9 (6/1/2015) ==
