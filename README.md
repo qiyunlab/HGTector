@@ -3,9 +3,9 @@ HGTector
 
 A computational pipeline for genome-wide detection of putative horizontal gene transfer (HGT) events based on sequence homology search hit distribution statistics
 
-Version: 0.2.0
+Version: 0.2.1
 
-Last update: 2015-10-25
+Last update: 2016-2-2
 
 Authors: Qiyun Zhu (<qiyunzhu@gmail.com>), Katharina Dittmar (<katharinad@gmail.com>)
 
@@ -19,4 +19,4 @@ Zhu Q, Kosoy M, Dittmar K. HGTector: an automated method facilitating genome-wid
 
 Please visit our lab's [website](http://katharina-dittmar.squarespace.com/) for details.
 
-
+Usage: Simply execute **perl HGTector.pl**, or, open **GUI.html** in a web browser to see a step-by-step wizard.

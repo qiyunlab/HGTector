@@ -1,10 +1,10 @@
 <!DOCTYPE HTML>
 <html>
 	<!--
-		This web page is a graphical user interface (GUI) of HGTector v0.2.0
+		This web page is a graphical user interface (GUI) of HGTector v0.2.1
 	-->
 	<head>
-		<title>HGTector v0.2.0 GUI</title>
+		<title>HGTector v0.2.1 GUI</title>
 		<style type="text/css" media=screen>
 			body{
 				color:#3D3C3A;
@@ -127,8 +127,8 @@
 					else{ out.value += 'taxdump='+val+'\n'; }
 					val = document.getElementById('prot2taxid').value; if (val != "" && val != "/path/to/db/gi2taxid.txt"){ out.value += 'prot2taxid='+val+'\n'; }
 					val = document.getElementById('preSearch').value; if (val != ""){ out.value += 'preSearch='+val+'\n'; }
-					val = document.getElementById('threads').value; if (val != 1){ out.value += 'threads='+val+'\n'; }
-					val = document.getElementById('queries').value; if (val != 1){ out.value += 'queries='+val+'\n'; }
+					val = document.getElementById('threads').value; if (val != 0){ out.value += 'threads='+val+'\n'; }
+					val = document.getElementById('queries').value; if (val != 0){ out.value += 'queries='+val+'\n'; }
 					val = document.getElementById('blastp').value; if (val != "" && val != "blastp"){ out.value += 'blastp='+val+'\n'; }
 					val = document.getElementById('blastdbcmd').value; if (val != "" && val != "blastdbcmd"){ out.value += 'blastdbcmd='+val+'\n'; }
 					val = document.getElementById('rapsearch').value; if (val != "" && val != "rapsearch"){ out.value += 'rapsearch='+val+'\n'; }
@@ -163,8 +163,6 @@
 					if (!document.getElementById('densityPlot').checked){ out.value += 'densityPlot=0\n' };
 					if (!document.getElementById('scatterPlot').checked){ out.value += 'scatterPlot=0\n' };
 					if (document.getElementById('plot3D').checked){ out.value += 'plot3D=1\n' };
-					if (document.getElementById('histDensity').checked){ out.value += 'histDensity=1\n' };
-					if (document.getElementById('merge3Groups').checked){ out.value += 'merge3Groups=1\n' };
 					val = document.getElementById('plotRef').value; if (val != ""){ out.value += 'plotRef='+val+'\n'; }
 				}
 				
@@ -260,7 +258,7 @@
 	</head>
 	
 	<body style="width:800px; margin-left:auto; margin-right:auto;">
-		<p><h3>HGTector v0.2.0 Configuration File Generator</h3></p>
+		<p><h3>HGTector v0.2.1 Configuration File Generator</h3></p>
 		<p>Qiyun Zhu, Katharina Dittmar</p>
 		<hr>
 		<p>Welcome! This page will guide you through the process of building an effective configuration file for HGTector.</p>
@@ -365,7 +363,7 @@
 					<p class="indent" id="exeBlast">blastp: <input type="text" id="blastp" size=50 value="blastp"><br>blastdbcmd: <input type="text" id="blastdbcmd" size=50 value="blastdbcmd"></p>
 					<p class="indent" id="exeRapsearch2" style="display:none">rapsearch: <input type="text" id="rapsearch" size=50 value="rapsearch"><br>prerapsearch: <input type="text" id="prerapsearch" size=50 value="prerapsearch"></p>
 					<p class="indent" id="exeDiamond" style="display:none">diamond: <input type="text" id="diamond" size=50 value="diamond"></p>
-					<p>Number of threads (0 for all CPUs): <input type="text" id="threads" size=4 value="1"> &nbsp; Query sequences per search (0 for all): <input type="text" id="queries" size=4 value="1"></p>
+					<p>Number of threads (0 for all CPUs): <input type="text" id="threads" size=4 value="0"> &nbsp; Query sequences per search (0 for all): <input type="text" id="queries" size=4 value="0"></p>
 				</div>
 			</div>
 
@@ -438,7 +436,7 @@
 					<p>The volume of the protein database directly determines the sensitivity of HGT discovery. NCBI's <b>nr</b> (can be downloaded from the <a href="ftp://ftp.ncbi.nlm.nih.gov/blast/db/">NCBI FTP server</a>) is among the most comprehensive protein sequence databases, and thus maximizing the discovery of any potential gene flows (vertical or horizontal).</p>
 					<p>However, 1) nr is huge, and searching through it takes long time. Meanwhile, 2) redundant protein sequences (e.g., a few marker genes have been excessively sequenced and GenBanked) and 3) unevenly distributed taxonomic groups (e.g., there are a ton of <i>E. coli</i> strains AND only one giant panda sequenced) may result in biased homolog distribution pattern, thus having a deleterious effect on the HGT identification process [<a href="javascript:show_hide_tooltip('DbBias')">?</a>].</p>
 					<p class="tooltip" id="tipDbBias" style="display:none">A work-around is to check the "<b>ignore subspecies</b>" option (see the "Analyzer" section) to suppress redundant hits.</p>
-					<p>The built-in script <b>databaser.py</b> aims to solve the problems. It downloads the proteomes (*.faa) associated with the the NCBI RefSeq genomes. By default the taxon sampling is limited to microbial organisms (archaea, bacteria, fungi, protozoa and viruses), up to one representative per species, plus the NCBI-defined representative genomes. Please execute the script with "<code>-help</code>" for advanced usages.</p>
+					<p>The built-in script <b>databaser.py</b> aims to solve the problems. It downloads the proteomes (*.faa) associated with the the NCBI RefSeq genomes. By default the taxon sampling is limited to microbial organisms (archaea, bacteria, fungi and protozoa), up to one representative per species, plus the NCBI-defined representative genomes. Please execute the script with "<code>-help</code>" for advanced usages.</p>
 					<p>Alternatively, you can create your own database with customized data. This is especially necessary when you want to focus on gene flows among a certain set of organisms. The instruction for creating customized BLAST database can be found in the official <a href="http://www.ncbi.nlm.nih.gov/books/NBK279688/">NCBI BLAST manual</a>. Note that if you want to enable TaxID look-up, you will need to turn on advanced arguments like <code>-parse_seqids</code> and <code>-taxid_map</code>. Alternative tools have their own instructions for building databases.</p>
 					<p>Please also check out our new program <a href="https://github.com/JCVI-metagenomics/SubDBer"><b>SubDBer</b></a>. This program subsamples a large database at designated level and generates a smaller database in which taxonomic groups are evenly (or purposely unevenly) represented. For example, an <i>E. coli</i> expert may use this program to extract every single strain of <i>E. coli</i> and <i>Shigella</i>, plus one representative per non-<i>E. coli</i> bacterial genus.</p>
 				</div>
@@ -518,7 +516,6 @@
 			<p><input type="button" id="btnGraph" class="expand" value="+" onclick="show_hide_section('Graph')" disabled> <input type="checkbox" id="chkGraph" onchange="document.getElementById('btnGraph').disabled=!this.checked;if(!this.checked){document.getElementById('divGraph').style.display='none';document.getElementById('btnGraph').value='+';}"> <b>Hit pattern plotting</b> (requires R)</p>
 			<div class="subsection" id="divGraph" style="display:none">
 				<p><input type="checkbox" id="boxPlot" checked> Box plot <input type="checkbox" id="histogram" checked> Histogram <input type="checkbox" id="densityPlot" checked> Density plot <input type="checkbox" id="scatterPlot" checked> Scatter plot</p>
-				<p><input type="checkbox" id="histDensity" onchange="document.getElementById('merge3Groups').disabled=!this.checked"> Overlap histogram and density plot <input type="checkbox" id="merge3Groups" onchange="document.getElementById('histDensity').disabled=!this.checked"> Overlap three groups in density plot</p>
 				<p>Highlight a subset of proteins defined in this file (one protein per line):<br><input type="text" id="plotRef" size=50></p>
 			</div>
 
@@ -731,7 +728,7 @@
 			</div>
 
 			<!-- BBH -->
-			<p><input type="button" id="btnBBH" class="expand" value="+" onclick="show_hide_section('BBH')"> <b>3D plotting method</b></p>
+			<p><input type="button" id="btnBBH" class="expand" value="+" onclick="show_hide_section('BBH')"> <b>Conventional best match method</b></p>
 			<div id="divBBH" class="subsection" style="display:none">
 				<p>Bidirectional Best Hit (BBH) is the traditional approach for identifying gene flows. For a protein-coding gene, if the best non-<i>self</i> match is <i>distal</i>, instead of <i>close</i>, then this gene is predicted as HGT-derived.</p>
 				<p>This conventional method is sensitive to stochastic events that lead to pseudo positives and negatives. It is therefore depreciated. HGTector contains this option for comparison purpose only.
@@ -740,7 +737,7 @@
 			</div>
 
 			<!-- 3D Plotting -->
-			<p><input type="button" id="btnRgl" class="expand" value="+" onclick="show_hide_section('Rgl')"> <b>Conventional best match method</b></p>
+			<p><input type="button" id="btnRgl" class="expand" value="+" onclick="show_hide_section('Rgl')"> <b>3D plotting method</b></p>
 			<div id="divRgl" class="subsection" style="display:none">
 				<p><input type="checkbox" id="plot3D"> Use R package <b>rgl</b> to creates interactive 3D scatter plots to visualize the weight populations.</p>
 			</div>

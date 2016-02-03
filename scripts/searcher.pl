@@ -124,7 +124,7 @@ my @ranks = ('species', 'genus', 'family', 'order', 'class', 'phylum');
 										# record the TaxIDs on these ranks for each hit
 
 # search tool behavior
-my $threads = 1;						# multiple threads (0 for all CPU cores)
+my $threads = 0;						# multiple threads (0 for all CPU cores)
 my $queries = 0;						# multiple queries per run (0 for all sequences per sample)
 my $getAln = 0;							# retrieve aligned part of subject sequence (for BLAST only)
 my $blastdbcmd = "blastdbcmd";
@@ -234,6 +234,7 @@ else{ die "Error: Invalid search tool: $searchTool.\n"; }
 
 if ($searchTool eq "customized" and not $preSearch){ die "Error: You must provide pre-computed search results for \"customized\" search tool.\n"; }
 if ($preSearch and not -d $preSearch){ die "Error: Invalid directory for pre-computed search results: $preSearch\n"; }
+
 if ($searchTool ne "BLAST"){ $httpBlast = 0; }
 if ($httpBlast and not $protdb){ $protdb = "nr"; }
 
@@ -664,7 +665,59 @@ if ($requests == 1 or not $httpBlast){
 			for (my $i=0; $i<scalar(@{$ins{$set}{'prots'}}); $i++){
 				$h{$ins{$set}{'prots'}[$i]{'name'}} = $i unless $ins{$set}{'prots'}[$i]{'seq'};
 			}
-			if (%h){ die "Error: Query sequences not found in $protdb.\n"; }
+			if (%h){ die "Error: One or more query sequences cannot be extracted from $protdb.\n"; }
+
+			# new feature: batch self search #
+			
+			if ($searchTool eq "RAPSearch2" or $searchTool eq "DIAMOND"){
+				%h = ();
+				open OUT, ">$wkDir/tmp.in";
+				for (my $i=0; $i<scalar(@{$ins{$set}{'prots'}}); $i++){
+					$h{$ins{$set}{'prots'}[$i]{'name'}} = $i;
+					print OUT ">".$ins{$set}{'prots'}[$i]{'name'}."\n".$ins{$set}{'prots'}[$i]{'seq'}."\n";
+				}
+				close OUT;
+				if ($searchTool eq "RAPSearch2"){
+					`$prerapsearch -d $wkDir/tmp.in -n $wkDir/raptmp`;
+					`$rapsearch -q $wkDir/tmp.in -d $wkDir/raptmp -t a -s f -o $wkDir/tmp -z $threads`;
+					unlink "$wkDir/tmp.in";
+					unlink "$wkDir/raptmp";
+					unlink "$wkDir/raptmp.info";
+					die "Error in running RAPSearch2. Please check." unless -s "$wkDir/tmp.m8";
+					open IN, "<$wkDir/tmp.m8";
+					while (<IN>){
+						s/\s+$//; next unless $_; next if /^#/;
+						@a = split (/\t/);
+						next if ($#a < 11);
+						next unless $a[0] eq $a[1];
+						next unless exists $h{$a[0]};
+						next if exists $ins{$set}{'prots'}[$h{$a[0]}]{'selfalign'};
+						$ins{$set}{'prots'}[$h{$a[0]}]{'selfalign'} = $a[10]."/".$a[11]."/".$a[2]."/".length($ins{$set}{'prots'}[$h{$a[0]}]{'seq'});
+					}
+					close IN;
+					unlink "$wkDir/tmp.aln";
+					unlink "$wkDir/tmp.m8";
+				}elsif ($searchTool eq "DIAMOND"){
+					`$diamond makedb --in $wkDir/tmp.in -d $wkDir/tmp`;
+					`$diamond blastp -p $threads -q $wkDir/tmp.in -d $wkDir/tmp -a $wkDir/tmp -t $wkDir`;
+					my @out = `$diamond view -a $wkDir/tmp.daa`;
+					unlink "$wkDir/tmp.in";
+					unlink "$wkDir/tmp.dmnd";
+					unlink "$wkDir/tmp.daa";
+					die "Error in running DIAMOND. Please check." unless @out;
+					foreach (@out){
+						s/\s+$//;
+						@a = split (/\t/);
+						next unless $#a == 11;
+						next unless $a[0] eq $a[1];
+						next unless exists $h{$a[0]};
+						next if exists $ins{$set}{'prots'}[$h{$a[0]}]{'selfalign'};
+						$ins{$set}{'prots'}[$h{$a[0]}]{'selfalign'} = $a[10]."/".$a[11]."/".$a[2]."/".length($ins{$set}{'prots'}[$h{$a[0]}]{'seq'});
+					}
+				}
+			}
+		
+			# end of new feature #
 			
 			my @ids = ();
 			for (my $i=0; $i<scalar(@{$ins{$set}{'prots'}}); $i++){
@@ -1021,7 +1074,11 @@ sub local_search {
 
 		# perform self search, in case not targetted in previous steps #
 		unless ($isQueryIn){
-			@a = self_align ($name, $ins{$set}{'prots'}[$id]{'seq'});
+			if (exists $ins{$set}{'prots'}[$id]{'selfalign'}){
+				@a = split(/\//, $ins{$set}{'prots'}[$id]{'selfalign'});
+			}else{
+				@a = self_align ($name, $ins{$set}{'prots'}[$id]{'seq'});
+			}
 			if (@a != (0,0,0,0)){
 				my %hit = ('accn'=>$name, 'expect'=>$a[0], 'score'=>$a[1], 'identity'=>$a[2], 'coverage'=>'100.00', 'taxid'=>$ins{$set}{'taxid'}, 'organism'=>$ins{$set}{'organism'}, 'sequence'=>$ins{$set}{'prots'}[$id]{'seq'});
 				unshift (@hits, {%hit});

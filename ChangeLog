@@ -1,5 +1,18 @@
 ChangeLog of HGTector
 
+== Version 0.2.1 (2/2/2016) ==
+
+New features:
+- Optimized the process of self-alignment by DIAMOND and RAPSearch2. Significantly faster.
+Results don't change.
+- Added a smart decision-making process. If the user does not specify a proper grouping scenario,
+the program will try to generate one.
+- Changed the way of creating graphics.
+
+Bug fixes:
+- Disabled FTP passive mode in databaser.py.
+
+
 == Version 0.2.0 (major upgrade) (10/25/2015) ==
 
 Note:

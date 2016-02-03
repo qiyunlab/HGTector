@@ -106,6 +106,8 @@ if (-e "$wkDir/config.txt"){
 		$outText = $1 if /^outText=([01])$/;
 		$outExcel = $1 if /^outExcel=([01])$/;
 		$outHTML = $1 if /^outHTML=([01])$/;
+		
+		$interactive = $1 if /^interactive=([01])$/;
 	}
 }
 

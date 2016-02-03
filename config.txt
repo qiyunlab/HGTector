@@ -1,6 +1,6 @@
 
 #######################################################
-#        HGTector v0.2.0 configuration file           #
+#        HGTector v0.2.1 configuration file           #
 #######################################################
 
 # This is a template of the configuration file (config.txt). It contains all parameters
@@ -36,10 +36,10 @@ interactive=1
     searchTool=blast
 
     # Number of threads (CPU cores, 0 for all)
-    threads=1
+    threads=0
 
     # Number of query sequences per search (0 for all)
-    queries=1
+    queries=0
 
     # Save aligned region of subject sequences
     getAln=0
@@ -230,8 +230,6 @@ interactive=1
     boxPlot=1                    # box plot
     histogram=1                  # histogram
     densityPlot=1                # density plot
-      histDensity=0              # overlap histogram and density plot
-      merge3Groups=0             # overlap three groups in density plot
     scatterPlot=1                # 2D scatter plot
     plot3D=0                     # interactive 3D scatter plot (requires R package "rgl")
 

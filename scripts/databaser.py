@@ -7,7 +7,7 @@ print '\n'.join((
 	'Databaser: generate taxonomically balanced, non-redundant proteome database.',
 	'Author: Qiyun Zhu (qzhu@jcvi.org)',
 	'Affiliation: J. Craig Venter Institute',
-	'Last updated: Oct 24, 2015',
+	'Last updated: Jan 18, 2016',
 	''
 	))
 
@@ -65,7 +65,7 @@ for argv in sys.argv[1:]:
 print 'Connecting to the NCBI FTP server...',
 sys.stdout.flush()
 ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', 'anonymous', '')
-ftp.set_pasv(False)
+# ftp.set_pasv(False)
 print 'done.'
 
 print 'Downloading the NCBI taxonomy database...',

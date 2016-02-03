@@ -51,7 +51,7 @@ sub recurse_Z(@);
 ## global variables ##
 
 my @sets;										# proteins sets to analyze
-my %lv;											# taxonomic grouping scenario
+my %lv = ();											# taxonomic grouping scenario
 my %selves = ();								# taxonomic information of self group
 my %lvList = ();								# list of taxids of each level
 
@@ -80,8 +80,6 @@ my $minSize = 0;								# minimal size (aa) of a valid protein (0 means infinite
 my $evalue = 1e-5;								# E-value cutoff
 my $identity = 0;								# percent identity cutoff
 my $coverage = 0;								# query coverage cutoff
-my $deHypo = 0;									# ignore hypothetical proteins
-my $smOrthology;								# file containing scheme of orthology
 
 # algorithm
 my $selfRank = 0;								# taxonomic rank(s) on which the program analyzes
@@ -101,8 +99,6 @@ my $plotRef = "";								# file name of reference set of genes
 my $boxPlot = 1;								# box plot
 my $histogram = 1;								# histogram
 my $densityPlot = 1;							# density plot
-my $histDensity = 0;							# overlap histogram and density plot
-my $merge3Groups = 0;							# merge 3 groups in density plot
 my $scatterPlot = 1;							# scatter plot
 my $plot3D = 0;									# 3-way scatter plot
 
@@ -159,8 +155,6 @@ if (-e "$wkDir/config.txt"){
 		$identity = $1 if /^identity=(.+)$/;
 		$identity = $1 if /^percIdent=(.+)$/; # backward compatibility
 		$coverage = $1 if /^coverage=(.+)$/;
-		$deHypo = $1 if /^deHypo=([012])$/;
-		$smOrthology = $1 if /^smOrthology=(.+)$/;
 
 		$selfRank = $1 if /^selfRank=(.+)$/;
 		$normalize = $1 if /^normalize=(.+)$/;
@@ -200,8 +194,6 @@ if (-e "$wkDir/config.txt"){
 		$boxPlot = $1 if /^boxPlot=([01])$/;
 		$histogram = $1 if /^histogram=([01])$/;
 		$densityPlot = $1 if /^densityPlot=([01])$/;
-		$histDensity = $1 if /^histDensity=([01])$/;
-		$merge3Groups = $1 if /^merge3Groups=([01])$/;
 		$scatterPlot = $1 if /^scatterPlot=([01])$/;
 		$plot3D = $1 if /^plot3D=([01])$/;
 	
@@ -305,31 +297,8 @@ elsif (exists $taxadb{$s}){ $selves{'rank_name'} = $taxadb{$s}{'name'}; }
 else{ die "Unknown TaxID $s.\n"; }
 print "  All input genomes belong to $selves{'rank'} $selves{'rank_name'} (TaxID: $selves{'rank_taxid'}).\n";
 
-if ($selfRank =~ /\d/){
-	%lv = ('rank', $ranks[$selves{'rank_id'} + $selfRank], 'id', $selves{'rank_id'} + $selfRank);
-}else{
-	%lv = ('rank', $selfRank);
-	for ($j=0; $j<=$#ranks; $j++){
-		if ($ranks[$j] eq $selfRank){ $lv{'id'} = $j; last; }
-	}
-}
-foreach my $key (keys %selfinfo){ # information of this level
-	$lv{'taxid'} = $taxadb{$selfinfo{$key}{'taxid'}}{$lv{'rank'}};
-	if (exists $ranksdb{$lv{'taxid'}}){ $lv{'name'} = $ranksdb{$lv{'taxid'}}; }
-	elsif (exists $taxadb{$lv{'taxid'}}){ $lv{'name'} = $taxadb{$lv{'taxid'}}{'name'}; }
-	else{ die "Unknown TaxID $lv{'taxid'}.\n"; }
-	$i = $lv{'id'}+1;
-	if ($i <= $#ranks){
-		$lv{'parentRank'} = $ranks[$i];
-		$lv{'parentTaxid'} = $taxadb{$selfinfo{$key}{'taxid'}}{$ranks[$i]};
-		if (exists $ranksdb{$lv{'parentTaxid'}}){ $lv{'parentName'} = $ranksdb{$lv{'parentTaxid'}}; }
-		elsif (exists $taxadb{$lv{'parentTaxid'}}){ $lv{'parentName'} = $taxadb{$lv{'parentTaxid'}}{'name'}; }
-		else{ die "Unknown TaxID $lv{'parentTaxid'}.\n"; }
-	}
-	last;
-}
 if (@selfGroup){ # user-defined self group
-	$lv{'rank'} = "(user defined self group)"; $lv{'id'} = -1; $lv{'taxid'} = join (",", @selfGroup);
+	$lv{'rank'} = "(user-defined self)"; $lv{'id'} = -1; $lv{'taxid'} = join (",", @selfGroup);
 	@a = ();
 	foreach (@selfGroup){
 		if (exists $ranksdb{$_}){ push @a, $ranksdb{$_}; }
@@ -337,71 +306,89 @@ if (@selfGroup){ # user-defined self group
 		else { push @a, "unknown"; }
 	}
 	$lv{'name'} = join (",", @a);
+}else{ # lowest rank that contains all input organisms
+	if ($selfRank =~ /\d/){ # relative level number
+		$lv{'rank'} = $ranks[$selves{'rank_id'} + $selfRank];
+		$lv{'id'} = $selves{'rank_id'} + $selfRank;
+	}else{ # rank name
+		$lv{'rank'} = $selfRank;
+		for ($j=0; $j<=$#ranks; $j++){
+			if ($ranks[$j] eq $selfRank){ $lv{'id'} = $j; last; }
+		}
+	}
+	$s = $selfinfo{(keys %selfinfo)[0]}{'taxid'};
+	$lv{'taxid'} = $taxadb{$s}{$lv{'rank'}};
+	if (exists $ranksdb{$lv{'taxid'}}){ $lv{'name'} = $ranksdb{$lv{'taxid'}}; }
+	elsif (exists $taxadb{$lv{'taxid'}}){ $lv{'name'} = $taxadb{$lv{'taxid'}}{'name'}; }
+	else{ die "Unknown TaxID $lv{'taxid'}.\n"; }
 }
+%h = ();
+foreach my $key (keys %taxadb){
+	next unless $taxadb{$key}{'rank'};
+	foreach (split (/,/, $lv{'taxid'})){
+		$h{$key} = 1 if ($key eq $_ or $taxadb{$key}{'rank'} =~ /\/$_$/ or $taxadb{$key}{'rank'} =~ /\/$_\//);
+	}
+}
+$lvList{$lv{'rank'}} = {%h};
+
 if (@closeGroup){ # user-defined close group
-	$lv{'parentRank'} = "(user defined close group)"; $lv{'parentTaxid'} = join (",", @closeGroup);
+	$lv{'prank'} = "(user-defined close)"; $lv{'ptaxid'} = join (",", @closeGroup);
 	@a = ();
 	foreach (@closeGroup){
 		if (exists $ranksdb{$_}){ push @a, $ranksdb{$_}; }
 		elsif (exists $taxadb{$_}) { push @a, $taxadb{$_}{'name'}; }
 		else { push @a, "unknown"; }
 	}
-	$lv{'parentName'} = join (",", @a);
-}
-
-my %ids = ();
-unless (exists $lvList{$lv{'rank'}}){ # list of taxids of same level
-	foreach my $key (keys %taxadb){
-		next unless $taxadb{$key}{'rank'};
-		foreach (split (/,/, $lv{'taxid'})){
-			$ids{$key} = 1 if ($key eq $_ or $taxadb{$key}{'rank'} =~ /\/$_$/ or $taxadb{$key}{'rank'} =~ /\/$_\//);
+	$lv{'pname'} = join (",", @a);
+}else{ # lowest parent rank that has adequate members for statistical analysis
+	if ($lv{'id'} >= $#ranks){ die "Cannot find a parent taxonomic rank of $lv{'taxid'}.\n"; }
+	print "  Choose one of the following parental taxonomic ranks as the close group:\n";
+	my @pranks = ();
+	$s = $selfinfo{(keys %selfinfo)[0]}{'taxid'};
+	for ($i=$lv{'id'}+1; $i<=$#ranks; $i++){
+		next unless exists $taxadb{$s}{$ranks[$i]};
+		$t = $taxadb{$s}{$ranks[$i]};
+		%h = ('rank' => $ranks[$i], 'taxid' => $t, 'name' => '', 'n' => 0, 'm' => 0); # m is the number of members - number of self members
+		if (exists $ranksdb{$t}){ $h{'name'} = $ranksdb{$t}; }
+		elsif (exists $taxadb{$t}){ $h{'name'} = $taxadb{$t}{'name'}; }
+		else{ next; }
+		foreach my $key (keys %taxadb){
+			if ($key eq $t or $taxadb{$key}{'rank'} =~ /\/$t$/ or $taxadb{$key}{'rank'} =~ /\/$t\//){
+				$h{'n'} ++;
+				$h{'m'} ++ unless exists $lvList{$lv{'rank'}}{$key};
+			}
+		}
+		push @pranks, {%h};
+		print "    ".$h{'rank'}." ".$h{'name'}." (TaxID: ".$h{'taxid'}.") (".$h{'n'}." members).\n";
+	}
+	unless (scalar @pranks){ die "Cannot find a parent taxonomic rank of $lv{'taxid'}.\n"; }
+	for ($i=0; $i<=$#pranks; $i++){
+		if ($pranks[$i]{'m'} >= 10 or $i == $#pranks){ ######## new rule: close group should have >=10 members
+			print "  The program intelligently chose $pranks[$i]{'rank'} $pranks[$i]{'name'}.\n";
+			if ($interactive){ print "Press Enter to accept, or Ctrl+C to exit:\n"; $s = <STDIN>; }
+			$lv{'prank'} = $pranks[$i]{'rank'};
+			$lv{'ptaxid'} = $pranks[$i]{'taxid'};
+			$lv{'pname'} = $pranks[$i]{'name'};
+			last;
 		}
 	}
-	$lvList{$lv{'rank'}} = {%ids};
 }
-%ids = ();
-unless (exists $lvList{$lv{'parentRank'}}){ # list of taxids of parent level
-	foreach my $key (keys %taxadb){
-		next unless $taxadb{$key}{'rank'};
-		foreach (split (/,/, $lv{'parentTaxid'})){
-			$ids{$key} = 1 if ($key eq $_ or $taxadb{$key}{'rank'} =~ /\/$_$/ or $taxadb{$key}{'rank'} =~ /\/$_\//);
-		}
+%h = ();
+foreach my $key (keys %taxadb){
+	next unless $taxadb{$key}{'rank'};
+	foreach (split (/,/, $lv{'ptaxid'})){
+		$h{$key} = 1 if ($key eq $_ or $taxadb{$key}{'rank'} =~ /\/$_$/ or $taxadb{$key}{'rank'} =~ /\/$_\//);
 	}
-	$lvList{$lv{'parentRank'}} = {%ids};
 }
+$lvList{$lv{'prank'}} = {%h};
 
 print "Analysis will work on the following taxonomic ranks:\n";
 print "  Self: $lv{'rank'} $lv{'name'} (TaxID: $lv{'taxid'}) (".(keys %{$lvList{$lv{'rank'}}})." members),\n";
-print "  Close: $lv{'parentRank'} $lv{'parentName'} (TaxID: $lv{'parentTaxid'}) (".(keys %{$lvList{$lv{'parentRank'}}})." members),\n";
+print "  Close: $lv{'prank'} $lv{'pname'} (TaxID: $lv{'ptaxid'}) (".(keys %{$lvList{$lv{'prank'}}})." members),\n";
 print "  Distal: all other organisms.\n";
 if ($interactive){
 	print "Press Enter to continue, or Ctrl+C to exit:";
 	$s = <STDIN>;
-}
-
-## Identify gene orthology ##
-
-if ($deHypo == 2){
-	if ($smOrthology){
-		unless (-e $smOrthology){
-			print "Orthology scheme file $smOrthology not accessible.\n";
-			$smOrthology = "$wkDir/taxonomy/orthology.db";
-		}
-	}else{ $smOrthology = "$wkDir/taxonomy/orthology.db"; }
-	unless (-e $smOrthology){ system "perl scripts/orthologer.pl $wkDir"; }
-	unless (-e $smOrthology){ print "Error: Identification of orthology failed.\n" and exit 1; }
-	open IN, "<$smOrthology";
-	while (<IN>){
-		s/\s+$//; next if /^#/; next unless $_;
-		@a = split (/\t/); next unless $#a;
-		$a[0] =~ s/^\d+\|//;
-		@b = split (/[\s\/,]/, $a[$#a]);
-		foreach (@b){
-			$proteins{$_} = $a[0] unless exists $proteins{$_};
-		}
-	}
-	close IN;
-	$deHypo = 1 unless %proteins # if no name is defined by the scheme file, then use original protein name.
 }
 
 ## Read reference proteins ##
@@ -419,6 +406,7 @@ if ($plotRef){
 	}
 	close IN;
 }
+
 
 ## Read protein sets ##
 
@@ -468,15 +456,9 @@ foreach my $set (@sets){
 		my %result = ();				# a record to store everything about this search										
 		my %scores = ();				# scores of each hit by category, as a buffer for computing the statistics above
 		my @hits;						# parameters of the hits. one hit contains:
-										#accn, organism, group, taxid, genus, score
+										# accn, organism, group, taxid, genus, score
 		$file =~ /(.+)\.[^.]+$/;
 		$result{'query'} = $1;
-
-		# discard hypothetical proteins
-		if ($deHypo == 2 and exists $proteins{$result{'query'}}){
-			$s = $proteins{$result{'query'}};
-			next if ($s =~ /hypothetical/ or $s =~ /hypotethical/ or $s =~ /hypothetcial/);
-		}
 
 		my $nHits = 0;					# total number of hits. just for convenience
 		my $nScore = 0;					# total score
@@ -560,7 +542,10 @@ foreach my $set (@sets){
 			last if ($maxHits and $#hits >= $maxHits-1);
 		}
 		close IN;
+		
+		# skip if there is no hit
 		next unless @hits;
+		
 		# next if ($minSize and ($result{'length'} < $minSize));
 		unless (exists $result{'query'} and exists $result{'length'}){
 			print "\nIncomplete search result: $set/$file.\n" ;
@@ -570,13 +555,6 @@ foreach my $set (@sets){
 			}
 		}
 		$result{'product'} = '' unless exists $result{'product'};
-
-		# discard hypothetical proteins
-		if ($deHypo == 1 and $result{'product'}){
-			$s = $result{'product'};
-			next if ($s =~ /hypothetical/ or $s =~ /hypotethical/ or $s =~ /hypothetcial/);
-		}
-
 
 		## Intepret hit table ##
 
@@ -639,7 +617,7 @@ foreach my $set (@sets){
 				if ($useWeight){ $result{'N0'} += $hits[$i]{'score'}; }
 				else { $result{'N0'} ++; }
 				push @{$result{'S0'}}, $hits[$i]{'score'};
-			}elsif (exists $lvList{$lv{'parentRank'}}{$hits[$i]{'taxid'}}){
+			}elsif (exists $lvList{$lv{'prank'}}{$hits[$i]{'taxid'}}){
 				if ($useWeight){ $result{'N1'} += $hits[$i]{'score'}; }
 				else { $result{'N1'} ++; }
 				push @{$result{'S1'}}, $hits[$i]{'score'};
@@ -670,11 +648,9 @@ foreach my $set (@sets){
 		}
 
 		# proteins without non-self hits are considered as de novo originated and not considered for statistics
-
 		$result{'origin'} = 1 if $result{'N1'}+$result{'N2'} < 0.000001;
 
 		# proteins with hits lower than minimum cutoff are considered as de novo originated and not considered for statistics
-
 		if ($minHits and ($result{'n'} < $minHits)){ $result{'origin'} = 1; $result{'BBH'} = ""; }
 
 		# Put this record into the master record
@@ -738,8 +714,13 @@ if ($graphFp){
 	foreach my $set (sort keys %fpN){
 		my $fpre = "$wkDir/result/statistics/".("$set." x ($set ne "0")); # prefix of filename
 		my $tpost = " of $set" x ($set ne "0"); # postfix of title
-		for (0..2){
+		my @gcode = ('Self', 'Close', 'Distal');
+		for (0..2){ # send data to R
 			@b = @{$fpN{$set}{$_}{'data'}};
+			$_ = sprintf("%.3f", $_) for (@b);
+			$R->send("x$_<-c(".join (",", @b).")");
+			@b = sort{$a<=>$b}@b;
+			$R->send("lim$_<-".$b[$#b]); # find proper xlim
 			if ($exOutlier){
 				@c = boxplot(@b) if ($exOutlier == 1);
 				@c = adjusted_boxplot(@b) if ($exOutlier == 2);
@@ -747,78 +728,90 @@ if ($graphFp){
 				if ($b[$#b] > $c[1]){
 					for ($i=$#b; $i>=0; $i--){
 						if ($b[$i] <= $c[1]){
-							@b = @b[0..$i];
+							$R->send("lim$_<-".$b[$i]);
 							last;
 						}
 					}
 				}
 			}
-			$_ = sprintf("%.3f", $_) for (@b);
-			$R->send("x$_<-c(".join (",", @b).")");
+		}
+		my @xr = ([], [], []); # reference positives
+		if (keys %refs){
+			foreach my $key (keys %refs){
+				if ($refs{$key}[0]){
+					push (@{$xr[$_]}, $refs{$key}[$_+1]) for (0..2);
+				}
+			}
+			for (0..2){
+				@b = @{$xr[$_]};
+				$_ = sprintf("%.3f", $_) for (@b);
+				$R->send("xr$_<-c(".join (",", @b).")");
+			}
 		}
 		if ($boxPlot){
-			$R->send("pdf(\"$fpre"."box.pdf\")");
-			$R->send("boxplot(x0,x1,x2,names=c(\"self\",\"close\",\"distal\"), main='Box plot$tpost', xlab='Group', ylab='Weight')");
+			$R->send("pdf('$fpre"."box.pdf',useDingbats=F)");
+			$R->send("par(mar=c(4,4,1,1)+0.1,mgp=c(2.5,0.75,0))");
+			$R->send("boxplot(x0,x1,x2,names=c('self','close','distal'),xlab='Group',ylab='Weight',main='')");
 			$R->send("dev.off()");
 		}
+		if ($selfLow){ @b = (0, 1, 2); }
+		else{ @b = (1, 2); }
 		if ($histogram){
-			$R->send("pdf(\"$fpre"."hist.pdf\", width=21, height=8)");
-			$R->send("par(mfrow=c(1,3), oma=c(0,0,3,0))");
-			for (0..2){
-				if ($_ == 0){ $s = "Self"; }elsif ($_ == 1){ $s = "Close"; }else{ $s = "Distal"; }
-				$R->send("hist(x$_, breaks=$nBin, freq=F, col='lightgrey', xlab='Weight', ylab='Probability density', main='$s')");
-				$R->send("lines(density(x$_".(",bw=bw.nrd0(x$_)*$bwF" x ($bwF and $bwF != 1))."), lwd=2)") if $histDensity;
+			for (@b){
+				$R->send("pdf('$fpre"."hist.".lc($gcode[$_]).".pdf',useDingbats=F)");
+				$R->send("par(mar=c(4,4,1,1)+0.1,mgp=c(2.5,0.75,0))");
+				$R->send("hist(x$_, breaks=$nBin,freq=F,col='lightgrey',xlab='$gcode[$_] weight',ylab='Probability density',main=''".",xlim=range(0:lim$_)" x ($exOutlier and $exOutlier > 0).")");
+				$R->send("dev.off()");
 			}
-			$R->send("title(\"Histogram".(" and density function" x $histDensity)."$tpost\",outer=T)");
-			$R->send("dev.off()");
 		}
 		if ($densityPlot){
-			if ($merge3Groups){
-				$R->send("pdf(\"$fpre"."density.pdf\")");
-				$R->send("plot(density(x0".(",bw=bw.nrd0(x0)*$bwF" x ($bwF and $bwF != 1))."), xlab='Weight', ylab='Probability density', main='Density plot$tpost')"); # xlim=range(0:1),
-				$R->send("lines(density(x1".(",bw=bw.nrd0(x1)*$bwF" x ($bwF and $bwF != 1))."), col=2)");
-				$R->send("lines(density(x2".(",bw=bw.nrd0(x2)*$bwF" x ($bwF and $bwF != 1))."), col=3)");
-				$R->send("legend(\"topright\",legend=c(\"self\",\"close\",\"distal\"),col=(1:3),lwd=2,lty=1)");
-				$R->send("dev.off()");
-			}elsif (not ($histogram and $histDensity)){
-				$R->send("pdf(\"$fpre"."density.pdf\", width=21, height=8)");
-				$R->send("par(mfrow=c(1,3), oma=c(0,0,3,0))");
-				for (0..2){
-					if ($_ == 0){ $s = "Self"; }elsif ($_ == 1){ $s = "Close"; }else{ $s = "Distal"; }
-					$R->send("dd<-density(x$_".(",bw=bw.nrd0(x$_)*$bwF" x ($bwF and $bwF != 1)).")");
-					$R->send("xlim1 <- range(dd\$x[is.finite(dd\$x)])");
-					$R->send("par(mar=c(5.1,4.1,4.1,5.1))") if $plotRef;
-					$R->send("plot(dd, lwd=2, xlab='Weight', ylab='Probability density', main='$s')");
-					if (scalar keys %refs){
-						@a = ();
-						foreach my $key (keys %refs){
-							push (@a, $refs{$key}[$_+1]) if $refs{$key}[0];
-						}
-						$R->send("ab<-c(".join (",", @a).")");
-						$R->send("par(new=TRUE)");
-						$R->send("plot(density(ab".(",bw=bw.nrd0(ab)*$bwF" x ($bwF and $bwF != 1))."),xlim=xlim1,xaxt='n',yaxt='n',xlab='',ylab='',main='',col=2)");
-						$R->send("axis(4,col=2,labels.col=2)");
-						$R->send("mtext('Probability density of true positives',side=4, line=3, col=2)");
-						$R->send("rug(ab,ticksize=0.04,col='red')"); # lwd=1,col=rgb(1,0,0,0.25))");
-					}
+			for (@b){
+				$R->send("pdf('$fpre"."density.".lc($gcode[$_]).".pdf',useDingbats=F)");
+				if ($plotRef){ $R->send("par(mar=c(4,4,1,3)+0.1,mgp=c(2.5,0.75,0))"); }
+				else{ $R->send("par(mar=c(4,4,1,1)+0.1,mgp=c(2.5,0.75,0))"); }
+				$R->send("d<-density(x$_".(",bw=bw.nrd0(x$_)*$bwF" x ($bwF and $bwF != 1)).")");
+				if ($exOutlier){ $R->send("lim<-range(min(d\$x):lim$_)"); }
+				else{ $R->send("lim<-range(d\$x[is.finite(d\$x)])"); }
+				$R->send("plot(d,lwd=2,xlim=lim,xlab='Weight',ylab='Probability density',main='')");
+				if (scalar @{$xr[0]}){
+					$R->send("par(new=TRUE)");
+					$R->send("plot(density(xr$_".(",bw=bw.nrd0(ab)*$bwF" x ($bwF and $bwF != 1))."),xlim=lim,xaxt='n',yaxt='n',xlab='',ylab='',main='',col=2)");
+					$R->send("axis(4,col=2,col.ticks=2)");
+					$R->send("mtext('Probability density of true positives',side=4,line=-2,col=2)");
+					$R->send("rug(xr$_,ticksize=0.04,lwd=1,col=rgb(1,0,0,0.25))");
 				}
-				$R->send("title(\"Density plot$tpost\",outer=T)");
 				$R->send("dev.off()");
 			}
 		}
 		if ($scatterPlot){
-			$R->send("pdf(\"$fpre"."scatter.pdf\", width=21, height=8)");
-			$R->send("par(mfrow=c(1,3), oma=c(0,0,3,0))");
-			$R->send("plot(x0, x1, xlab='Self weight', ylab='Close weight')");
-			$R->send("plot(x1, x2, xlab='Close weight', ylab='Distal weight')");
-			$R->send("plot(x2, x0, xlab='Distal weight', ylab='Self weight')");
-			$R->send("title(\"Scatter plot$tpost\",outer=T)");
-			$R->send("dev.off()");
+			if ($selfLow){
+				for (@b){
+					($i, $j) = ($_, $_+1);
+					$j = 0 if ($j == 3);
+					$R->send("pdf('$fpre"."scatter.".lc($gcode[$i])."-".lc($gcode[$j]).".pdf',useDingbats=F)");
+					$R->send("par(mar=c(4,4,1,1)+0.1,mgp=c(2.5,0.75,0))");
+					$R->send("plot(x$i,x$j,pch=16,col=rgb(0,0,0,0.25),xlim=range(0:lim$i),ylim=range(0:lim$j),xlab='$gcode[$i] weight',ylab='$gcode[$j] weight')");
+					if (scalar @{$xr[0]}){
+						$R->send("points(xr$i,xr$j,pch=16,col=rgb(1,0,0,0.5))");
+						$R->send("legend('topright','true positive',pch=16,col='red')");
+					}
+					$R->send("dev.off()");
+				}
+			}else{
+				$R->send("pdf(\"$fpre"."scatter.pdf\",useDingbats=F)");
+				$R->send("par(mar=c(4,4,1,1)+0.1,mgp=c(2.5,0.75,0))");
+				$R->send("plot(x1,x2,pch=16,col=rgb(0,0,0,0.25),xlim=range(0:lim1),ylim=range(0:lim2),xlab='Close weight',ylab='Distal weight',main='')");
+				if (scalar @{$xr[0]}){
+					$R->send("points(xr1,xr2,pch=16,col=rgb(1,0,0,0.5))");
+					$R->send("legend('topright','true positive',pch=16,col='red')");
+				}
+				$R->send("dev.off()");
+			}
 		}
 		if ($plot3D){ # This function is not functioning properly
 			# if ($^O=~/Win/){ $R->send("windows()"); }elsif ($^O=~/Mac/){ $R->send("quartz()"); }else{ $R->send("x11()"); }
-			$R->send("plot3d(x0, x1, x2, xlab='Self weight', ylab='Close weight', zlab='Distal weight', title=\"3D scatter plot$tpost\")");
-			print "Displaying 3D plot$tpost";
+			$R->send("plot3d(x0,x1,x2,xlab='Self weight',ylab='Close weight',zlab='Distal weight')");
+			print "Displaying 3D plot$tpost. Press Enter to move on.";
 			$s = <STDIN>;
 		}
 	}
@@ -855,6 +848,7 @@ foreach my $set (keys %fpN){
 		my $global_cutoff;
 		my $computed_cutoff;
 		my $use_global = 0;
+		my $half_way = median(@a); ########## if computed cutoff > median, use global cutoff
 
 		# compute basic statistical parameters
 		
@@ -879,12 +873,12 @@ foreach my $set (keys %fpN){
 
 		$i = $fpN{$set}{$key}{'n'}*$globalCO;
 		if (int($i) == $i){
-			$global_cutoff = ($a[$#a-$i+1]+$a[$#a-$i])/2;
+			$global_cutoff = ($a[$i-1]+$a[$i])/2;
 		}else{
 			if ($i-int($i) <= int($i)-$i+1){
-				$global_cutoff = $a[$#a-int($i)+1];
+				$global_cutoff = $a[int($i)];
 			}else{
-				$global_cutoff = $a[$#a-int($i)];
+				$global_cutoff = $a[int($i)-1];
 			}
 		}
 		print "      Global cutoff ($globalCO) = $global_cutoff.\n";
@@ -919,7 +913,6 @@ foreach my $set (keys %fpN){
 			open OUT, ">$key.out";
 			print OUT join(' ', @a);
 			close OUT;
-			
 			
 			if ($s =~ /D = (\S+), p-value [<=] (\S+)\n/){
 				print " done.\n";
@@ -1208,13 +1201,19 @@ foreach my $set (keys %fpN){
 			elsif ($howCO == 4){ $s = "kernel density estimation"; }
 			elsif ($howCO == 5){ $s = "clustering analysis"; }
 			if ($computed_cutoff){
-				$fpN{$set}{$key}{'cutoff'} = $computed_cutoff;
-				print "      Cutoff is ".sprintf("%.3f", $computed_cutoff)." (determined by $s).\n";
+				if ($computed_cutoff <= $half_way){
+					$fpN{$set}{$key}{'cutoff'} = $computed_cutoff;
+					print "      Cutoff is ".sprintf("%.3f", $computed_cutoff)." (determined by $s).\n";
+				}else{
+					$fpN{$set}{$key}{'cutoff'} = $global_cutoff;
+					print "      ". ucfirst($s) ." identified a cutoff ".sprintf("%.3f", $computed_cutoff)." which is too large. Use global cutoff $global_cutoff instead.\n";
+				}
 			}else{
 				$fpN{$set}{$key}{'cutoff'} = $global_cutoff;
 				print "      ". ucfirst($s) ." failed to identify a cutoff. Use global cutoff $global_cutoff instead.\n";
 			}
 		}
+		# $fpN{$set}{$key}{'cutoff'} = 0.00001 unless $fpN{$set}{$key}{'cutoff'};
 		
 		# ask user to enter cutoff
 		
@@ -1318,17 +1317,17 @@ foreach my $set (keys %results){
 
 		# principle: fewer hits suggests income or loss
 		# check if self hits are low (indicating the gene is not prevalent within the group)
-		if ($res{'N0'} < $fpN{$fp}{'0'}{'cutoff'}){
+		if (($res{'N0'} < $fpN{$fp}{'0'}{'cutoff'}) or ($res{'N0'} == 0)){
 			$res{'in'} = 1;
 		}
 
 		## predict incoming HGT events ##
 		# hits from close sister groups are low, indicating there's no vertical ancestor
-		if ($res{'N1'} < $fpN{$fp}{'1'}{'cutoff'}){
+		if (($res{'N1'} < $fpN{$fp}{'1'}{'cutoff'}) or ($res{'N1'} == 0)){
 			# overall non-self hits are normal, indicating it's not an origination event
-			if ($res{'N2'} >= $fpN{$fp}{'2'}{'cutoff'}){
+			if ($res{'N2'} and $res{'N2'} >= $fpN{$fp}{'2'}{'cutoff'}){
 				$res{'income'} = 1;
-				$res{'income'} = "" if ($selfLow and ($res{'N0'} >= $fpN{$fp}{'0'}{'cutoff'}));
+				$res{'income'} = "" if ($selfLow and (($res{'N0'} > 0) and ($res{'N0'} >= $fpN{$fp}{'0'}{'cutoff'})));
 			}
 		}
 		

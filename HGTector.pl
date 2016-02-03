@@ -12,14 +12,14 @@ $| = 1;
 
 print "
 ┌---------------------┐
-|   HGTector v0.2.0   |
+|   HGTector v0.2.1   |
 └---------------------┘
 ";
 
 my $usage = "
 Usage:
   1) Choose a working directory (say, wkdir).
-  2) Create wkdir/input, and place your *.faa file(s) in it..
+  2) Create wkdir/input, and place your *.faa file(s) in it.
   3) Create a configuration file: wkdir/config.txt.
   4) Execute:
      perl HGTector.pl /path/to/wkdir
@@ -44,7 +44,7 @@ if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help"){
 		print "\nWould you like to test on a small sample dataset (yes/NO)? ";
 		my $s = <STDIN>; chomp $s;
 		if ($s =~ /^yes$/i or $s =~ /^y$/i){
-			print "\nNote: HGTector will connect the NCBI BLAST server to perform sequence homology search and identify taxonomy of hits. You don't need any local search tool, database or computing power. However, please be prepared that the server may hang in some situations.\nProceed (yes) or opt out (NO): ";
+			print "\nWarning: HGTector will connect the NCBI BLAST server to perform sequence similarity search and identify taxonomy of hits. You don't need any local search tool, database or computing power. However, please be prepared that this process is slow and the server may hang in some situations.\nProceed (yes) or opt out (NO): ";
 			$s = <STDIN>; chomp $s;
 			if ($s =~ /^yes$/i or $s =~ /^y$/i){
 				pipeline;
