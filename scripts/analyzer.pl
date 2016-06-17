@@ -631,6 +631,9 @@ foreach my $set (@sets){
 				unless (exists $result{'hit2'}){
 					$result{'hit2'} = $hits[$i]{'taxid'};
 					$result{'hit2accn'} = $hits[$i]{'accn'};
+					$result{'hit2evalue'} = $hits[$i]{'evalue'};
+					$result{'hit2identity'} = $hits[$i]{'identity'};
+					$result{'hit2coverage'} = $hits[$i]{'coverage'};
 				}
 				$topDistalScore = $hits[$i]{'score'} unless $topDistalScore;
 				$result{'BBH'} = 1 unless exists $result{'BBH'};
@@ -1382,7 +1385,7 @@ foreach my $set (keys %results){
 		push (@a, "Loss") if $loss;
 		push (@a, "POE") if $POE;
 	}
-	push @a, "Match";
+	push @a, "Match | E-value | Identity | Coverage | TaxID";
 	print OUT "HGTector result of $set\n".join("\t",@a)."\n";
 	for ($i=0; $i<$n; $i++){
 		%h = %{$results{$set}[$i]};
@@ -1397,8 +1400,8 @@ foreach my $set (keys %results){
 			print OUT $h{'BBH'} if exists $h{'BBH'} and $h{'BBH'};
 		}
 		print OUT "\t";
-		if (exists $h{'hit2'} and exists $taxadb{$h{'hit2'}}){
-			print OUT $h{'hit2'}." (".$taxadb{$h{'hit2'}}{'name'}.")";
+		if (exists $h{'hit2'}){
+			print OUT $h{'hit2accn'}.'|'.$h{'hit2evalue'}.'|'.$h{'hit2identity'}.'|'.$h{'hit2coverage'}.'|'.$h{'hit2'}
 		}
 		print OUT "\n";
 	}
@@ -1580,4 +1583,3 @@ sub recurse_Z(@){
 	}
 	return @data;
 }
-
