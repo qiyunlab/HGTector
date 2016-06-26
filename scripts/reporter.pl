@@ -31,14 +31,14 @@ my $i; my $j; my $n; my $s; my $t; my @a; my @b; my @c; my %h;
 my $wkDir = $ARGV[0];
 my $interactive = 1;
 
-my $deHypo = 0;					# ignore hypothetical proteins
+my $deHypo = 0;						# ignore hypothetical proteins
 
 my $byDonor = 1;					# summarize HGT events by organism
 my @ranks = ('species', 'genus', 'family', 'order', 'class', 'phylum');
-my $sumRank = "order";			# on this rank
+my $sumRank = "order";				# on this rank
 my $defOnly = 1;					# ignore those without this rank defined
 
-my $byFunction = 0;				# summarize HGT by function
+my $byFunction = 0;					# summarize HGT by function
 my $dirFunction;					# directory containing functional annotations
 
 my $byOrthology = 0;				# generate report by ortholog
@@ -72,7 +72,7 @@ my %ranksdb = ();					# ranks.db
 my $workbook;						# Excel workbook
 my $worksheet;						# Excel worksheet
 my $excelRow;						# active row number
-my $excelTitle;					# Excel title format
+my $excelTitle;						# Excel title format
 my $excelHeader;					# Excel header format
 my ($excelGrey, $excelGreen, $excelYellow, $excelRed);				# Excel data formats
 
@@ -215,7 +215,7 @@ foreach my $set (@sets){
 			for ($i=0; $i<=$#a; $i++){
 				$iLoss = $i if ($a[$i] eq "Loss");
 				$iPOE = $i if ($a[$i] eq "POE");
-				$iMatch = $i if ($a[$i] eq "Match");
+				$iMatch = $i if ($a[$i] eq "TaxID");
 			}
 			next;
 		}
@@ -368,18 +368,10 @@ if ($byDonor){
 			my $organism = $result{$accn}{'match'};
 			my $group = "";
 			if ($sumRank){
-				$organism =~ /^(\d+) \(/;
-				if (exists $taxadb{$1} and exists $taxadb{$1}{$sumRank} and $taxadb{$1}{$sumRank} and exists $ranksdb{$taxadb{$1}{$sumRank}}){
-					# next unless exists $taxadb{$1}{'class'} and $taxadb{$1}{'class'} eq '28211'; # alphaproteobacteria
-					# next unless substr ($taxadb{$1}{'rank'}, 0, 3) eq "/2/"; # bacteria
-					# next if exists $taxadb{$1}{'class'} and $taxadb{$1}{'class'};
-					# $organism = $ranksdb{$taxadb{$1}{'phylum'}}.",".$ranksdb{$taxadb{$1}{'class'}}.",".$ranksdb{$taxadb{$1}{'order'}};
-					$organism = $ranksdb{$taxadb{$1}{$sumRank}};
+				# $organism =~ /^(\d+) \(/;
+				if (exists $taxadb{$organism} and exists $taxadb{$organism}{$sumRank} and $taxadb{$organism}{$sumRank} and exists $ranksdb{$taxadb{$organism}{$sumRank}}){
+					$organism = $ranksdb{$taxadb{$organism}{$sumRank}};
 				}else{ next; }
-				# if (exists $taxadb{$1} and substr ($taxadb{$1}{'rank'}, 0, 3) eq "/2/"){ $organism = "Bacteria"; }
-				# elsif (exists $taxadb{$1} and substr ($taxadb{$1}{'rank'}, 0, 6) eq "/2157/"){ $organism = "Archaea"; }
-				# elsif (exists $taxadb{$1} and substr ($taxadb{$1}{'rank'}, 0, 6) eq "/2759/"){ $organism = "Eukaryota"; }
-				# else{ next; }
 			}
 			$results{$set}{$accn}{'group'} = $organism;
 			if (exists $organisms{$organism}){
@@ -805,4 +797,3 @@ if ($outExcel){
 }
 
 exit 0;
-
