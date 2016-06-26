@@ -132,6 +132,7 @@ my $loss = 0;									# also report gene loss events
 my $POE = 0;									# also report POE
 
 my @ranks = ('species', 'genus', 'family', 'order', 'class', 'phylum');
+my $ignoreSubspecies = 0;
 
 my @selfGroup = ();
 my @closeGroup = ();
@@ -202,6 +203,7 @@ if (-e "$wkDir/config.txt"){
 		$POE = $1 if /^POE=([01])$/;
 		
 		@ranks = split (/\s*,\s*/, $1) if /^ranks=(.+)$/;
+		$ignoreSubspecies = $1 if /^ignoreSubspecies=([01])$/;
 
 		@selfGroup = split (/\s*,\s*/, $1) if /^selfGroup=(.+)$/;
 		@closeGroup = split (/\s*,\s*/, $1) if /^closeGroup=(.+)$/;
@@ -1385,7 +1387,7 @@ foreach my $set (keys %results){
 		push (@a, "Loss") if $loss;
 		push (@a, "POE") if $POE;
 	}
-	push @a, "Match | E-value | Identity | Coverage | TaxID";
+	push @a, ('Hit', 'E-value', 'Identity', 'Coverage', 'TaxID', 'Organism', 'Lineage');
 	print OUT "HGTector result of $set\n".join("\t",@a)."\n";
 	for ($i=0; $i<$n; $i++){
 		%h = %{$results{$set}[$i]};
@@ -1401,7 +1403,25 @@ foreach my $set (keys %results){
 		}
 		print OUT "\t";
 		if (exists $h{'hit2'}){
-			print OUT $h{'hit2accn'}.'|'.$h{'hit2evalue'}.'|'.$h{'hit2identity'}.'|'.$h{'hit2coverage'}.'|'.$h{'hit2'}
+			print OUT join("\t", ($h{'hit2accn'}, $h{'hit2evalue'}, $h{'hit2identity'}, $h{'hit2coverage'}, $h{'hit2'}));
+			my $organism = $taxadb{$h{'hit2'}}{'name'};
+			if ($ignoreSubspecies){
+				$s = $taxadb{$h{'hit2'}}{'species'};
+				if ($s){
+					if (exists $taxadb{$s}){ $organism = $taxadb{$s}{'name'}; }
+					elsif (exists $ranksdb{$s}) { $organism = $ranksdb{$s}; }
+				}
+			}
+			print OUT "\t".$organism;
+			@a = ();
+			foreach (reverse(@ranks)){
+				$s = $taxadb{$h{'hit2'}}{$_};
+				if ($s){
+					if (exists $taxadb{$s}){ push @a, $taxadb{$s}{'name'}; }
+					elsif (exists $ranksdb{$s}) { push @a, $ranksdb{$s}; }
+				}
+			}
+			print OUT "\t".join(";", @a);
 		}
 		print OUT "\n";
 	}
