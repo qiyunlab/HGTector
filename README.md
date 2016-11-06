@@ -1,11 +1,13 @@
 HGTector
 ==========
 
+**Note: Instead of downloading the release, please git clone the master branch, which contains an important update in match with the new NCBI FTP site structure.**
+
 A computational pipeline for genome-wide detection of putative horizontal gene transfer (HGT) events based on sequence homology search hit distribution statistics
 
 Latest release: [0.2.1](https://github.com/DittmarLab/HGTector/archive/0.2.1.zip)
 
-Last update: 2016-2-2
+Last update: 2016-11-6
 
 Authors: Qiyun Zhu (<qiyunzhu@gmail.com>), Katharina Dittmar (<katharinad@gmail.com>)
 
