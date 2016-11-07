@@ -280,6 +280,7 @@ for gcf in gcfs:
 		except ftplib.error_temp as resp:
 			time.sleep(delay)
 			continue
+		else: pass
 		break
 	if not found:
 		if err550: nodata.append(gcf)
@@ -294,6 +295,7 @@ for gcf in gcfs:
 		except ftplib.error_temp as resp:
 			time.sleep(delay)
 			continue
+		else: pass
 		break
 	if not files:
 		if err550: nodata.append(gcf)
@@ -317,6 +319,7 @@ for gcf in gcfs:
 		except ftplib.error_temp as resp:
 			time.sleep(delay)
 			continue
+		else: pass
 		break
 	if not found:
 		if err550: nodata.append(gcf)
@@ -331,6 +334,7 @@ for gcf in gcfs:
 		except ftplib.error_temp as resp:
 			time.sleep(delay)
 			continue
+		else: pass
 		break
 	if not files:
 		if err550: nodata.append(gcf)
@@ -349,6 +353,7 @@ for gcf in gcfs:
 		except ftplib.error_temp as resp:
 			time.sleep(delay)
 			continue
+		else: pass
 		break
 	if not written:
 		haserror.append(gcf)

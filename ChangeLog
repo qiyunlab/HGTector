@@ -1,5 +1,12 @@
 ChangeLog of HGTector
 
+== Incremental update (11/6/2016) ==
+New features:
+- Added Python 3 support for databaser.py
+Bug fixes:
+- NCBI has changed the FTP site file system structure (see [notification](https://www.ncbi.nlm.nih.gov/news/08-30-2016-genomes-ftp-reorganization/)). So databaser.py was modified accordingly.
+
+
 == Version 0.2.1 (2/2/2016) ==
 
 New features:
@@ -59,5 +66,5 @@ New features:
 Bug fixes:
 - Updated the BLAST server URL.
 - Improved efficiency of batch BLAST and result processing.
-- Allowed taxonomy of input genomes defined in config.txt. 
+- Allowed taxonomy of input genomes defined in config.txt.
 - Multiple bug fixes in Perl code and in GUI.
