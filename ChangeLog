@@ -1,5 +1,10 @@
 ChangeLog of HGTector
 
+== Incremental update (1/28/2017) ==
+Bug fixes:
+- Fixed a bug in databaser.py which incorrectly deals the case with subsampling off.
+
+
 == Incremental update (11/6/2016) ==
 New features:
 - Added Python 3 support for databaser.py

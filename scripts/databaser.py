@@ -13,7 +13,7 @@ print('\n'.join((
 	'Databaser: generate taxonomically balanced, non-redundant proteome database.',
 	'Author: Qiyun Zhu (qzhu@jcvi.org)',
 	'Affiliation: J. Craig Venter Institute',
-	'Last updated: Nov 5, 2016',
+	'Last updated: Jan 28, 2017',
 	''
 	)))
 
@@ -268,7 +268,7 @@ print(' ', end=' ')
 with open('sampled_genomes.txt', 'w') as fout:
 	fout.write('#' + '\t'.join(('assembly_accession', 'wgs_master', 'taxid', 'species_taxid', 'organism_name', 'assembly_level', 'proteins', 'residues')) + '\n')
 for gcf in gcfs:
-	if 'in' not in gcfs[gcf]: continue
+	if subsp and 'in' not in gcfs[gcf]: continue
 	dir = '/'.join((gcf[4:7], gcf[7:10], gcf[10:13]))
 	(found, err550) = (0, 0)
 	for i in range(retries):

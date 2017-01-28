@@ -7,7 +7,7 @@ A computational pipeline for genome-wide detection of putative horizontal gene t
 
 Latest release: [0.2.1](https://github.com/DittmarLab/HGTector/archive/0.2.1.zip)
 
-Last update: 2016-11-6
+Last update: 2017-1-28
 
 Authors: Qiyun Zhu (<qiyunzhu@gmail.com>), Katharina Dittmar (<katharinad@gmail.com>)
 

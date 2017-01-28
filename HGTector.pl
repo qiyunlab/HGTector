@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
-# HGTector (version 0.2.0): Genome-wide detection of horizontal gene transfer based on sequence similarity search result distribution statistics
-# Copyright (C) 2013-2015, Qiyun Zhu, Katharina Dittmar. All rights reserved.
+# HGTector (version 0.2.1): Genome-wide detection of horizontal gene transfer based on sequence similarity search result distribution statistics
+# Copyright (C) 2013-2017, Qiyun Zhu, Katharina Dittmar. All rights reserved.
 # Licensed under BSD 2-clause license.
 
 use warnings;
