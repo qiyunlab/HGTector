@@ -50,85 +50,85 @@ sub recurse_Z(@);
 
 ## global variables ##
 
-my @sets;                                        # proteins sets to analyze
-my %lv = ();                                            # taxonomic grouping scenario
+my @sets;                                       # proteins sets to analyze
+my %lv = ();                                    # taxonomic grouping scenario
 my %selves = ();                                # taxonomic information of self group
 my %lvList = ();                                # list of taxids of each level
 
 my %taxadb = ();                                # taxa.db
-my %ranksdb = ();                                # ranks.db
-my %selfinfo = ();                                # self.info
+my %ranksdb = ();                               # ranks.db
+my %selfinfo = ();                              # self.info
 
-my %proteins = ();                                # accn -> name (identified by COG)
+my %proteins = ();                              # accn -> name (identified by COG)
 
-my @files;                                        # search report files for each protein set
+my @files;                                      # search report files for each protein set
 
 ## the master table storing everything. It's an array of hashes. Each row is a record.
 my %results = ();
 
 ## the phyletic pattern of the whole genome, aka "fingerprint"
-my %fpN = ();                                    # number of hits per protein
+my %fpN = ();                                   # number of hits per protein
 
 ## program parameters ##
 
-my $wkDir = $ARGV[0];                            # working directory
+my $wkDir = $ARGV[0];                           # working directory
 my $interactive = 1;                            # interactive or automatic mode
 
 my $minHits = 0;                                # minimal number of hits a valid search result should contain
 my $maxHits = 0;                                # maximal number of hits to retain for one protein, 0 means infinite
 my $minSize = 0;                                # minimal size (aa) of a valid protein (0 means infinite)
-my $evalue = 1e-5;                                # E-value cutoff
-my $identity = 0;                                # percent identity cutoff
-my $coverage = 0;                                # query coverage cutoff
+my $evalue = 1e-5;                              # E-value cutoff
+my $identity = 0;                               # percent identity cutoff
+my $coverage = 0;                               # query coverage cutoff
 
 # algorithm
-my $selfRank = 0;                                # taxonomic rank(s) on which the program analyzes
-my $normalize = 1;                                # use relative bit score (bit score of subject / bit score of query)
-my $unite = 1;                                    # hit pattern (0: each genome has own pattern, 1: one pattern for all genomes)
+my $selfRank = 0;                               # taxonomic rank(s) on which the program analyzes
+my $normalize = 1;                              # use relative bit score (bit score of subject / bit score of query)
+my $unite = 1;                                  # hit pattern (0: each genome has own pattern, 1: one pattern for all genomes)
 
 my $useDistance = 0;                            # use phylogenetic distance instead of bit scores
-my $useWeight = 1;                                # use weight (sum of scores) instead of number of hits
+my $useWeight = 1;                              # use weight (sum of scores) instead of number of hits
 
 # fingerprints
-my $outRaw = 1;                                    # output raw number/weight data
-my $outFp = 1;                                    # output fingerprint
+my $outRaw = 1;                                 # output raw number/weight data
+my $outFp = 1;                                  # output fingerprint
 my $graphFp = 0;                                # graph fingerprint (requires R)
 
-my $plotRef = "";                                # file name of reference set of genes
+my $plotRef = "";                               # file name of reference set of genes
 
 my $boxPlot = 1;                                # box plot
-my $histogram = 1;                                # histogram
+my $histogram = 1;                              # histogram
 my $densityPlot = 1;                            # density plot
 my $scatterPlot = 1;                            # scatter plot
-my $plot3D = 0;                                    # 3-way scatter plot
+my $plot3D = 0;                                 # 3-way scatter plot
 
 # cutoffs
-my $howCO = 4;                                    # how to determine cutoffs (0: user-defined global cutoff (%), 1: user-defined individual
-                                                    # cutoffs, 2: wait for user input, 3: histogram, 4: kernel density estimation,
-                                                    # 5: hierarchical clustering)
+my $howCO = 4;                                  # how to determine cutoffs (0: user-defined global cutoff (%), 1: user-defined individual
+                                                # cutoffs, 2: wait for user input, 3: histogram, 4: kernel density estimation,
+                                                # 5: hierarchical clustering)
 my $globalCO = 0.25;                            # arbitrary global cutoff (%)
-my ($selfCO, $closeCO, $distalCO) = (0, 0, 0);    # user-defined cutoffs for individual groups
+my ($selfCO, $closeCO, $distalCO) = (0, 0, 0);  # user-defined cutoffs for individual groups
 
-my $exOutlier = 0;                                # exclude outliers, hits distant from other hits of the same group
+my $exOutlier = 0;                              # exclude outliers, hits distant from other hits of the same group
 
-my $nBin = 20;                                    # number of bins in histogram
-my $plotHist = 0;                                # plot histogram on screen
+my $nBin = 20;                                  # number of bins in histogram
+my $plotHist = 0;                               # plot histogram on screen
 
 my $toolKDE = 0;                                # computational tool for kernel density estimation
 my $bwF = 1;                                    # bandwidth selection factor
 my $plotKDE = 0;                                # plot density function on screen
 my $toolExtrema = 0;                            # computational tool for identifying local extrema of density function (0: Perl code, 1: R package "pastecs")
-my $whichPeak = 0;                                # definition of "typical" and "atypical" regions
-my $modKCO = 1;                                    # location of cutoff (0: 1st pit, 1: midpoint of x-coordinates between 1st peak and 1st pit, 2/3: quantile
-my $qKCO = 0.5;                                    # horizontal/vertical quantile from 1st pit toward 1st peak
+my $whichPeak = 0;                              # definition of "typical" and "atypical" regions
+my $modKCO = 1;                                 # location of cutoff (0: 1st pit, 1: midpoint of x-coordinates between 1st peak and 1st pit, 2/3: quantile
+my $qKCO = 0.5;                                 # horizontal/vertical quantile from 1st pit toward 1st peak
 
 my $dipTest = 0;                                # perform non-unimodality test (Hartigan's dip test) and report p-value
-my $dipSig = 0;                                    # use global cutoff if dip test's result is not significant
+my $dipSig = 0;                                 # use global cutoff if dip test's result is not significant
 
 my $selfLow = 0;                                # HGT-derived genes must have low self weight (an optional criterion)
 
 my $BBH = 0;                                    # use conventional best match method instead
-my $loss = 0;                                    # also report gene loss events
+my $loss = 0;                                   # also report gene loss events
 my $POE = 0;                                    # also report POE
 
 my @ranks = ('species', 'genus', 'family', 'order', 'class', 'phylum');
@@ -139,7 +139,7 @@ my @excludeGroup = ();
 my @inSets = ();
 my @exSets = ();
 
-my $R;                                            # Statistics::R instance
+my $R;                                          # Statistics::R instance
 
 ## read configurations ##
 
@@ -153,7 +153,7 @@ if (-e "$wkDir/config.txt") {
         $minSize = $1 if /^minSize=(\d+)$/;
         $evalue = $1 if /^evalue=(.+)$/;
         $identity = $1 if /^identity=(.+)$/;
-        $identity = $1 if /^percIdent=(.+)$/; # backward compatibility
+        $identity = $1 if /^percIdent=(.+)$/;  # backward compatibility
         $coverage = $1 if /^coverage=(.+)$/;
 
         $selfRank = $1 if /^selfRank=(.+)$/;

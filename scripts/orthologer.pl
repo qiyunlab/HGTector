@@ -26,25 +26,25 @@ my $i; my $j; my $n; my $s; my @a; my @b; my @c; my %h;
 
 ## Program parameters ##
 
-my $wkDir = $ARGV[0];                                # working directory
-my @sets = ();                                        # list of protein sets
+my $wkDir = $ARGV[0];               # working directory
+my @sets = ();                      # list of protein sets
 
-my %taxa = ();                                        # set -> taxid
-my %proteins = ();                                    # all input proteins (accn -> id)
+my %taxa = ();                      # set -> taxid
+my %proteins = ();                  # all input proteins (accn -> id)
 
-my @cogs = ();                                        # all COGs. array of hashes, including:
-                                                        # accns -> accn1/accn2/accn3...
-                                                        # names -> name1    name2    name3...
-                                                        # nProtein -> number of proteins
-                                                        # nSet -> number of genomes
-                                                        # name -> best name
-my %names = ();                                        # id -> names
-my %accns = ();                                        # id -> accns
-my $cogid = 1;                                        # current id
+my @cogs = ();                      # all COGs. array of hashes, including:
+                                    # accns -> accn1/accn2/accn3...
+                                    # names -> name1    name2    name3...
+                                    # nProtein -> number of proteins
+                                    # nSet -> number of genomes
+                                    # name -> best name
+my %names = ();                     # id -> names
+my %accns = ();                     # id -> accns
+my $cogid = 1;                      # current id
 
-my $evalue = 1e-5;                                    # maximum E-value threshold
+my $evalue = 1e-5;                  # maximum E-value threshold
 
-my $pairRule = 3;                                    # pairing rule
+my $pairRule = 3;                   # pairing rule
 
 ## Read configuration ##
 

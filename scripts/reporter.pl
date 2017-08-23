@@ -31,50 +31,51 @@ my $i; my $j; my $n; my $s; my $t; my @a; my @b; my @c; my %h;
 my $wkDir = $ARGV[0];
 my $interactive = 1;
 
-my $deHypo = 0;                    # ignore hypothetical proteins
+my $deHypo = 0;                     # ignore hypothetical proteins
 
 my $byDonor = 1;                    # summarize HGT events by organism
 my @ranks = ('species', 'genus', 'family', 'order', 'class', 'phylum');
-my $sumRank = "order";            # on this rank
+my $sumRank = "order";              # on this rank
 my $defOnly = 1;                    # ignore those without this rank defined
 
-my $byFunction = 0;                # summarize HGT by function
+my $byFunction = 0;                 # summarize HGT by function
 my $dirFunction;                    # directory containing functional annotations
 
 my $byOrthology = 0;                # generate report by ortholog
 my $smOrthology;                    # file containing scheme of gene orthology
 my $nameOGs = 1;                    # Name COGs if necessary
 my $exORFan = 1;                    # Exclude ORFans
-my @cogs;                            # clusters of orthologs (COGs) [ID] -> name short (long), predicted?
+my @cogs;                           # clusters of orthologs (COGs) [ID] -> name short (long), predicted?
 my %cogids = ();                    # clusters of orthologs (COGs): accn -> ID
-my $isCOG = 0;                        # whether use COG
+my $isCOG = 0;                      # whether use COG
 my %ORFans = ();                    # ORFans set -> (array)
 
 my $outText = 1;                    # generate report in plain text
 my $outHTML = 1;                    # generate report in web page (HTML)
-my $outExcel = 0;                    # generate report in Excel spreadsheet
+my $outExcel = 0;                   # generate report in Excel spreadsheet
 my $detailExcel = 1;                # attach detailed output in Excel workbook
 
 
 ## global variables ##
 
-my $title;                            # title of the analysis
-my @sets;                            # protein sets (genomes)
+my $title;                          # title of the analysis
+my @sets;                           # protein sets (genomes)
 
-my %results = ();                    # master variable of results: $results{$set}{$accn}{$match}
+my %results = ();                   # master variable of results: $results{$set}{$accn}{$match}
 
 my %totals = ();                    # total number of genes per genome
 my %organisms = ();
 
 my %taxadb = ();                    # taxa.db
-my %ranksdb = ();                    # ranks.db
+my %ranksdb = ();                   # ranks.db
 
-my $workbook;                        # Excel workbook
-my $worksheet;                        # Excel worksheet
-my $excelRow;                        # active row number
-my $excelTitle;                    # Excel title format
+my $workbook;                       # Excel workbook
+my $worksheet;                      # Excel worksheet
+my $excelRow;                       # active row number
+my $excelTitle;                     # Excel title format
 my $excelHeader;                    # Excel header format
-my ($excelGrey, $excelGreen, $excelYellow, $excelRed);                # Excel data formats
+my ($excelGrey, $excelGreen, $excelYellow, $excelRed);
+                                    # Excel data formats
 
 my $iLoss = 0; my $iPOE = 0; my $iMatch = 0;
 

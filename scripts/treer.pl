@@ -23,30 +23,30 @@ Output:
 
 my $i; my $j; my $n; my $s; my $t; my @a; my @b; my @c; my %h;
 
-my @sets;                                            # protein sets (genomes)
-my @hits;                                            # blast hits, each element is a hash, including:
-                                                        # accn, accns, organism, group, taxid, score, distance, ignore
+my @sets;                           # protein sets (genomes)
+my @hits;                           # blast hits, each element is a hash, including:
+                                    # accn, accns, organism, group, taxid, score, distance, ignore
 
-my %self;                                            # query information
-my %seqs;                                            # accn -> sequence
-my %names;                                            # accn -> organism name
-my $nSeq;                                            # number of hits with sequences
-my $nChar;                                            # number of aa per sequence in alignment
-my $tree;                                            # phylogenetic tree with annotations
+my %self;                           # query information
+my %seqs;                           # accn -> sequence
+my %names;                          # accn -> organism name
+my $nSeq;                           # number of hits with sequences
+my $nChar;                          # number of aa per sequence in alignment
+my $tree;                           # phylogenetic tree with annotations
 
 
 ## program parameters ##
 
-my $wkDir = $ARGV[0];                                # working directory
+my $wkDir = $ARGV[0];               # working directory
 
-my $minHits = 3;                                    # minimal number of valid hits for phylogenetic analysis
+my $minHits = 3;                    # minimal number of valid hits for phylogenetic analysis
 
-my $trimSeq = 0;                                    # trim unreliable regions from sequence alignment (options: 0, gblocks)
-my $realign = 0;                                    # realign sequences (options: 0, clustalw, mafft, muscle, clustalo)
-my $buildTree = 0;                                    # Build phylogenetic tree using specified program (options: 0, clustalw, mafft, phyml, raxml)
-my $bsTree = 0;                                        # perform bootstrap for designated times.
-my $distance = 0;                                    # use distance matrix instead of BLAST bit scores to rank hits (options: 0, clustalw, mafft, raxml)
-my $aaModel = "WAG";                                # protein substitution model for RAxML
+my $trimSeq = 0;                    # trim unreliable regions from sequence alignment (options: 0, gblocks)
+my $realign = 0;                    # realign sequences (options: 0, clustalw, mafft, muscle, clustalo)
+my $buildTree = 0;                  # build phylogenetic tree using specified program (options: 0, clustalw, mafft, phyml, raxml)
+my $bsTree = 0;                     # perform bootstrap for designated times.
+my $distance = 0;                   # use distance matrix instead of BLAST bit scores to rank hits (options: 0, clustalw, mafft, raxml)
+my $aaModel = "WAG";                # protein substitution model for RAxML
 
 my $gblocks = "Gblocks";
 my $clustalw = "clustalw";

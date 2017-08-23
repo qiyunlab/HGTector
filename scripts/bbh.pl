@@ -25,17 +25,17 @@ my $i; my $j; my $s; my $t; my @a; my @b; my %h;
 
 ## global variables ##
 
-my @queries = ();                                    # list of query proteins
-my %done = ();                                        # queries that is already done.
+my @queries = ();                   # list of query proteins
+my %done = ();                      # queries that is already done.
 
-my $query;                                            # current query protein (accession number)
-my $taxid;                                            # target organism
-my $subject;                                        # subject protein (accession number)
-my $eqText;                                            # entrez query text
-my $isBBH;                                            # whether a hit is BBH
+my $query;                          # current query protein (accession number)
+my $taxid;                          # target organism
+my $subject;                        # subject protein (accession number)
+my $eqText;                         # entrez query text
+my $isBBH;                          # whether a hit is BBH
 
-my $iRetry = 0;                                        # current number of retries
-my $isError = 0;                                    # if error
+my $iRetry = 0;                     # current number of retries
+my $isError = 0;                    # if error
 
 use LWP::UserAgent;
 use HTTP::Request::Common qw(POST);
@@ -212,7 +212,6 @@ sub blast () {
         foreach (@out) {
             if (/hits? found/) { $read = 1; next; }
             next unless $read;
-#            print;
             @a = split (/\t/);
             if ($a[1] =~ $subject) { $isBBH = 1; }
             last;
