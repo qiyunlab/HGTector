@@ -691,11 +691,9 @@ if ($requests == 1 or not $httpBlast) {
                     unlink "$wkDir/tmp.m8";
                 } elsif ($searchTool eq "DIAMOND") {
                     `$diamond makedb --in $wkDir/tmp.in -d $wkDir/tmp`;
-                    `$diamond blastp -p $threads -q $wkDir/tmp.in -d $wkDir/tmp -a $wkDir/tmp -t $wkDir`;
-                    my @out = `$diamond view -a $wkDir/tmp.daa`;
+                    my @out = `$diamond blastp -p $threads -q $wkDir/tmp.in -d $wkDir/tmp.dmnd`;
                     unlink "$wkDir/tmp.in";
                     unlink "$wkDir/tmp.dmnd";
-                    unlink "$wkDir/tmp.daa";
                     die "Error in running DIAMOND. Please check." unless @out;
                     foreach (@out) {
                         s/\s+$//;
@@ -895,13 +893,10 @@ sub local_search {
             $outfile = $wkDir."/tmp.m8";
             unlink $wkDir."/tmp.aln";
         } elsif ($searchTool eq "DIAMOND") {
-            $s = "$diamond blastp -p $threads -q $wkDir/tmp.in -d $protdb -a $wkDir/tmp -t $wkDir";
+            $s = "$diamond blastp -p $threads -q $wkDir/tmp.in -d $protdb -o $outfile";
             $s .= " -e $evalue" if ($evalue);
             $s .= " -k $nHits" if ($nHits);
             `$s`;
-            $s = "$diamond view -a $wkDir/tmp.daa -o $outfile";
-            `$s`;
-            unlink $wkDir."/tmp.daa";
         } else {
             unlink "$wkDir/tmp.in";
             die "Error: Search tool not specified and pre-computed results not found for $set.\n";
@@ -1594,11 +1589,9 @@ sub self_align {
 
         } elsif ($searchTool eq "DIAMOND") {
             `$diamond makedb --in $wkDir/tmp.in -d $wkDir/tmp`;
-            `$diamond blastp -p 1 -q $wkDir/tmp.in -d $wkDir/tmp -a $wkDir/tmp -t $wkDir`;
-            my @out = `$diamond view -a $wkDir/tmp.daa`;
+            my @out = `$diamond blastp -p 1 -q $wkDir/tmp.in -d $wkDir/tmp.dmnd`;
             unlink "$wkDir/tmp.in";
             unlink "$wkDir/tmp.dmnd";
-            unlink "$wkDir/tmp.daa";
             if (@out) {
                 @a = split (/\t/, $out[0]);
                 if ($#a == 11) {
