@@ -1138,7 +1138,7 @@ sub http_blast{
     if ($s =~ /\s\((\d+) letters\)/) { $self{'length'} = $1; }
     if ($s =~ /^    RTOE = (.*$)/m) {
         my $rtoe = $1;
-        if ($rtoe and $rtoe =~ /^\d+$/) { print "yah"; sleep $rtoe; } else { sleep $delay; }
+        if ($rtoe and $rtoe =~ /^\d+$/) { sleep $rtoe; } else { sleep $delay; }
     } else { return "$query/$set/0/0"; }
     while (1) {
         sleep 5;

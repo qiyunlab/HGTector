@@ -40,20 +40,24 @@ if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help") {
         print $usage;
 
     } else {
-        print "\nWelcome! This seems to be the first time you run HGTector on this computer.\n";
+        print "\n";
+        print "Welcome! This seems to be the first time you run HGTector on this computer.\n";
         print "I will guide you through the basics of the program.\n";
 
-        print "\nWould you like to test on a small sample dataset (yes/NO)? ";
+        print "\n";
+        print "Would you like to test on a small sample dataset (yes/NO)? ";
         my $s = <STDIN>; chomp $s;
         if ($s =~ /^yes$/i or $s =~ /^y$/i) {
-            print "\nWarning: HGTector will connect the NCBI BLAST server to perform sequence similarity search and identify taxonomy of hits. You don't need any local search tool, database or computing power. However, please be prepared that this process is slow and the server may hang in some situations.\n";
+            print "\n";
+            print "HGTector will connect the NCBI BLAST server to perform sequence similarity search and to identify taxonomy of hits. You don't need any local search tool, database or computing power. However, please be prepared that this process may take some time depending on how busy the server is.\n";
             print "Proceed (yes) or opt out (NO): ";
             $s = <STDIN>; chomp $s;
             if ($s =~ /^yes$/i or $s =~ /^y$/i) {
+                print "\n";
                 pipeline;
             }
         }
-        print "The sample dataset and its corresponding configuration files, plus an archive of sample output can be found in the /sample subdirectory. You may take a look and get a general idea of how the input / output files are organized in an HGTector analysis.\n";
+        print "The sample dataset and its configuration file, plus an archive of sample output can be found in the /sample subdirectory. You may take a look and get a general idea of how the input / output files are organized in an HGTector analysis.\n";
         print "\n";
 
         print "Now I will assist you to install optional dependencies.\n";
