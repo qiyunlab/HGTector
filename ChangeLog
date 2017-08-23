@@ -3,11 +3,16 @@ ChangeLog of HGTector
 == Version 0.2.2 (8/23/2017) ==
 
 New features:
-- Adopt new NCBI standard (accession instead of GI as sequence identifier)
+- Added an installation script "installer.sh".
+- Adopted new NCBI standard, i.e., using accession instead of GI as sequence identifier.
+- Modified the mechanism of databaser.py. Now it downloads both DNA and protein sequences.
+- Replaced 'http' with 'https' in NCBI server URLs.
+- Adopted the command-line interface of DIAMOND 0.8+.
 
 Bug fixes:
-- Reformatted all Perl scripts.
-- Replaced 'http' in NCBI URLs with 'https'.
+- Reformatted all Perl and Python scripts.
+- Reworded multiple screen prompts.
+- Multiple trivial bug fixes.
 
 
 == Incremental update (1/28/2017) ==
