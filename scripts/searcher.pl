@@ -59,7 +59,7 @@ my %ins = ();                           # the master data structure of the whole
                                         #    prots (array...)
                                         # prot => (
                                         #    name (accn or user-defined)
-                                        #    title (after the 1st whitespace)
+                                        #    product (after 1st whitespace, excluding [organism name])
                                         #    seq (necessary for local searches, optional for remote BLAST)
                                         #    done (boolean)
                                         #    hits (array...)
@@ -87,6 +87,7 @@ sub http_blast;                          # parameters: query (accn. no.), set; r
 sub local_search;                        # same as above
 sub self_align;                          # search against itself
 sub get_taxonomy;                        # paramter: array of TaxIDs
+sub get_product;                         # get product from protein title
 sub stem_name;                           # get stem file name
 sub order_accns;                         # reorder accession number
 
@@ -295,12 +296,12 @@ foreach my $set (sort keys %ins) {
     while (<IN>) {
         s/\s+$//; next unless $_; next if /^#/;
         $intype = /^>/ ? "fasta" : "list" unless $intype;
-        my %prot = ('name'=>'', 'title'=>'', 'seq'=>'', 'hits'=>[], 'done'=>0);
+        my %prot = ('name'=>'', 'product'=>'', 'seq'=>'', 'hits'=>[], 'done'=>0);
         if ($intype eq 'fasta') {
             if (s/^>//) {
                 @a = split(/\s+/, $_, 2);
                 $prot{'name'} = $a[0];
-                $prot{'title'} = $a[1] if $#a;
+                $prot{'product'} = get_product($a[1]) if $#a;
                 push @{$ins{$set}{'prots'}}, {%prot};
             } else {
                 $ins{$set}{'prots'}[-1]{'seq'} .= $_;  # append sequence
@@ -1066,7 +1067,7 @@ sub local_search {
         print OUT "#NEXUS\nBEGIN QUERY;\n";
         print OUT "\tName=".$ins{$set}{'prots'}[$id]{'name'}.";\n";
         print OUT "\tLength=".length($ins{$set}{'prots'}[$id]{'seq'}).";\n";
-        print OUT "\tTitle=".$ins{$set}{'prots'}[$id]{'title'}.";\n";
+        print OUT "\tProduct=".$ins{$set}{'prots'}[$id]{'product'}.";\n";
         print OUT "END;\n\n";
         print OUT "BEGIN ORGANISM;\n";
         print OUT "[Accession\tOrganism\tTaxID\tBit-score\tE-value\t\%Identity\t\%Coverage]\n";
@@ -1180,9 +1181,8 @@ sub http_blast{
     foreach (split(/\n/, $s)) {
         if (/^#/) {
             if (s/^# Query: // and not $self{'seq'}) {
-                # s/>.*//;
                 @a = split(/\s+/, $_, 2);
-                $self{'title'} = $a[1] if $#a;
+                $self{'product'} = get_product($a[1]) if $#a;
             }
         } else {
             # fields: query id, subject ids, % identity, % positives, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score
@@ -1393,7 +1393,7 @@ sub http_blast{
     print OUT "#NEXUS\nBEGIN QUERY;\n";
     print OUT "\tName=".$self{'name'}.";\n";
     print OUT "\tLength=".$self{'length'}.";\n";
-    print OUT "\tTitle=".$self{'title'}.";\n";
+    print OUT "\tProduct=".$self{'product'}.";\n";
     print OUT "END;\n\n";
 
     # retrieve taxonomy report (using TaxBLAST)
@@ -1788,6 +1788,13 @@ sub order_accns {
         else{ push (@accns1, $_); }
     }
     return join ("/", @accns1);
+}
+
+# get product from protein title
+sub get_product {
+    my $title = $_[0];
+    $title =~ s/^\s+|\s+$//g;
+    $title =~ s/\[.+\]$//;
 }
 
 # get stem file name #

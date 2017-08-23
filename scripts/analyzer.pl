@@ -478,11 +478,9 @@ foreach my $set (@sets) {
             if (/^END;/) { $reading = 0; next; }
             if ($reading eq "query") { # read query (self)
                 $result{'accn'} = $1 if /^\tName=(.+);$/;
-                $result{'gi'} = $1 if /^\tGI=(\d+);$/;
                 $result{'length'} = $1 if /^\tLength=(.+);$/;
                 $result{'product'} = $1 if /^\tProduct=(.+)\s*;$/;
-                $result{'organism'} = $1 if /^\tOrganism=(.+)\s*;$/;
-                if (/^\tAccession=(.+);$/) { $result{'accn'} = $1; $result{'accn'} =~ s/\.[\d]+$//; }
+                $result{'accn'} = $1 if /^\tAccession=(.+);$/;
             }
             if ($reading eq "organism") { # read organisms
                 next if /^;/;
