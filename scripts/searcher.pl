@@ -42,7 +42,7 @@ Output:
 
 ## public variables ##
 
-my $s; my @a; my @b; my @c; my %h;
+my $s; my @a; my @b; my %h;
 
 
 ## global variables ##
@@ -231,7 +231,7 @@ elsif (lc($searchTool) eq "rapsearch") { $searchTool = "RAPSearch2"; }
 elsif (lc($searchTool) eq "rapsearch2") { $searchTool = "RAPSearch2"; }
 elsif (lc($searchTool) eq "diamond") { $searchTool = "DIAMOND"; }
 elsif (lc($searchTool) eq "customized") { $searchTool = "customized"; }
-else{ die "Error: Invalid search tool: $searchTool.\n"; }
+else { die "Error: Invalid search tool: $searchTool.\n"; }
 
 if ($searchTool eq "customized" and not $preSearch) { die "Error: You must provide pre-computed search results for \"customized\" search tool.\n"; }
 if ($preSearch and not -d $preSearch) { die "Error: Invalid directory for pre-computed search results: $preSearch\n"; }
@@ -400,7 +400,7 @@ if ($nProt-$nDone <= 0) {
 
 
 ## detect pre-computed search results ##
-# This function was inspired by Conor Meehan (cmeehan@itg.be) #
+# this function was inspired by Conor Meehan (cmeehan@itg.be) #
 
 if ($preSearch) {
     my $n = 0;
@@ -516,7 +516,7 @@ if (-s "$wkDir/taxonomy/self.info") {
     }
     close IN;
 }
-if ($selfTax) { # TaxIDs of input protein sets
+if ($selfTax) {  # TaxIDs of input protein sets
     %h = ();
     @a = split (/,/, $selfTax);
     foreach (@a) {
@@ -554,7 +554,7 @@ foreach my $set (sort keys %ins) {
     if (exists $ins{$set}{'taxid'}) {
         print "  $set: ", $ins{$set}{'organism'}, " (", $ins{$set}{'taxid'}, ")\n";
     } else {
-        push (@missingTax, $set);
+        push @missingTax, $set;
     }
 }
 if (@missingTax) {
@@ -562,7 +562,7 @@ if (@missingTax) {
     print "  ", join (",", @missingTax), "\n";
     foreach my $set (@missingTax) {
         my $taxid = "";
-        if (%prot2taxids) { # look up the dictionary
+        if (%prot2taxids) {  # look up the dictionary
             foreach my $prot (@{$ins{$set}{'prots'}}) {
                 $taxid = '';
                 my $name = $prot->{'name'};
@@ -572,7 +572,7 @@ if (@missingTax) {
                 last;
             }
         }
-        unless ($taxid) { # look up the BLAST database
+        unless ($taxid) {  # look up the BLAST database
             my $name = $ins{$set}{'prots'}[0]{'name'};
             if ($searchTool eq "BLAST" and not $httpBlast) {
                 my $query = $name;
@@ -598,7 +598,7 @@ if (@missingTax) {
                         die "\nFailed to retrieve taxonomic information from NCBI.\n" if ($iRetry >= $retries);
                         $iRetry ++; sleep $delay; next;
                     }
-                    $taxid = $1 if ($s =~ /<Item Name=\"TaxId\" Type=\"Integer\">(\d+?)<\/Item>/);
+                    $taxid = $1 if $s =~ /<Item Name=\"TaxId\" Type=\"Integer\">(\d+?)<\/Item>/;
                 }
             }
         }
@@ -723,7 +723,7 @@ if ($requests == 1 or not $httpBlast) {
             }
             local_search ($set, \@ids) if (@ids);
 
-        } else { # single-process http BLAST #
+        } else {  # single-process http BLAST #
 
             for (my $i=0; $i<scalar(@{$ins{$set}{'prots'}}); $i++) {
                 my $query = $ins{$set}{'prots'}[$i]{'name'};
@@ -1105,7 +1105,7 @@ sub local_search {
   # return: (query, set, number_of_hits, whether_successful (0 - failed, 1- successful)) separated by "/"
   # refer to: ftp://ftp.ncbi.nlm.nih.gov/blast/documents/web_blast.pl
   # and: http://www.ncbi.nlm.nih.gov/BLAST/Doc/urlapi.html
-  # note: the Perl thread join function has some problems, that why I used this inconvenient way.
+  # note: the Perl thread join function has some problems, that's why I used this inconvenient way.
 
 sub http_blast{
     my ($set, $id) = ($_[0], $_[1]);
@@ -1116,7 +1116,7 @@ sub http_blast{
     $self{'length'} = length($self{'seq'}) if $self{'seq'}; # ideally, sequence is available, otherwise see below
     my $query = $self{'name'};
 
-    # send BLAST request #
+    # send BLAST request
     my $isError = 0;
     my $url = "$blastServer?CMD=Put&PROGRAM=blastp&DATABASE=$httpDb&FILTER=m%20S";
     $url .= "&EXPECT=$evalue" if $evalue;
@@ -1134,15 +1134,14 @@ sub http_blast{
     my $rid;
     # @a = localtime(time); print "Respond: $a[2]:$a[1]:$a[0], ";
     if ($s =~ /^    RID = (.*$)/m) { $rid = $1; print "RID=$rid "; }
-    else{ return "$query/$set/0/0"; } ##########################
+    else { return "$query/$set/0/0"; } ##########################
     if ($s =~ /\s\((\d+) letters\)/) { $self{'length'} = $1; }
     if ($s =~ /^    RTOE = (.*$)/m) {
         my $rtoe = $1;
-        # print "RTOE=$rtoe, ";
-        if ($rtoe and $rtoe =~ /^\d+$/) { sleep $rtoe; } else { sleep $delay; }
+        if ($rtoe and $rtoe =~ /^\d+$/) { print "yah"; sleep $rtoe; } else { sleep $delay; }
     } else { return "$query/$set/0/0"; }
     while (1) {
-        sleep 1;
+        sleep 5;
         $s = get "$blastServer?CMD=Get&FORMAT_OBJECT=SearchInfo&RID=$rid";
         if ($s =~ /\s+Status=([A-Z]+)/m) {
             if ($1 eq "WAITING") {
@@ -1155,18 +1154,10 @@ sub http_blast{
             elsif ($1 eq "FAILED") { $isError = 1; last; }
             elsif ($1 eq "UNKNOWN") { $isError = 1; last; }
             elsif ($1 eq "READY") { @a = localtime(time); last; }
-            else{ $isError = 1; last; }
+            else { $isError = 1; last; }
         } else {
             $isError = 1; last;
         }
-
-        # if ($s =~ /\s+Status=WAITING/m) { next; }
-        # if ($s =~ /\s+Status=FAILED/m) { $isError = 1; last; }
-        # if ($s =~ /\s+Status=UNKNOWN/m) { $isError = 1; last; }
-        # if ($s =~ /\s+Status=READY/m) {
-        #     if ($s =~ /\s+ThereAreHits=yes/m) { last; }
-        #     else{ last; } # no hits;
-        # }
     }
     if ($isError) { return "$query/$set/0/0"; }
 
@@ -1204,13 +1195,13 @@ sub http_blast{
     }
 
     # retrieve taxonomy information #
-    my $i = 0; # count
-    @a = (); # all results
-    @b = (); # subset of names
+    my $i = 0;  # count
+    @a = ();  # all results
+    @b = ();  # subset of names
     foreach (keys %hits) {
         $i ++;
         push (@b, $_);
-        if ($i == 190) { # in some situations, a URI should not exceed ~2000 characters, which is approximately 190 GIs.
+        if ($i == 190) {  # in some situations, a URI should not exceed ~2000 characters, which is approximately 190 GIs.
             sleep 1;
             while (1) {
                 $s = get $eSummaryServer."?db=protein&id=".join (",", @b);
@@ -1356,7 +1347,7 @@ sub http_blast{
         my %hit = ('id', 0, 'name', $query, 'expect', $a[0], 'score', $a[1], 'identity', $a[2], 'coverage', '100.00', 'taxid', $ins{$set}{'taxid'}, 'organism', $ins{$set}{'organism'});
         if ($self{'length'}) { $hit{'length'} = $self{'length'}; }
         elsif ($a[3]) { $hit{'length'} = $a[3]; }
-        else{ $hit{'length'} = 0; }
+        else { $hit{'length'} = 0; }
         $hits{$query} = {%hit};
     }
 
@@ -1486,11 +1477,10 @@ sub http_blast{
         if (($s !~ /blastp/i) or ($s !~ /\nQuery=\s/)) {
             print OUT "BEGIN ERROR;\nRetrieval of multiple sequence alignment failed.\n;\nEND;\n\n";
         } else {
-            @c = split(/\n/, $s);
             my $reading = 0; # reading status
             my $iBlock = -1; # block ID
             my %seqs; # sequence alignment
-            foreach (@c) {
+            foreach (split(/\n/, $s)) {
                 if ($_ eq "ALIGNMENTS") { $reading = 1; next; }
                 if ($reading and /^\s/) { $reading = 0; last; }
                 next unless $reading;
@@ -1608,7 +1598,7 @@ sub self_align {
     } else { # http mode
         my $isError = 0;
         if ($seq) { $s = get "$blastAlignServer?CMD=Put&PROGRAM=blastp&DATABASE=$protdb&QUERY=".$seq."&SUBJECTS=".$seq; }
-        else{ $s = get "$blastAlignServer?CMD=Put&PROGRAM=blastp&DATABASE=$protdb&QUERY=$name&SUBJECTS=$name"; };
+        else { $s = get "$blastAlignServer?CMD=Put&PROGRAM=blastp&DATABASE=$protdb&QUERY=$name&SUBJECTS=$name"; };
         return (0,0,0,0) unless (defined $s and $s =~ /^    RID = (.*$)/m);
         my $rid = $1;
         if ($s =~ /\s\((\d+) letters\)/ and not $length) { $length = $1; }
@@ -1696,7 +1686,7 @@ sub get_taxonomy{
         my %taxid2organism = ();
         foreach (@_) {
             if (exists $dbTaxa{$_}) { $taxid2organism{$_} = $dbTaxa{$_}{'organism'}; }
-            else{ push (@taxids2get, $_) }
+            else { push (@taxids2get, $_) }
         }
         sleep 1;
         while (1) {
@@ -1775,17 +1765,17 @@ sub order_accns {
     my @accns1 =  ();
     foreach (@accns0) {
         if (/_/) { unshift (@accns1, $_); }
-        else{ push (@accns1, $_); }
+        else { push (@accns1, $_); }
     }
     @accns0 = ();
     foreach (@accns1) {
         if (/^NP_/) { unshift (@accns0, $_); }
-        else{ push (@accns0, $_); }
+        else { push (@accns0, $_); }
     }
     @accns1 = ();
     foreach (@accns0) {
         if ($#_ and /^$_[1]$/) { unshift (@accns1, $_); }
-        else{ push (@accns1, $_); }
+        else { push (@accns1, $_); }
     }
     return join ("/", @accns1);
 }
@@ -1794,7 +1784,8 @@ sub order_accns {
 sub get_product {
     my $title = $_[0];
     $title =~ s/^\s+|\s+$//g;
-    $title =~ s/\[.+\]$//;
+    $title =~ s/\s+\[.+\]$//;
+    return $title;
 }
 
 # get stem file name #

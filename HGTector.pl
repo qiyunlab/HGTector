@@ -24,7 +24,7 @@ Usage:
   4) Execute:
      perl HGTector.pl /path/to/wkdir
 
-Note: Please browse GUI.html, a comprehensive and interactive web page that helps you to understand the whole pipeline and to generate proper configurations for your analyses.
+Please take a look at GUI.html, an interactive web interface that helps you to understand the whole pipeline and to generate configuration files for your analyses.
 
 ";
 
@@ -38,13 +38,16 @@ my $wkDir = abs_path($0); $wkDir =~ s/HGTector\.pl$/sample/;
 if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help") {
     if (-d $db) {
         print $usage;
+
     } else {
-        print "\nWelcome! This seems to be the first time you run HGTector on this device.\n";
+        print "\nWelcome! This seems to be the first time you run HGTector on this computer.\n";
         print "I will guide you through the basics of the program.\n";
+
         print "\nWould you like to test on a small sample dataset (yes/NO)? ";
         my $s = <STDIN>; chomp $s;
         if ($s =~ /^yes$/i or $s =~ /^y$/i) {
-            print "\nWarning: HGTector will connect the NCBI BLAST server to perform sequence similarity search and identify taxonomy of hits. You don't need any local search tool, database or computing power. However, please be prepared that this process is slow and the server may hang in some situations.\nProceed (yes) or opt out (NO): ";
+            print "\nWarning: HGTector will connect the NCBI BLAST server to perform sequence similarity search and identify taxonomy of hits. You don't need any local search tool, database or computing power. However, please be prepared that this process is slow and the server may hang in some situations.\n";
+            print "Proceed (yes) or opt out (NO): ";
             $s = <STDIN>; chomp $s;
             if ($s =~ /^yes$/i or $s =~ /^y$/i) {
                 pipeline;
@@ -52,12 +55,27 @@ if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help") {
         }
         print "The sample dataset and its corresponding configuration files, plus an archive of sample output can be found in the /sample subdirectory. You may take a look and get a general idea of how the input / output files are organized in an HGTector analysis.\n";
         print "\n";
-        print "Now I will assist you to create necessary databases for future analyses.\nProceed (YES/no)? ";
+
+        print "Now I will assist you to install optional dependencies.\n";
+        print "HGTector by default works out-of-the-box, without relying on any third-party dependencies, whereas several optional modules will enhance HGTector's functionality.\n";
+        print "These modules include Perl modules Statistics::R and Spreadsheet::WriteExcel, and R packages pastecs and diptest (you will need R first).\n";
+        print "Proceed (yes/NO)? ";
+        $s = <STDIN>; chomp $s;
+        if ($s =~ /^yes$/i or $s =~ /^y$/i) {
+            if ($^O eq "MSWin32") {
+                print "You are using the Windows system, in which the installation script cannot be executed. You will need to manually install the dependencies.\n";
+            } else {
+                system "bash $scripts/installer.sh";
+            }
+        }
+        print "\n";
+
+        print "Now I will assist you to generate a reference database.\n";
+        print "Unless you plan to use HGTector in remote mode, a local reference database is recommended for consistant and controllable analyses.\n";
+        print "Proceed (YES/no)? ";
         $s = <STDIN>; chomp $s;
         if (not $s or $s =~ /^yes$/i or $s =~ /^y$/i) {
-            print "HGTector needs three databases: a protein sequence database, a taxonomy database, and a protein-to-taxonomy dictionary. Using proper databases is important for effective analyses. Please read about the details of choice of databases in the GUI.\n";
-            print "Since release 0.2.0, a Python script databaser.py is implemented to automate the database construction process.\n";
-            die "Error: databaser.py is not found in the scripts/ subdirectory.\n" unless -e "$scripts/databaser.py";
+            print "HGTector requires three databases: a protein sequence database, a taxonomy database, and a protein-to-taxonomy dictionary. Using proper databases is important for optimal results. Please read about the details of choice of databases in the GUI.\n";
             print "\nPlease specify a location to store the databases (default: db/ in the program directory): ";
             $s = <STDIN>; chomp $s; $s =~ s/\/$//;
             $db = $s if $s;
@@ -96,7 +114,7 @@ if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help") {
                 print "# You still need to build a searchable database based on $db/$out.faa";
             }
             print "taxdump=$db/taxdump\n";
-            print "prot2taxid=$db/gi2taxid.txt\n";
+            print "prot2taxid=$db/prot2taxid.txt\n";
             print "\n";
         }
         print "You may start to use HGTector to analyze your data.\n";
@@ -107,6 +125,7 @@ if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help") {
     pipeline;
 }
 exit 0;
+
 
 sub pipeline {
     print "\nValidating task...\n";
