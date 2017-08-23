@@ -7,7 +7,7 @@ HGTector
 
 A computational pipeline for genome-wide detection of putative horizontal gene transfer (HGT) events based on sequence homology search hit distribution statistics
 
-Latest release: [0.2.1](https://github.com/DittmarLab/HGTector/archive/0.2.1.zip)
+Latest release: [0.2.1](https://github.com/DittmarLab/HGTector/archive/0.2.2.zip)
 
 Last update: 2017-1-28
 

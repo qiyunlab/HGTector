@@ -1,6 +1,6 @@
 
 #######################################################
-#        HGTector v0.2.1 configuration file           #
+#        HGTector v0.2.2 configuration file           #
 #######################################################
 
 # This is a template of the configuration file (config.txt). It contains all parameters
@@ -31,7 +31,7 @@ interactive=1
   preSearch=
 
   ## Search tool ##
-  
+
     # Choice of BLAST, RAPSearch2, DIAMOND and customized
     searchTool=blast
 
@@ -188,7 +188,7 @@ interactive=1
       # selfRank=family       # family level (Enterobacteriaceae)
       # selfRank=0            # the lowest rank that includes all input genomes (Escherichia)
       # selfRank=1            # the second lowest rank (Enterobacteriaceae)
-    
+
     # Option 2: manually specify TaxID(s) for each group
       # TaxIDs can be looked-up in NCBI taxonomy database. They don't have to be limited to
       # taxonomic ranks defined by 'ranks'.
@@ -396,7 +396,7 @@ interactive=1
   outText=1
   outHTML=1
   outExcel=0
-  
+
   # Attach detailed outputs in Excel spreadsheet
   detailExcel=1
 
@@ -449,4 +449,3 @@ interactive=1
     fasttree=FastTree
     raxml=raxmlHPC
     phyml=phyml
-

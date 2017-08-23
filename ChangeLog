@@ -1,12 +1,12 @@
 ChangeLog of HGTector
 
-== Version 0.2.2 (8/22/2017) ==
+== Version 0.2.2 (8/23/2017) ==
 
 New features:
-- Adopt the new NCBI format (accession instead of GI as sequence identifier)
+- Adopt new NCBI standard (accession instead of GI as sequence identifier)
 
 Bug fixes:
-- Reformatted all Perl scripts using Perltidy.
+- Reformatted all Perl scripts.
 - Replaced 'http' in NCBI URLs with 'https'.
 
 

@@ -1,10 +1,10 @@
 <!DOCTYPE HTML>
 <html>
 	<!--
-		This web page is a graphical user interface (GUI) of HGTector v0.2.1
+		This web page is a graphical user interface (GUI) of HGTector v0.2.2
 	-->
 	<head>
-		<title>HGTector v0.2.1 GUI</title>
+		<title>HGTector v0.2.2 GUI</title>
 		<style type="text/css" media=screen>
 			body{
 				color:#3D3C3A;
@@ -148,7 +148,7 @@
 				if (!document.getElementById('ignoreParalogs').checked){ out.value += 'ignoreParalogs=0\n' };
 				if (!document.getElementById('ignoreSeqRepeats').checked){ out.value += 'ignoreSeqRepeats=0\n' };
 				if (document.getElementById('ignoreSubspecies').checked){ out.value += 'ignoreSubspecies=1\n' };
-				
+
 				if (document.getElementsByName('grouping')[0].checked){
 					val = document.getElementById('selfRank').value; if (val != ""){ out.value += 'selfRank='+val+'\n'; }
 				}
@@ -165,7 +165,7 @@
 					if (document.getElementById('plot3D').checked){ out.value += 'plot3D=1\n' };
 					val = document.getElementById('plotRef').value; if (val != ""){ out.value += 'plotRef='+val+'\n'; }
 				}
-				
+
 				if (document.getElementsByName('cutoffing')[0].checked){
 					if (!document.getElementById('exOutlier').disabled){ out.value += 'exOutlier='+document.getElementById('exOutlier').value+'\n'; }
 					if (!document.getElementById('dipTest').disabled && document.getElementById('dipTest').checked){
@@ -213,7 +213,7 @@
 				val = document.getElementById('minSize').value; if (val != "0"){ out.value += 'minSize='+val+'\n'; }
 				if (document.getElementById('selfLow').checked){ out.value += 'selfLow=1\n'; }
 				if (document.getElementById('BBH0').checked){ out.value += 'BBH='+document.getElementById('BBH12').value+'\n'; }
-				
+
 				val = document.getElementById('title').value; if (val != ""){ out.value += 'title='+val+'\n'; }
 				val = document.getElementById('deHypo').value; if (val != 0){ out.value += 'deHypo='+val+'\n'; }
 				if (!document.getElementById('byDonor').checked){
@@ -238,7 +238,7 @@
 				if (!document.getElementById('outText').checked){ out.value += 'outText=0\n'; }
 				if (!document.getElementById('outHTML').checked){ out.value += 'outHTML=0\n'; }
 				if (document.getElementById('outExcel').checked){ out.value += 'outExcel=1\n'; }
-				
+
 				val = document.getElementById('clustalw').value; if (val != "" && val != "clustalw"){ out.value += 'clustalw='+val+'\n'; }
 				val = document.getElementById('mafft').value; if (val != "" && val != "mafft"){ out.value += 'mafft='+val+'\n'; }
 				val = document.getElementById('gblocks').value; if (val != "" && val != "Gblocks"){ out.value += 'gblocks='+val+'\n'; }
@@ -251,21 +251,21 @@
 					val = document.getElementById('bsTree').value; if (val != ""){ out.value += 'bsTree='+val+'\n'; }
 					if (document.getElementById('distance').checked){ out.value += 'distance=1\n' };
 				};
-				
+
 				if (!out.value){ out.value = "# You didn't change any default settings."; }
 			}
 		</script>
 	</head>
-	
+
 	<body style="width:800px; margin-left:auto; margin-right:auto;">
-		<p><h3>HGTector v0.2.1 Configuration File Generator</h3></p>
+		<p><h3>HGTector v0.2.2 Configuration File Generator</h3></p>
 		<p>Qiyun Zhu, Katharina Dittmar</p>
 		<hr>
 		<p>Welcome! This page will guide you through the process of building an effective configuration file for HGTector.</p>
 		<p>Program mode: <select id="interactive"><option value=0>automatic</option><option value=1 selected="selected">interactive</option></select></p>
 		<hr>
 		<p></p>
-		
+
 		<!-- Input data -->
 		<p class="header"><input type="button" id="btnInput" value="Show" onclick="show_hide_section('Input')"> Input data</p>
 		<div id="divInput" style="display:none">
@@ -334,7 +334,7 @@
 					<option value="RAPSearch2">RAPSearch2</option>
 					<option value="DIAMOND">DIAMOND</option>
 					<option value="customized">customized</option>
-				</select> &nbsp; 
+				</select> &nbsp;
 				<span id="RemoteBlast">
 					<input type="checkbox" id="chkRemote" onchange="
 					show_hide_subsection('Remote');
@@ -532,7 +532,7 @@
 						<option value=3>modified Z-score</option>
 					 </select> method. [<a href="javascript:show_hide_tooltip('Outlier')">?</a>]</p>
 					<p class="tooltip" id="tipOutlier" style="display:none">These outliers are genes with unexpected high number of hits. They may be caused by database redundancy. Excluding them prior to clustering may help to suppress false results.</p>
-					<p><input id="dipTest" type="checkbox" onchange="document.getElementById('isDipSig').disabled=!this.checked"> Test for non-unimodality (requires R package diptest). [<a href="javascript:show_hide_tooltip('Dip')">?</a>] 
+					<p><input id="dipTest" type="checkbox" onchange="document.getElementById('isDipSig').disabled=!this.checked"> Test for non-unimodality (requires R package diptest). [<a href="javascript:show_hide_tooltip('Dip')">?</a>]
 					<input id="isDipSig" type="checkbox" onchange="document.getElementById('dipSig').disabled=!this.checked" disabled> P-value threshold: <input type="text" id="dipSig" size=4 value="0.05" disabled> [<a href="javascript:show_hide_tooltip('DipSig')">?</a>]</p>
 					<p class="tooltip" id="tipDip" style="display:none">Perform Hartigan's dip test using R package <b>diptest</b> to assess the significance of non-unimodality of weight distribution. The smaller the p-value is, the more comfortable it is to split the population into two or more clusters.</p>
 					<p class="tooltip" id="tipDipSig" style="display:none">If p-value >= this threshold (meaning the non-unimodality is insignificant), the program will consider that there is inadequate statistical support for dividing the population into two clusters. In such circumstance, the global cutoff will be used.</p>
@@ -556,7 +556,7 @@
 							<option value=1 selected>horizontal midpoint between 1st peak and 1st pit</option>
 							<option value=2>horizontal quantile from 1st pit toward 1st peak, as:</option>
 							<option value=3>vertical quantile from 1st pit toward 1st peak, as:</option>
-						 </select> 
+						 </select>
 						 <input type="text" id="qKCO" size=4 value="0.5" disabled></p>
 					</div>
 					<p>Specify a global cutoff (quantile) if the population cannot be partitioned statistically: <input type="text" id="globalCO2" size=4 value="0.25"></p>
@@ -632,7 +632,7 @@
 				</div>
 				<p><input type="radio" name="orthologing" onclick="change_orthologing()"> Let the program infer gene orthology using its built-in function.</p>
 				<div id="divInOrthologing" class="subsection" style="display:none">
-					<p>Rule: two genes are defined as (co-)orthologous if they: 
+					<p>Rule: two genes are defined as (co-)orthologous if they:
 					<select id="pairRule">
 						<option value=1>one is a hit of the other</option>
 						<option value=2>one is the best hit of the other</option>
@@ -679,19 +679,19 @@
 			<div class="subsection" id="divTreer" style="display:none">
 				<p><b>Treer</b> is an extra step that stands alone from the standard HGTector pipeline. It calls external programs to build phylogenetic trees based on protein sequences obtained from homology search. Resulting trees will be appended to each search result file (*.bla), as a standard NEXUS Tree block. These files may be directly displayed in external tree viewers (such as <a href="http://tree.bio.ed.ac.uk/software/figtree/">FigTree</a>) for visual examination of evolutionary patterns, or subject to downstream phylogenetic analyses.</p>
 				<p>Warning: Treer is an experimental module. Its behavior is highly unpredictable.</p>
-				<p><input type="checkbox" onchange="document.getElementById('realign').disabled=!this.checked"> Realign sequences, using: 
+				<p><input type="checkbox" onchange="document.getElementById('realign').disabled=!this.checked"> Realign sequences, using:
 					<select id="realign" disabled=true">
 						<option value='ClustalW'>ClustalW</option>
 						<option value='MAFFT'>MAFFT</option>
 						<option value='Muscle'>Muscle</option>
 					</select>
 				</p>
-				<p><input type="checkbox" onchange="document.getElementById('trimSeq').disabled=!this.checked"> Trim unreliable regions from alignment, using: 
+				<p><input type="checkbox" onchange="document.getElementById('trimSeq').disabled=!this.checked"> Trim unreliable regions from alignment, using:
 					<select id="trimSeq" disabled=true">
 						<option value='Gblocks'>Gblocks</option>
 					</select>
 				</p>
-				<p><input type="checkbox" id="chkTreeOption" onchange="document.getElementById('buildTree').disabled=!this.checked;show_hide_subsection('TreeOption')"> Build phylogenetic tree, using: 
+				<p><input type="checkbox" id="chkTreeOption" onchange="document.getElementById('buildTree').disabled=!this.checked;show_hide_subsection('TreeOption')"> Build phylogenetic tree, using:
 					<select id="buildTree" disabled=true">
 						<option value='clustalw'>ClustalW (Neighbor-Joining)</option>
 						<option value='mafft'>MAFFT (Neighbor-Joining)</option>
@@ -742,7 +742,7 @@
 				<p><input type="checkbox" id="plot3D"> Use R package <b>rgl</b> to creates interactive 3D scatter plots to visualize the weight populations.</p>
 			</div>
 		</div>
-		
+
 		<!-- Generate config.txt -->
 		<hr>
 		<p><input type="button" id="btnOK" value="Generate configuration file!" onclick="generate_config()"><input type="button" id="btnMiscShow" value="misc features" style="float:right" onclick="document.getElementById('divMisc').style.display='block';document.getElementById('btnMiscShow').style.display='none';"></p>
@@ -768,4 +768,3 @@
 		<p><br><br><br><br><br><br><br><br></p>
 	</body>
 </html>
-
