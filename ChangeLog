@@ -3,6 +3,7 @@ ChangeLog of HGTector
 == Version 0.2.2 (8/23/2017) ==
 
 New features:
+- Provided a pre-built standard database.
 - Added an installation script "installer.sh".
 - Adopted new NCBI standard, i.e., using accession instead of GI as sequence identifier.
 - Modified the mechanism of databaser.py. Now it downloads both DNA and protein sequences.

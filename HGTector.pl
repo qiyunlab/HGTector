@@ -74,12 +74,16 @@ if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help") {
         }
         print "\n";
 
-        print "Now I will assist you to generate a reference database.\n";
-        print "Unless you plan to use HGTector in remote mode, a local reference database is recommended for consistant and controllable analyses.\n";
+        print "Now I will assist you to prepare a reference database.\n";
+        print "Unless you plan to always use HGTector in remote mode, a local reference database is recommended for consistant and controllable analyses.\n";
+        print "The database will have three components: a protein sequence database, a taxonomy database, and a protein-to-taxonomy dictionary.\n";
+        print "Using proper databases is important for optimal results. Please consider reading about the details of choice of databases in the GUI.\n";
+        print "\n";
+
+        print "A pre-built database is available (see README.md for download link). Alternatively, I will build an up-to-date one for you now.\n";
         print "Proceed (YES/no)? ";
         $s = <STDIN>; chomp $s;
         if (not $s or $s =~ /^yes$/i or $s =~ /^y$/i) {
-            print "HGTector requires three databases: a protein sequence database, a taxonomy database, and a protein-to-taxonomy dictionary. Using proper databases is important for optimal results. Please read about the details of choice of databases in the GUI.\n";
             print "\nPlease specify a location to store the databases (default: db/ in the program directory): ";
             $s = <STDIN>; chomp $s; $s =~ s/\/$//;
             $db = $s if $s;
@@ -110,7 +114,7 @@ if (not @ARGV or $ARGV[0] eq "-h" or $ARGV[0] eq "--help") {
             }
             my $i = system "python $scripts/databaser.py -format=$format -range=$range -represent=$represent -subsample=$subsample -out=$out";
             chdir $cwd;
-            print "\nThere appear to be some problems in database building.\n" unless -s "$db/$out.faa";
+            print "\nThere appears to be some problems in database building.\n" unless -s "$db/$out.faa";
             print "\nNow that databases are created. Your may link HGTector to them in future analyses, by setting the following parameters in config.txt:\n";
             if ($format eq "blast") {
                 print "protdb=$db/blast/$out\n";
