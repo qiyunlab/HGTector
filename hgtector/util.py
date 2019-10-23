@@ -10,12 +10,15 @@
 
 import re
 from os import listdir
-from os.path import join, isfile, basename, splitext
+from os.path import (
+    join, isfile, basename, splitext, dirname, realpath, expanduser)
 import subprocess
 import gzip
 import bz2
 import lzma
 import datetime
+
+import yaml
 
 
 zipdict = {'.gz': gzip, '.bz2': bz2, '.xz': lzma, '.lz': lzma}
@@ -27,7 +30,45 @@ def timestamp():
     return datetime.datetime.now()
 
 
-def get_config(obj, attr, cfg, entry, func=None):
+def load_configs():
+    """Load configurations from file.
+
+    Returns
+    -------
+    dict or None
+        configurations, or None if not found
+    """
+    file = find_config_file()
+    if file is not None:
+        with open(file, 'r') as f:
+            return yaml.load(f, Loader=yaml.SafeLoader)
+    return None
+
+
+def find_config_file():
+    """Find configuration file path.
+
+    Returns
+    -------
+    str or None
+        configuration file path, or None if not found
+    """
+    fname = 'config.yml'
+    # current directory
+    fp = fname
+    # home directory
+    if not isfile(fp):
+        fp = join(expanduser('~'), '.hgtector', fname)
+    # program directory
+    if not isfile(fp):
+        fp = join(dirname(realpath(__file__)), fname)
+    # not found
+    if not isfile(fp):
+        fp = None
+    return fp
+
+
+def get_config(obj, attr, entry, func=None):
     """Load a single configuration into an attribute.
 
     Parameters
@@ -36,19 +77,17 @@ def get_config(obj, attr, cfg, entry, func=None):
         target class to edit attribute
     attr : str
         target attribute
-    cfg : dict
-        configuration
     entry : str
         configuration entry (period-delimited)
     func : function, optional
         function to manipulate variable
     """
-    if cfg is None:
+    if obj.cfg is None:
         return
     if getattr(obj, attr, None) is not None:
         return
     keys = entry.split('.')
-    d_ = cfg
+    d_ = obj.cfg
     for key in keys[:-1]:
         try:
             d_ = d_[key]

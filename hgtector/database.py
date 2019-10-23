@@ -20,9 +20,9 @@ from tempfile import mkdtemp
 import pandas as pd
 
 from hgtector.util import (
-    timestamp, get_config, arg2bool, run_command, list_from_param,
-    read_taxdump, contain_words, is_latin, is_capital, taxid_at_rank,
-    taxids_at_ranks, is_ancestral, find_lca)
+    timestamp, load_configs, get_config, arg2bool, run_command,
+    list_from_param, read_taxdump, contain_words, is_latin, is_capital,
+    taxid_at_rank, taxids_at_ranks, is_ancestral, find_lca)
 
 
 description = """build reference protein sequence and taxonomy database"""
@@ -100,11 +100,14 @@ class Database(object):
         self.arguments = arguments
         self.description = description
 
-    def __call__(self, args, cfg):
+    def __call__(self, args):
         print('Database building started at {}.'.format(timestamp()))
 
+        # load configurations
+        self.cfg = load_configs()
+
         # read and validate arguments
-        self.set_parameters(args, cfg)
+        self.set_parameters(args)
 
         # connect to NCBI FTP server
         self.connect_server()
@@ -157,15 +160,13 @@ class Database(object):
 
         print('Database building finished at {}.'.format(timestamp()))
 
-    def set_parameters(self, args, cfg):
+    def set_parameters(self, args):
         """Workflow for validating and setting arguments.
 
         Parameters
         ----------
         args : dict
             command-line arguments
-        cfg : dict
-            configurations from file
         """
         # load arguments
         for key, val in vars(args).items():
@@ -173,13 +174,13 @@ class Database(object):
 
         # load configurations
         for key in ('capital', 'block', 'latin'):
-            get_config(self, key, cfg, 'taxonomy.{}'.format(key))
+            get_config(self, key, 'taxonomy.{}'.format(key))
         for key in ('retries', 'delay', 'timeout'):
-            get_config(self, key, cfg, 'download.{}'.format(key))
+            get_config(self, key, 'download.{}'.format(key))
         for key in ('diamond', 'makeblastdb'):
-            get_config(self, key, cfg, 'program.{}'.format(key))
+            get_config(self, key, 'program.{}'.format(key))
         for key in ('threads', 'tmpdir'):
-            get_config(self, key, cfg, 'local.{}'.format(key))
+            get_config(self, key, 'local.{}'.format(key))
 
         # convert boolean values
         for key in ('capital', 'latin'):
