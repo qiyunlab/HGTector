@@ -1,4 +1,0 @@
-include config.yml
-include README.md
-include LICENSE
-include CHANGELOG.md
