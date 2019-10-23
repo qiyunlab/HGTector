@@ -1,0 +1,267 @@
+--- # HGTector 2.0 configuration file
+
+# This file defines the default values of some command-line arguments.
+
+# The program will sequentially look for "config.yml" in the following
+# locations:
+# 1. current directory
+# 2. home directory, under subdirectory ".hgtector"
+# 3. program directory
+
+
+## Database locations
+database:
+
+  # reference protein sequence database for DIAMOND
+  diamond:
+
+  # reference protein sequence database for BLASTp
+  blast:
+
+  # directory of taxonomy database files (NCBI-style nodes.dmp and names.dmp)
+  # if omitted, the program will retrieve information from remote server
+  taxdump:
+
+  # sequence Id to taxId mapping file (e.g., NCBI's prot.accession2taxid)
+  # not necessary if protein database already contains taxonomy information
+  taxmap:
+
+
+## External program executables
+program:
+
+  # DIAMOND executable
+  diamond:
+
+  # BLAST executables
+  blastp:
+  blastdbcmd:
+  makeblastdb:
+
+
+## Remote server URLs
+server:
+  search: https://blast.ncbi.nlm.nih.gov/Blast.cgi
+  selfaln: https://blast.ncbi.nlm.nih.gov/BlastAlign.cgi
+  fetch: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi
+
+
+## Sequence homology search
+# each protein sequence will be searched against a reference database
+search:
+
+  # search method
+  # options: auto, diamond, blast, remote, precomp (pre-computed result)
+  # if auto, priority will be precomp > diamond > blast > remote, if
+  # available
+  method: auto
+
+  # gene (protein) filtering
+  minsize: 30         # minimum size (aa) of a valid protein
+
+  # search cutoffs
+  maxseqs: 500        # maximum number of sequences to return
+  evalue: 1.0e-5      # maximum E-value cutoff (note: keep decimal point)
+  identity: 0         # minimum percent identity cutoff
+  coverage: 0         # minimum percent query coverage cutoff
+
+  # hits filtering
+  maxhits: 0          # maximum number of hits to preserve (0 for unlimited)
+
+  # self-alignment method
+  # options: auto, native, fast, lookup, precomp
+  # - native: use choice of search method (diamond, blast or remote)
+  # - fast: use built-in algorithm to calculate blast bit score
+  # - lookup: search result already contains self-alignment result
+  # - auto: priority is precomp > native > fast, if available
+  selfaln: auto
+
+
+# local search behavior
+local:
+  threads: 0        # number of threads (0 for all CPU cores)
+  tmpdir:           # temporary directory
+
+
+# DIAMOND search behavior
+diamond:
+  queries: 0        # number of queries per run (0 for whole sample)
+  maxchars: 0       # maximum number of characters per run (0 for unlimited)
+  extrargs:         # extra command-line arguments for diamond
+
+
+## BLAST search behavior
+blast:
+  queries: 100      # number of queries per run
+  maxchars: 100000  # maximum number of characters per run
+  extrargs:         # extra command-line arguments for blastp
+
+
+## Remote search behavior
+remote:
+
+  # remote search database
+  # options: nr, refseq_protein, swissprot, pdb, etc.
+  db: nr
+
+  # remote search algorithm
+  # options: blastp psiBlast deltaBlast kmerBlastp phiBlast, etc.
+  # recommended: kmerBlastp (a.k.a. Quick BLASTP)
+  algorithm: kmerBlastp
+
+  queries: 0        # number of queries per run
+  maxchars: 7000    # maximum number of characters per run (note: a valid URL
+                    # typically cannot exceed 8,000 characters)
+  retries: 5        # maximum number of retries per search
+  delay: 60         # seconds between two search requests
+  timeout: 900      # seconds before program gives up waiting
+
+  # entrez query text
+  entrez: all [filter] NOT(environmental samples[filter] OR metagenomes[orgn]) txid131567[orgn]
+
+  # extra URL arguments for remote search
+  extrargs: "&FILTER=m%20S"
+
+
+## Fetch information from remote server
+fetch:
+
+  # whether to enable remote fetch
+  # options: auto, yes, no
+  # if auto, only enable when search is remote or taxdump is not provided
+  enable: auto
+
+  # remote query behavior
+  queries: 100      # maximum number of query entries per search
+  retries: 3        # maximum number of retries per search
+  delay: 5          # seconds between two fetch requests
+  timeout: 60       # seconds before program gives up waiting
+
+
+## Download database files from remote server
+download:
+  retries: 3        # maximum number of retries per file
+  delay: 10         # seconds between retries
+  timeout: 60       # seconds before program gives up waiting
+
+## Taxonomic filtering
+taxonomy:
+
+  # include taxIds equal to or as children of any of the following taxIds
+  # i.e., limit the search range within those taxIds
+  include:
+  # examples:
+  # - 2               # Bacteria
+  # - 2157            # Archaea
+  # - 2759            # Eukaryota
+
+  # exclude taxIds equal to or as children of any of the following taxIds
+  exclude:
+  # examples:
+  # - 10239           # Viruses
+
+  # ignore more than one hit with same taxId (i.e., potential paralogs)
+  unique: yes
+
+  # ignore more than one hit assigned to the same taxonomic rank
+  unirank:            # example: species
+
+  # ignore taxon names that are not capitalized
+  capital: yes
+
+  # ignore species names that are not Latinate
+  latin: no
+
+  # ignore taxon names that contain any of the following words
+  block:
+    - unknown
+    - uncultured
+    - unidentified
+    - unclassified
+    - unresolved
+    - environmental
+    - plasmid
+    - vector
+    - synthetic
+    - phage
+
+
+## Hit filtering for analysis
+analyze:
+
+  # one may test multiple sets of filters that are more stringent than the
+  # homology search parameters (see above), so that one does not need to repeat
+  # the expensive search step
+  maxhits:
+  evalue:
+  identity:
+  coverage:
+
+
+## Taxonomic grouping
+grouping:
+
+  # assign an input genome to a taxon if it represents this percentage or more
+  # best hits (50-100)
+  inputcov: 75
+
+  # "self" group must be at or above this taxonomic rank (e.g., species)
+  selfrank:
+
+  # "close" group must have this number or more taxa (larger is more
+  # statistically informative, but consider biological question)
+  closesize: 10
+
+
+## HGT prediction statistics
+predict:
+
+  ## gene score calculation
+  # weigh genes by bit scores (recommended); otherwise simply count occurrence
+  weighted: yes
+
+  ## gene filtering
+  # detect and remove outliers at the high end using this method
+  # options: none, zscore, boxplot
+  outliers: zscore
+
+  # keep orphans (a.k.a. ORFans; gene without non-self hits)
+  orphans: no
+
+  ## kernel density estimation (KDE)
+  # kernel bandwidth value or method for estimation
+  # options: auto, grid, or a number between 0.1 and 1.0
+  #  auto: a built-in algorithm that tests bandwidth values from high to low
+  #    until an "atypical" cluster at the low end can be identified
+  #  grid: grid search optimization with cross validation to determine the best
+  #    bandwidth
+  #  number: larger is smoother; smaller is sharper
+  bandwidth: auto
+
+  # number of steps for kernel bandwidth optimization,
+  # larger is more accurate, but slower
+  bwsteps: 20
+
+  # "atypical" part cannot exceed this quantile in automatic bandwidth
+  # estimation
+  # lower is more accurate but may fail in more instances
+  lowpart: 75
+
+  # exclude this percentage of valley-to-peak distance from "atypical" cluster
+  # larger is more stringent
+  noise: 50
+
+  # if clustering threshold cannot be determined by statistics, mandatorily
+  # assign this quantile from low end as "atypical" part
+  fixed: 25
+
+  ## cluster refinement
+  # drop data points with silhouette score below this threshold AND at the
+  # ambiguous side of centroid (i.e., uncertain classification)
+  silhouette: 0.5
+
+  # an additional criterion for HGT prediction: "self" score must be atypically
+  # low
+  selflow: no
+
+...
