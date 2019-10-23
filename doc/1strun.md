@@ -130,8 +130,6 @@ Let's do a sanity check on the result. The original paper, [Schönknecht _et al_
 
 Next, one may examine these predicted genes and their hit tables. This will provide clues for further inferring the putative donors of the genes. For example, in the hit table of `EME29520`, there are multiple hits from beta- and gammaproteobacteria...
 
-Please note that HGTector's prediction results are NOT strict proofs of individual HGT events; they are a list of _putatively_ HGT-derived genes. To further support (or falsify) a specific HGT event, I would recommend performing explicit phylogenetic analyses on that gene's evolutionary history, which, of course will involve additional human and computational efforts.
-
-Please also note two limitations of this small test: 1) Only 100 genes are sampled, which are but a small subset of the _G. sulphuraria_ genome. The statistical power is thus limited. 2) Because _G. sulphuraria_ is a unicellular eukaryote, and there are not many closely related eukaryotic genomes sequenced, the frequency of "close" hits are lower (and more difficult to cluster) than what you will typically see if your research interests are bacteria and archaea.
+Please note two limitations of this small test: 1) Only 100 genes are sampled, which are but a small subset of the _G. sulphuraria_ genome. The statistical power is thus limited. 2) Because _G. sulphuraria_ is a unicellular eukaryote, and there are not many closely related eukaryotic genomes sequenced, the frequency of "close" hits are lower (and more difficult to cluster) than what you will typically see if your research interests are bacteria and archaea.
 
 Next, please read the [second run](2ndrun.md) for more detailed demonstration and discussion of the analysis.

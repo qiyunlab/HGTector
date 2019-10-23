@@ -20,10 +20,10 @@ If you are already convinced that you will invest a dozen hours of computer time
 Otherwise, let's now make a very small test database to for this quick demo. This database will only contain protein sequences extracted from NCBI-defined microbial "reference genomes".
 
 ```
-hgtector database -c microbe -s 1 -r superkingdom --reference --compile diamond -o <output_dir>
+hgtector database -c microbe -t 2 -s 1 -r superkingdom --reference --compile diamond -o <output_dir>
 ```
 
-There will be roughly 100-120 genomes in this catalog. The multi-Fasta file of protein sequences is around 150 MB. If you have any trouble getting this database built automatically, we provide a sample database, **ref107**, for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).
+There will be around 120 genomes in this catalog. The multi-Fasta file of protein sequences is around 150 MB. If you have any trouble getting this database built automatically, we provide a sample database, **ref107**, for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).
 
 Note that however, with this small database, one really can't expect very high sensitivity in HGT prediction. We will address this later in the tutorial.
 
