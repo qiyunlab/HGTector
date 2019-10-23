@@ -8,14 +8,14 @@ Now let's go through a bit more sophisticated sample, with more practical progra
 
 HGTector should ideally work with a local database and a local program for sequence homology search. This is to ensure fast, controllable and repeatable bioinformatic analyses.
 
-Two protein sequence aligners are supported: **DIAMOND** and **BLAST** . By default, HGTector first looks for `diamond`, then `blastp`, in the current environment. If you need, here is a one-line installation [instruction](install#Aligner).
+Two protein sequence aligners are supported: **DIAMOND** and **BLAST** . By default, HGTector first looks for `diamond`, then `blastp`, in the current environment. If you need, here is a one-line installation [instruction](install.md#Aligner).
 
 
 ## Database
 
 A reference protein sequence database should ideally contain a significant breadth of known microbial diversity. HGTector provides an automated workflow, `database`, for downloading non-redundant protein sequences from the NCBI server and compiling them into a DIAMOND or BLASTp database.
 
-If you are already convinced that you will invest a dozen hours of computer time and several dozens of GB disk space to build the default database, please read [database](database).
+If you are already convinced that you will invest a dozen hours of computer time and several dozens of GB disk space to build the default database, please read [database](database.md).
 
 Otherwise, let's now make a very small test database to for this quick demo. This database will only contain protein sequences extracted from NCBI-defined microbial "reference genomes".
 
@@ -50,7 +50,7 @@ Perform batch **homology search** of the 5,278 protein sequences against the ref
 hgtector search -i o55h7.faa.gz -o . -m diamond -d <ref107>/diamond/db -t <ref107>/taxdump
 ```
 
-If you have already entered the database paths in the [configuration](config) file, this command can be simplified into:
+If you have already entered the database paths in the [configuration](config.md) file, this command can be simplified into:
 
 ```bash
 hgtector search -i o55h7.faa.gz -o .
@@ -90,7 +90,7 @@ YP_001006157.1	86.3	0.0e+00	1221.8	100.0	393305
 ...
 ```
 
-More details of the `search` command are documented [here](search).
+More details of the `search` command are documented [here](search.md).
 
 
 ## Analyze
@@ -105,7 +105,7 @@ We will go through the individual procedures behind this command, and explain wh
 
 ### Hit filtering
 
-The `analyze` command also has search threshold parameters like `--maxhits`, `--evalue`, `--identity` and `--coverage`. Their meaning are the same as those for the `search` command (see [here](search#Search-thresholds)). For example:
+The `analyze` command also has search threshold parameters like `--maxhits`, `--evalue`, `--identity` and `--coverage`. Their meaning are the same as those for the `search` command (see [here](search.md#Search-thresholds)). For example:
 
 ```bash
 hgtector analyze ... --maxhits 100 --evalue 1e-50 --identity 80 --coverage 80

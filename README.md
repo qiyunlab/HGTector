@@ -7,31 +7,25 @@ HGTector2
 
 ## Documentation
 
-[What's New](CHANGELOG)
+[What's New](CHANGELOG.md)
 
-[Installation](doc/install)
+[Installation](doc/install.md)
 
 Tutorials
-- [First Run](doc/1strun)
-- [Second Run](doc/2ndrun)
+- [First Run](doc/1strun.md)
+- [Second Run](doc/2ndrun.md)
 
 References
-- [Search](doc/search)
-- [Analyze](doc/analyze)
-- [Database](doc/database)
-- [Configuration](doc/config)
+- [Search](doc/search.md)
+- [Analyze](doc/analyze.md)
+- [Database](doc/database.md)
+- [Configuration](doc/config.md)
 
 
-## About
-
-### License
+## License
 
 Copyright (c) 2013-2019, [Qiyun Zhu](mailto:qiyunzhu@gmail.com) and [Katharina Dittmar](mailto:katharinad@gmail.com). Licensed under [BSD 3-clause](http://opensource.org/licenses/BSD-3-Clause). See full license [statement](LICENSE).
 
-### Citation
+## Citation
 
 > Zhu Q, Kosoy M, Dittmar K. HGTector: [an automated method facilitating genome-wide discovery of putative horizontal gene transfers](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-15-717). *BMC Genomics*. 2014. 15:717.
-
-
-
-

@@ -30,11 +30,11 @@ python setup.py
 
 Type `hgtector` to check if installation is successful, in which case command-line help information will be displayed on the screen.
 
-You may now read [first run](1strun) and [second run](2ndrun) before proceeding with aligner and database installation.
+You may now read [first run](1strun.md) and [second run](2ndrun.md) before proceeding with aligner and database installation.
 
 ## Aligner
 
-One may use choice of [DIAMOND](https://github.com/bbuchfink/diamond) or [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins) for sequence homology search. If you have already installed them, make sure they are callable from the environment, or use command-line [arguments](search#Local-search-behaviors) to point the executables to HGTector. Alternatively, you may install them via Conda:
+One may use choice of [DIAMOND](https://github.com/bbuchfink/diamond) or [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins) for sequence homology search. If you have already installed them, make sure they are callable from the environment, or use command-line [arguments](search.md#Local-search-behaviors) to point the executables to HGTector. Alternatively, you may install them via Conda:
 
 ```bash
 conda install -c bioconda diamond blast
@@ -42,8 +42,8 @@ conda install -c bioconda diamond blast
 
 ## Database
 
-HGTector has a command `database` for automated database construction. See [details](database).
+HGTector has a command `database` for automated database construction. See [details](database.md).
 
-A standard database built using the default protocol on 2019-11-22 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0), together with [instruction](database#Manual-compiling) for compiling.
+A standard database built using the default protocol on 2019-11-22 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0), together with [instruction](database.md#Manual-compiling) for compiling.
 
 A small, pre-compiled test database is also available for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).

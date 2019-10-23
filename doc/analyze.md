@@ -9,7 +9,7 @@ The `analyze` command predicts HGT-derived genes based on the distribution of th
 hgtector analyze -i sample.tsv -o <output_dir> <parameters...>
 ```
 
-The underlying procedures and the guideline for tuning parameters are explained in detail in [second run](2ndrun).
+The underlying procedures and the guideline for tuning parameters are explained in detail in [second run](2ndrun.md).
 
 
 ## Command-line reference
