@@ -1,0 +1,8 @@
+numpy
+scipy
+pandas
+scikit-learn
+matplotlib
+pyyaml
+nose
+flake8

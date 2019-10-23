@@ -1,0 +1,59 @@
+Analysis started at 2019-10-21 17:39:08.350565.
+Reading custom taxonomy database...
+Done. Read 11021 taxa.
+Reading homology search results...
+  gsul: 100 proteins.
+Done. Read search results of 1 samples.
+Auto-inferring plausible taxIds for input genomes based on taxonomy of search results...
+  gsul: 130081 (Galdieria sulphuraria) (covering 100% best hits).
+Refining taxonomy database...
+Done. Retained 11021 taxa.
+All input genomes belong to 130081 (species Galdieria sulphuraria).
+Auto-inferred self group:
+  130081 (species Galdieria sulphuraria)
+Self group has 1 taxa.
+Auto-inferred close group:
+  2797 (class Bangiophyceae)
+Close group has 31 taxa.
+Calculating protein scores by groups...
+  gsul
+Done.
+Summarizing scores of all proteins... done.
+Protein scores written to scores.tsv.
+Removed 45 ORFans.
+Removed 2 outliers.
+Predicting HGTs...
+Calculating thresholds for clustering...
+Close group:
+  1.000: n/a
+  0.886: n/a
+  0.785: n/a
+  0.695: n/a
+  0.616: n/a
+  0.546: n/a
+  0.483: n/a
+  0.428: n/a
+  0.379: 0.935109 - 86.79%
+  0.336: 0.690268 - 83.02%
+  0.298: 0.237601 - 67.92%
+  Auto-determined bandwidth: 0.297635.
+  Threshold: 0.237601.
+Distal group:
+  1.000: n/a
+  0.886: n/a
+  0.785: n/a
+  0.695: n/a
+  0.616: n/a
+  0.546: 77.5005 - 43.40%
+  Auto-determined bandwidth: 0.545559.
+  Threshold: 77.5005.
+Done.
+Labeling cluster... done.
+  Total predicted HGTs: 14.
+Calculating cluster properties... done.
+Refining cluster... done.
+  Total predicted HGTs after refinement: 13.
+Predicted HGTs by sample:
+  gsul: 13.
+Prediction results saved to hgts.
+Analysis finished at 2019-10-21 17:39:10.185116.

@@ -1,0 +1,13 @@
+accession	taxid	assembly	species	strain
+YP_002410793.1	585056	GCF_000026325.1	Escherichia coli	UMN026
+YP_006780959.1	1133852	GCF_000299455.1	Escherichia coli	O104:H4 str. 2011C-3493
+NP_454622.1	220341	GCF_000195995.1	Salmonella enterica	subsp. enterica serovar Typhi str. CT18
+YP_003611339.1	716541	GCF_000025565.1	Enterobacter cloacae	subsp. cloacae ATCC 13047
+YP_005225024.1	1125630	GCF_000240185.1	Klebsiella pneumoniae	subsp. pneumoniae HS11286
+YP_002345540.1	214092	GCF_000009065.1	Yersinia pestis	CO92
+NP_230502.1	243277	GCF_000006745.1	Vibrio cholerae	O1 biovar El Tor str. N16961
+YP_237263.1	205918	GCF_000012245.1	Pseudomonas syringae	pv. syringae B728a
+NP_384288.1	266834	GCF_000006965.1	Sinorhizobium meliloti	1021
+YP_098509.1	295405	GCF_000009925.1	Bacteroides fragilis	YCH46
+YP_001088975.1	272563	GCF_000009205.1	Clostridioides difficile	630
+NP_720561.1	210007	GCF_000007465.2	Streptococcus mutans	UA159

@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+
+# ----------------------------------------------------------------------------
+# Copyright (c) 2013--, Qiyun Zhu and Katharina Dittmar.
+#
+# Distributed under the terms of the Modified BSD License.
+#
+# The full license is in the file LICENSE, distributed with this software.
+# ----------------------------------------------------------------------------
+
+import sys
+import argparse
+from importlib import import_module
+from os.path import join, isfile, dirname, realpath, expanduser
+import yaml
+
+
+__version__ = '2.0b1'
+
+description = """HGTector: Genome-wide detection of putative horizontal gene \
+transfer (HGT) events based on sequence homology search hit distribution \
+statistics."""
+
+module_names = ('search', 'analyze', 'database')
+
+
+def main():
+    # load modules
+    modules = []
+    for name in module_names:
+        module = getattr(import_module(
+            'hgtector.{}'.format(name)), name.capitalize())()
+        modules.append([name, module])
+
+    # load configurations
+    cfg = None
+    cfgfile = locate_config_file()
+    if cfgfile is not None:
+        with open(cfgfile, 'r') as f:
+            cfg = yaml.load(f, Loader=yaml.SafeLoader)
+
+    # parse command-line arguments
+    args = parse_args(modules)
+
+    # execute selected module
+    for name, module in modules:
+        if name == args.command:
+            module(args, cfg)
+            break
+
+
+def parse_args(modules):
+    """Parse command-line arguments.
+
+    Parameters
+    ----------
+    modules : list of list
+        [name, class]
+        modules which define sub-commands
+
+    Returns
+    -------
+    dict
+        arguments
+    """
+    parser = argparse.ArgumentParser(
+        description=description, add_help=False,
+        epilog='version: {}'.format(__version__),
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    subparsers = parser.add_subparsers(
+        title='commands', dest='command', required=True)
+
+    # add sub-commands for modules
+    for name, module in modules:
+        par = cmd = subparsers.add_parser(
+            name, help=module.description,
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+        for arg in module.arguments:
+            # create argument group
+            if isinstance(arg, str):
+                if arg == '*':
+                    par = cmd.add_mutually_exclusive_group(required=True)
+                else:
+                    par = cmd.add_argument_group(arg)
+            # add argument
+            else:
+                flags = arg[0].split('|')
+                kwargs = arg[2] if len(arg) > 2 else {}
+                helpinfo = (arg[1] if len(arg) == 2 or 'choices' not in arg[2]
+                            else '{} ({})'.format(
+                                arg[1], ', '.join(arg[2]['choices'])))
+                par.add_argument(*flags, **kwargs, help=helpinfo)
+        for arg in cmd._actions:
+            # argparse bug which crashes when required and empty metavar
+            arg.metavar = '\b' if arg.required else ''
+
+    # show interface
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
+    try:
+        return parser.parse_args()
+    except TypeError:
+        parser.print_help()
+        sys.exit(0)
+
+
+def locate_config_file():
+    """Get configuration file path.
+
+    Returns
+    -------
+    str or None
+        configuration file path, or None if not found
+    """
+    fname = 'config.yml'
+    # current directory
+    fp = fname
+    # home directory
+    if not isfile(fp):
+        fp = join(expanduser('~'), '.hgtector', fname)
+    # program directory
+    if not isfile(fp):
+        fp = join(dirname(realpath(__file__)), '..', fname)
+    # not found
+    if not isfile(fp):
+        fp = None
+    return fp
+
+
+if __name__ == '__main__':
+    main()
