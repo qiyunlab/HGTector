@@ -24,7 +24,7 @@ pip install git+https://github.com/DittmarLab/HGTector.git
 Download this [repository](https://github.com/DittmarLab/HGTector/archive/master.zip). Unzip. Then execute:
 
 ```bash
-python setup.py
+python setup.py install
 ```
 
 

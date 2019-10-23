@@ -47,6 +47,7 @@ setup(
     url='https://github.com/DittmarLab/HGTector',
     packages=find_packages(),
     scripts=glob('scripts/hgtector'),
+    package_data={'hgtector': ['config.yml']},
     include_package_data=True,
     install_requires=[
         'pyyaml',
