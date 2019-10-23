@@ -1,0 +1,37 @@
+Homology search started at 2019-10-16 ##:##:##.
+Settings:
+  Search method: remote.
+  Self-alignment method: native.
+  Remote fetch enabled: yes.
+Reading input proteins...
+  gsul: 100 proteins.
+Done. Read 100 proteins from 1 samples.
+Sequences of 100 proteins are to be retrieved.
+Fetching 100 sequences from remote server...
+  Fetched information of 100 sequences.
+Done. Obtained sequences of 100 proteins.
+Batch homology search of gsul started at 2019-10-16 ##:##:##.
+Number of queries: 100.
+Submitting 18 queries for search. RID: ###########.. Results retrieved.
+Fetching taxIds of #### sequences from remote server...
+  Fetched information of 100 sequences.
+  Fetched information of 100 sequences.
+  Fetched information of 100 sequences.
+  ...
+Done. Obtained taxIds of #### sequences.
+WARNING: Cannot obtain taxIds for # sequences. These hits will be dropped.
+Fetching #### taxIds and ancestors from remote server...
+  Fetched information of 100 taxIds.
+  Fetched information of 100 taxIds.
+  Fetched information of 100 taxIds.
+  ...
+Done. Obtained taxonomy of #### taxIds.
+Submitting 10 queries for self-alignment. RID: ###########. Results retrieved.
+Submitting 6 queries for self-alignment. RID: ###########. Results retrieved.
+Submitting 2 queries for self-alignment. RID: ###########. Results retrieved.
+  18 queries completed.
+Submitting 19 queries for search. RID: ###########... Results retrieved.
+Fetching taxIds of #### sequences from remote server...
+ ...
+Batch homology search of gsul (100 proteins) ended at 2019-10-16 ##:##:##.
+Batch homology search finished at 2019-10-16 ##:##:##.

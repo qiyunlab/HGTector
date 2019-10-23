@@ -1,22 +1,37 @@
-HGTector
-========
+HGTector2
+=========
 
-A computational pipeline for genome-wide detection of putative horizontal gene transfer (HGT) events based on sequence homology search hit distribution statistics
+**HGTector2** is a completely re-engineered software tool, featuring a fully-automated analytical pipeline with smart determination of parameters which requires minimum human involvement, a re-designed command-line interface which facilitates standardized scientific computing, and a high-quality Python 3 codebase.
 
-Authors: Qiyun Zhu (<qiyunzhu@gmail.com>), Katharina Dittmar (<katharinad@gmail.com>)
+**HGTector** is a computational pipeline for genome-wide detection of putative horizontal gene transfer (HGT) events based on sequence homology search hit distribution statistics.
 
-Affiliation: Department of Biological Sciences, University at Buffalo, State University of New York, Buffalo, USA
+## Documentation
 
-License: [BSD 2-clause](http://opensource.org/licenses/BSD-2-Clause).
+[What's New](CHANGELOG)
 
-Download the latest release: [0.2.2](https://github.com/DittmarLab/HGTector/archive/0.2.2.zip), updated on 2017-8-23; and a standard [database](https://www.dropbox.com/s/mqwkm0tl7r0p7qe/stdb_20170630.tar?dl=0), updated on 2017-6-30.
+[Installation](doc/install)
 
-An article detailing the method and its performance on simulated and real genomic datasets can be found [here](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-15-717):
+Tutorials
+- [First Run](doc/1strun)
+- [Second Run](doc/2ndrun)
 
-Zhu Q, Kosoy M, Dittmar K. HGTector: an automated method facilitating genome-wide discovery of putative horizontal gene transfers. *BMC Genomics*. 2014. 15:717.
+References
+- [Search](doc/search)
+- [Analyze](doc/analyze)
+- [Database](doc/database)
+- [Configuration](doc/config)
 
-Please visit our lab's [website](http://katharina-dittmar.squarespace.com/) for details.
 
-Usage: Simply execute **perl HGTector.pl**, or, open **GUI.html** in a web browser to see a step-by-step wizard.
+## About
 
-Download [HGTector 0.2.2](https://github.com/DittmarLab/HGTector/archive/0.2.2.zip).
+### License
+
+Copyright (c) 2013-2019, [Qiyun Zhu](mailto:qiyunzhu@gmail.com) and [Katharina Dittmar](mailto:katharinad@gmail.com). Licensed under [BSD 3-clause](http://opensource.org/licenses/BSD-3-Clause). See full license [statement](LICENSE).
+
+### Citation
+
+> Zhu Q, Kosoy M, Dittmar K. HGTector: [an automated method facilitating genome-wide discovery of putative horizontal gene transfers](https://bmcgenomics.biomedcentral.com/articles/10.1186/1471-2164-15-717). *BMC Genomics*. 2014. 15:717.
+
+
+
+

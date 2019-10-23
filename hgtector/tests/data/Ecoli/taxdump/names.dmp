@@ -1,0 +1,486 @@
+1	|	root	|		|	scientific name	|
+2	|	Bacteria	|	Bacteria <prokaryotes>	|	scientific name	|
+13	|	Dictyoglomus	|		|	scientific name	|
+22	|	Shewanella	|		|	scientific name	|
+75	|	Caulobacter	|		|	scientific name	|
+112	|	Planctomycetales	|		|	scientific name	|
+126	|	Planctomycetaceae	|		|	scientific name	|
+136	|	Spirochaetales	|		|	scientific name	|
+137	|	Spirochaetaceae	|		|	scientific name	|
+139	|	Borreliella burgdorferi	|		|	scientific name	|
+157	|	Treponema	|		|	scientific name	|
+158	|	Treponema denticola	|		|	scientific name	|
+170	|	Leptospiraceae	|		|	scientific name	|
+171	|	Leptospira	|		|	scientific name	|
+173	|	Leptospira interrogans	|		|	scientific name	|
+209	|	Helicobacter	|		|	scientific name	|
+210	|	Helicobacter pylori	|		|	scientific name	|
+237	|	Flavobacterium	|		|	scientific name	|
+270	|	Thermus	|		|	scientific name	|
+274	|	Thermus thermophilus	|		|	scientific name	|
+286	|	Pseudomonas	|		|	scientific name	|
+303	|	Pseudomonas putida	|		|	scientific name	|
+317	|	Pseudomonas syringae	|		|	scientific name	|
+321	|	Pseudomonas syringae pv. syringae	|		|	scientific name	|
+323	|	Pseudomonas syringae pv. tomato	|		|	scientific name	|
+338	|	Xanthomonas	|		|	scientific name	|
+339	|	Xanthomonas campestris	|		|	scientific name	|
+340	|	Xanthomonas campestris pv. campestris	|		|	scientific name	|
+356	|	Rhizobiales	|		|	scientific name	|
+357	|	Agrobacterium	|		|	scientific name	|
+374	|	Bradyrhizobium	|		|	scientific name	|
+380	|	Sinorhizobium fredii	|		|	scientific name	|
+382	|	Sinorhizobium meliloti	|		|	scientific name	|
+394	|	Sinorhizobium fredii NGR234	|		|	scientific name	|
+468	|	Moraxellaceae	|		|	scientific name	|
+469	|	Acinetobacter	|		|	scientific name	|
+481	|	Neisseriaceae	|		|	scientific name	|
+482	|	Neisseria	|		|	scientific name	|
+485	|	Neisseria gonorrhoeae	|		|	scientific name	|
+487	|	Neisseria meningitidis	|		|	scientific name	|
+491	|	Neisseria meningitidis serogroup B	|		|	scientific name	|
+506	|	Alcaligenaceae	|		|	scientific name	|
+517	|	Bordetella	|		|	scientific name	|
+518	|	Bordetella bronchiseptica	|		|	scientific name	|
+519	|	Bordetella parapertussis	|		|	scientific name	|
+520	|	Bordetella pertussis	|		|	scientific name	|
+543	|	Enterobacteriaceae	|		|	scientific name	|
+547	|	Enterobacter	|		|	scientific name	|
+548	|	[Enterobacter] aerogenes	|		|	scientific name	|
+550	|	Enterobacter cloacae	|		|	scientific name	|
+561	|	Escherichia	|		|	scientific name	|
+562	|	Escherichia coli	|		|	scientific name	|
+570	|	Klebsiella	|		|	scientific name	|
+573	|	Klebsiella pneumoniae	|		|	scientific name	|
+590	|	Salmonella	|		|	scientific name	|
+620	|	Shigella	|		|	scientific name	|
+622	|	Shigella dysenteriae	|		|	scientific name	|
+623	|	Shigella flexneri	|		|	scientific name	|
+629	|	Yersinia	|	Yersinia <bacteria>	|	scientific name	|
+630	|	Yersinia enterocolitica	|		|	scientific name	|
+632	|	Yersinia pestis	|		|	scientific name	|
+641	|	Vibrionaceae	|		|	scientific name	|
+642	|	Aeromonas	|		|	scientific name	|
+644	|	Aeromonas hydrophila	|		|	scientific name	|
+662	|	Vibrio	|		|	scientific name	|
+666	|	Vibrio cholerae	|		|	scientific name	|
+668	|	Aliivibrio fischeri	|		|	scientific name	|
+670	|	Vibrio parahaemolyticus	|		|	scientific name	|
+686	|	Vibrio cholerae O1 biovar El Tor	|		|	scientific name	|
+712	|	Pasteurellaceae	|		|	scientific name	|
+724	|	Haemophilus	|		|	scientific name	|
+727	|	Haemophilus influenzae	|		|	scientific name	|
+766	|	Rickettsiales	|		|	scientific name	|
+775	|	Rickettsiaceae	|		|	scientific name	|
+776	|	Coxiella	|	Coxiella <Bacteria>	|	scientific name	|
+777	|	Coxiella burnetii	|		|	scientific name	|
+780	|	Rickettsia	|		|	scientific name	|
+782	|	Rickettsia prowazekii	|		|	scientific name	|
+809	|	Chlamydiaceae	|		|	scientific name	|
+810	|	Chlamydia	|		|	scientific name	|
+813	|	Chlamydia trachomatis	|		|	scientific name	|
+815	|	Bacteroidaceae	|		|	scientific name	|
+816	|	Bacteroides	|	Bacteroides <genus>	|	scientific name	|
+817	|	Bacteroides fragilis	|		|	scientific name	|
+818	|	Bacteroides thetaiotaomicron	|		|	scientific name	|
+848	|	Fusobacterium	|		|	scientific name	|
+851	|	Fusobacterium nucleatum	|		|	scientific name	|
+872	|	Desulfovibrio	|		|	scientific name	|
+881	|	Desulfovibrio vulgaris	|		|	scientific name	|
+882	|	Desulfovibrio vulgaris str. Hildenborough	|		|	scientific name	|
+976	|	Bacteroidetes	|	Bacteroidetes <phylum>	|	scientific name	|
+1060	|	Rhodobacter	|		|	scientific name	|
+1063	|	Rhodobacter sphaeroides	|		|	scientific name	|
+1081	|	Rhodospirillum	|		|	scientific name	|
+1085	|	Rhodospirillum rubrum	|		|	scientific name	|
+1090	|	Chlorobi	|		|	scientific name	|
+1097	|	Chlorobaculum tepidum	|		|	scientific name	|
+1106	|	Chloroflexaceae	|		|	scientific name	|
+1107	|	Chloroflexus	|		|	scientific name	|
+1108	|	Chloroflexus aurantiacus	|		|	scientific name	|
+1117	|	Cyanobacteria	|		|	scientific name	|
+1213	|	Prochloraceae	|		|	scientific name	|
+1218	|	Prochlorococcus	|		|	scientific name	|
+1219	|	Prochlorococcus marinus	|		|	scientific name	|
+1224	|	Proteobacteria	|		|	scientific name	|
+1236	|	Gammaproteobacteria	|		|	scientific name	|
+1239	|	Firmicutes	|		|	scientific name	|
+1279	|	Staphylococcus	|		|	scientific name	|
+1282	|	Staphylococcus epidermidis	|		|	scientific name	|
+1297	|	Deinococcus-Thermus	|		|	scientific name	|
+1298	|	Deinococcus	|		|	scientific name	|
+1299	|	Deinococcus radiodurans	|		|	scientific name	|
+1300	|	Streptococcaceae	|		|	scientific name	|
+1301	|	Streptococcus	|		|	scientific name	|
+1305	|	Streptococcus sanguinis	|		|	scientific name	|
+1307	|	Streptococcus suis	|		|	scientific name	|
+1309	|	Streptococcus mutans	|		|	scientific name	|
+1311	|	Streptococcus agalactiae	|		|	scientific name	|
+1314	|	Streptococcus pyogenes	|		|	scientific name	|
+1350	|	Enterococcus	|		|	scientific name	|
+1351	|	Enterococcus faecalis	|		|	scientific name	|
+1352	|	Enterococcus faecium	|		|	scientific name	|
+1357	|	Lactococcus	|		|	scientific name	|
+1358	|	Lactococcus lactis	|		|	scientific name	|
+1360	|	Lactococcus lactis subsp. lactis	|		|	scientific name	|
+1385	|	Bacillales	|		|	scientific name	|
+1386	|	Bacillus	|	Bacillus <bacterium>	|	scientific name	|
+1392	|	Bacillus anthracis	|		|	scientific name	|
+1396	|	Bacillus cereus	|		|	scientific name	|
+1428	|	Bacillus thuringiensis	|		|	scientific name	|
+1485	|	Clostridium	|		|	scientific name	|
+1488	|	Clostridium acetobutylicum	|		|	scientific name	|
+1491	|	Clostridium botulinum	|		|	scientific name	|
+1496	|	Clostridioides difficile	|		|	scientific name	|
+1525	|	Moorella thermoacetica	|		|	scientific name	|
+1578	|	Lactobacillus	|		|	scientific name	|
+1579	|	Lactobacillus acidophilus	|		|	scientific name	|
+1590	|	Lactobacillus plantarum	|		|	scientific name	|
+1597	|	Lactobacillus paracasei	|		|	scientific name	|
+1624	|	Lactobacillus salivarius	|		|	scientific name	|
+1637	|	Listeria	|		|	scientific name	|
+1639	|	Listeria monocytogenes	|		|	scientific name	|
+1678	|	Bifidobacterium	|		|	scientific name	|
+1681	|	Bifidobacterium bifidum	|		|	scientific name	|
+1760	|	Actinobacteria	|	Actinobacteria <class>	|	scientific name	|
+1762	|	Mycobacteriaceae	|		|	scientific name	|
+1763	|	Mycobacterium	|		|	scientific name	|
+1765	|	Mycobacterium bovis	|		|	scientific name	|
+1769	|	Mycobacterium leprae	|		|	scientific name	|
+1772	|	Mycobacterium smegmatis	|		|	scientific name	|
+1813	|	Amycolatopsis	|		|	scientific name	|
+1883	|	Streptomyces	|		|	scientific name	|
+1902	|	Streptomyces coelicolor	|		|	scientific name	|
+2062	|	Streptomycetaceae	|		|	scientific name	|
+2070	|	Pseudonocardiaceae	|		|	scientific name	|
+2085	|	Mycoplasmatales	|		|	scientific name	|
+2092	|	Mycoplasmataceae	|		|	scientific name	|
+2093	|	Mycoplasma	|		|	scientific name	|
+2102	|	Mycoplasma mycoides	|		|	scientific name	|
+2103	|	Mycoplasma mycoides subsp. mycoides	|		|	scientific name	|
+2104	|	Mycoplasma pneumoniae	|		|	scientific name	|
+2151	|	Mesoplasma florum	|		|	scientific name	|
+2335	|	Thermotoga	|		|	scientific name	|
+2336	|	Thermotoga maritima	|		|	scientific name	|
+2419	|	Thermotogales	|		|	scientific name	|
+2701	|	Gardnerella	|		|	scientific name	|
+2702	|	Gardnerella vaginalis	|		|	scientific name	|
+2713	|	Aquifex	|		|	scientific name	|
+13373	|	Burkholderia mallei	|		|	scientific name	|
+28037	|	Streptococcus mitis	|		|	scientific name	|
+28105	|	Sinorhizobium	|		|	scientific name	|
+28211	|	Alphaproteobacteria	|		|	scientific name	|
+28216	|	Betaproteobacteria	|		|	scientific name	|
+28221	|	Deltaproteobacteria	|		|	scientific name	|
+28231	|	Geobacter	|		|	scientific name	|
+28261	|	Thermodesulfovibrio	|		|	scientific name	|
+28262	|	Thermodesulfovibrio yellowstonii	|		|	scientific name	|
+28450	|	Burkholderia pseudomallei	|		|	scientific name	|
+28901	|	Salmonella enterica	|		|	scientific name	|
+29547	|	Epsilonproteobacteria	|		|	scientific name	|
+31953	|	Bifidobacteriaceae	|		|	scientific name	|
+31969	|	Mollicutes	|		|	scientific name	|
+31979	|	Clostridiaceae	|		|	scientific name	|
+31989	|	Rhodobacteraceae	|		|	scientific name	|
+32008	|	Burkholderia	|		|	scientific name	|
+32033	|	Xanthomonadaceae	|		|	scientific name	|
+32061	|	Chloroflexia	|		|	scientific name	|
+32064	|	Chloroflexales	|		|	scientific name	|
+32066	|	Fusobacteria	|	Fusobacteria <phylum>	|	scientific name	|
+32069	|	Aquificales	|		|	scientific name	|
+33071	|	Gloeobacter	|		|	scientific name	|
+33072	|	Gloeobacter violaceus	|		|	scientific name	|
+33910	|	Amycolatopsis mediterranei	|		|	scientific name	|
+33925	|	Entomoplasmataceae	|		|	scientific name	|
+33958	|	Lactobacillaceae	|		|	scientific name	|
+33988	|	Rickettsieae	|		|	scientific name	|
+35554	|	Geobacter sulfurreducens	|		|	scientific name	|
+36809	|	Mycobacterium abscessus	|		|	scientific name	|
+36826	|	Clostridium botulinum A	|		|	scientific name	|
+39645	|	Mesorhizobium ciceri	|		|	scientific name	|
+40117	|	Nitrospirae	|		|	scientific name	|
+41294	|	Bradyrhizobiaceae	|		|	scientific name	|
+41295	|	Rhodospirillaceae	|		|	scientific name	|
+42857	|	Moorella group	|		|	scientific name	|
+42897	|	Shigella flexneri 2a	|		|	scientific name	|
+43668	|	Brachybacterium	|		|	scientific name	|
+43669	|	Brachybacterium faecium	|		|	scientific name	|
+44101	|	Mycoplasma mycoides subsp. mycoides SC	|		|	scientific name	|
+44260	|	Moorella	|	Moorella <bacteria>	|	scientific name	|
+46239	|	Mesoplasma	|		|	scientific name	|
+48296	|	Acinetobacter pittii	|		|	scientific name	|
+49546	|	Flavobacteriaceae	|		|	scientific name	|
+51291	|	Chlamydiales	|		|	scientific name	|
+57678	|	Leptospira interrogans serovar Lai	|		|	scientific name	|
+59201	|	Salmonella enterica subsp. enterica	|		|	scientific name	|
+63363	|	Aquifex aeolicus	|		|	scientific name	|
+64895	|	Borreliella	|		|	scientific name	|
+64898	|	Aquificaceae	|		|	scientific name	|
+68287	|	Mesorhizobium	|		|	scientific name	|
+68295	|	Thermoanaerobacterales	|		|	scientific name	|
+68297	|	Dictyoglomi	|	Dictyoglomi <phylum>	|	scientific name	|
+68336	|	Bacteroidetes/Chlorobi group	|		|	scientific name	|
+68525	|	delta/epsilon subdivisions	|		|	scientific name	|
+68933	|	Thermales	|		|	scientific name	|
+69277	|	Phyllobacteriaceae	|		|	scientific name	|
+69541	|	Desulfuromonadales	|		|	scientific name	|
+70863	|	Shewanella oneidensis	|		|	scientific name	|
+71421	|	Haemophilus influenzae Rd KW20	|		|	scientific name	|
+72274	|	Pseudomonadales	|		|	scientific name	|
+72293	|	Helicobacteraceae	|		|	scientific name	|
+72407	|	Klebsiella pneumoniae subsp. pneumoniae	|		|	scientific name	|
+76856	|	Fusobacterium nucleatum subsp. nucleatum	|		|	scientific name	|
+76892	|	Caulobacteraceae	|		|	scientific name	|
+77643	|	Mycobacterium tuberculosis complex	|		|	scientific name	|
+80840	|	Burkholderiales	|		|	scientific name	|
+81461	|	Thermanaerovibrio	|		|	scientific name	|
+81462	|	Thermanaerovibrio acidaminovorans	|		|	scientific name	|
+81852	|	Enterococcaceae	|		|	scientific name	|
+82115	|	Rhizobiaceae	|		|	scientific name	|
+83334	|	Escherichia coli O157:H7	|		|	scientific name	|
+83558	|	Chlamydia pneumoniae	|		|	scientific name	|
+84642	|	Aeromonadaceae	|		|	scientific name	|
+85004	|	Bifidobacteriales	|		|	scientific name	|
+85006	|	Micrococcales	|		|	scientific name	|
+85007	|	Corynebacteriales	|		|	scientific name	|
+85010	|	Pseudonocardiales	|		|	scientific name	|
+85011	|	Streptomycetales	|		|	scientific name	|
+85020	|	Dermabacteraceae	|		|	scientific name	|
+85962	|	Helicobacter pylori 26695	|		|	scientific name	|
+86661	|	Bacillus cereus group	|		|	scientific name	|
+90370	|	Salmonella enterica subsp. enterica serovar Typhi	|		|	scientific name	|
+90964	|	Staphylococcaceae	|		|	scientific name	|
+91061	|	Bacilli	|		|	scientific name	|
+91347	|	Enterobacterales	|		|	scientific name	|
+92944	|	Ketogulonicigenium	|		|	scientific name	|
+92945	|	Ketogulonicigenium vulgare	|		|	scientific name	|
+96345	|	Flavobacterium psychrophilum	|		|	scientific name	|
+100226	|	Streptomyces coelicolor A3(2)	|		|	scientific name	|
+110321	|	Sinorhizobium medicae	|		|	scientific name	|
+111527	|	pseudomallei group	|		|	scientific name	|
+114292	|	typhus group	|		|	scientific name	|
+115713	|	Chlamydophila pneumoniae CWL029	|		|	scientific name	|
+117743	|	Flavobacteriia	|		|	scientific name	|
+118964	|	Deinococcales	|		|	scientific name	|
+118968	|	Coxiellaceae	|		|	scientific name	|
+118969	|	Legionellales	|		|	scientific name	|
+119060	|	Burkholderiaceae	|		|	scientific name	|
+122586	|	Neisseria meningitidis MC58	|		|	scientific name	|
+127906	|	Vibrio cholerae O1	|		|	scientific name	|
+131567	|	cellular organisms	|		|	scientific name	|
+135614	|	Xanthomonadales	|		|	scientific name	|
+135621	|	Pseudomonadaceae	|		|	scientific name	|
+135622	|	Alteromonadales	|		|	scientific name	|
+135623	|	Vibrionales	|		|	scientific name	|
+135624	|	Aeromonadales	|		|	scientific name	|
+135625	|	Pasteurellales	|		|	scientific name	|
+136845	|	Pseudomonas putida group	|		|	scientific name	|
+136849	|	Pseudomonas syringae group	|		|	scientific name	|
+142554	|	Prochlorococcus marinus subsp. marinus	|		|	scientific name	|
+146785	|	Thermosynechococcus	|		|	scientific name	|
+146786	|	Thermosynechococcus elongatus	|		|	scientific name	|
+146918	|	Salinibacter	|		|	scientific name	|
+146919	|	Salinibacter ruber	|		|	scientific name	|
+150052	|	Yersinia enterocolitica subsp. enterocolitica	|		|	scientific name	|
+155892	|	Caulobacter vibrioides	|		|	scientific name	|
+160488	|	Pseudomonas putida KT2440	|		|	scientific name	|
+160490	|	Streptococcus pyogenes M1 GAS	|		|	scientific name	|
+167539	|	Prochlorococcus marinus subsp. marinus str. CCMP1375	|		|	scientific name	|
+169963	|	Listeria monocytogenes EGD-e	|		|	scientific name	|
+171549	|	Bacteroidales	|		|	scientific name	|
+176280	|	Staphylococcus epidermidis ATCC 12228	|		|	scientific name	|
+176299	|	Agrobacterium fabrum str. C58	|		|	scientific name	|
+180856	|	[Bacillus thuringiensis] serovar konkukian	|		|	scientific name	|
+183710	|	Deinococcaceae	|		|	scientific name	|
+186328	|	Entomoplasmatales	|		|	scientific name	|
+186801	|	Clostridia	|		|	scientific name	|
+186802	|	Clostridiales	|		|	scientific name	|
+186804	|	Peptostreptococcaceae	|		|	scientific name	|
+186814	|	Thermoanaerobacteraceae	|		|	scientific name	|
+186817	|	Bacillaceae	|		|	scientific name	|
+186820	|	Listeriaceae	|		|	scientific name	|
+186826	|	Lactobacillales	|		|	scientific name	|
+187857	|	Aquificae	|	Aquificae <class>	|	scientific name	|
+188708	|	Thermotogae	|	Thermotogae <class>	|	scientific name	|
+188709	|	Thermotogaceae	|		|	scientific name	|
+188786	|	Thermaceae	|		|	scientific name	|
+188787	|	Deinococci	|		|	scientific name	|
+189518	|	Leptospira interrogans serovar Lai str. 56601	|		|	scientific name	|
+189778	|	Nitrospirales	|		|	scientific name	|
+189779	|	Nitrospiraceae	|		|	scientific name	|
+190304	|	Fusobacterium nucleatum subsp. nucleatum ATCC 25586	|		|	scientific name	|
+190485	|	Xanthomonas campestris pv. campestris str. ATCC 33913	|		|	scientific name	|
+190650	|	Caulobacter crescentus CB15	|		|	scientific name	|
+191410	|	Chlorobia	|		|	scientific name	|
+191411	|	Chlorobiales	|		|	scientific name	|
+191412	|	Chlorobiaceae	|		|	scientific name	|
+194439	|	Chlorobium tepidum TLS	|		|	scientific name	|
+194924	|	Desulfovibrionaceae	|		|	scientific name	|
+196023	|	Aeromonas hydrophila subsp. hydrophila	|		|	scientific name	|
+197221	|	Thermosynechococcus elongatus BP-1	|		|	scientific name	|
+198094	|	Bacillus anthracis str. Ames	|		|	scientific name	|
+198214	|	Shigella flexneri 2a str. 301	|		|	scientific name	|
+200643	|	Bacteroidia	|		|	scientific name	|
+200644	|	Flavobacteriales	|		|	scientific name	|
+200783	|	Aquificae	|	Aquificae <phylum>	|	scientific name	|
+200795	|	Chloroflexi	|	Chloroflexi <phylum>	|	scientific name	|
+200918	|	Thermotogae	|	Thermotogae <phylum>	|	scientific name	|
+201174	|	Actinobacteria	|	Actinobacteria <phylum>	|	scientific name	|
+203486	|	Dictyoglomia	|		|	scientific name	|
+203487	|	Dictyoglomales	|		|	scientific name	|
+203488	|	Dictyoglomaceae	|		|	scientific name	|
+203490	|	Fusobacteriia	|		|	scientific name	|
+203491	|	Fusobacteriales	|		|	scientific name	|
+203492	|	Fusobacteriaceae	|		|	scientific name	|
+203682	|	Planctomycetes	|	Planctomycetes <phylum>	|	scientific name	|
+203683	|	Planctomycetia	|		|	scientific name	|
+203691	|	Spirochaetes	|	Spirochaetes <phylum>	|	scientific name	|
+203692	|	Spirochaetia	|		|	scientific name	|
+203693	|	Nitrospira	|	Nitrospira <class>	|	scientific name	|
+204428	|	Chlamydiae	|	Chlamydiae <phylum>	|	scientific name	|
+204429	|	Chlamydiia	|		|	scientific name	|
+204441	|	Rhodospirillales	|		|	scientific name	|
+204455	|	Rhodobacterales	|		|	scientific name	|
+204458	|	Caulobacterales	|		|	scientific name	|
+205918	|	Pseudomonas syringae pv. syringae B728a	|		|	scientific name	|
+206351	|	Neisseriales	|		|	scientific name	|
+206672	|	Bifidobacterium longum NCC2705	|		|	scientific name	|
+208435	|	Streptococcus agalactiae 2603V/R	|		|	scientific name	|
+210007	|	Streptococcus mutans UA159	|		|	scientific name	|
+211586	|	Shewanella oneidensis MR-1	|		|	scientific name	|
+213115	|	Desulfovibrionales	|		|	scientific name	|
+213422	|	Geobacteraceae	|		|	scientific name	|
+213849	|	Campylobacterales	|		|	scientific name	|
+214092	|	Yersinia pestis CO92	|		|	scientific name	|
+216466	|	Streptococcus agalactiae serogroup V	|		|	scientific name	|
+216816	|	Bifidobacterium longum	|		|	scientific name	|
+220341	|	Salmonella enterica subsp. enterica serovar Typhi str. CT18	|		|	scientific name	|
+220668	|	Lactobacillus plantarum WCFS1	|		|	scientific name	|
+223283	|	[Pseudomonas syringae] pv. tomato str. DC3000	|		|	scientific name	|
+223926	|	Vibrio parahaemolyticus RIMD 2210633	|		|	scientific name	|
+224324	|	Aquifex aeolicus VF5	|		|	scientific name	|
+224326	|	Borrelia burgdorferi B31	|		|	scientific name	|
+224911	|	Bradyrhizobium diazoefficiens USDA 110	|		|	scientific name	|
+226185	|	Enterococcus faecalis V583	|		|	scientific name	|
+226186	|	Bacteroides thetaiotaomicron VPI-5482	|		|	scientific name	|
+226900	|	Bacillus cereus ATCC 14579	|		|	scientific name	|
+227290	|	Rhizobium/Agrobacterium group	|		|	scientific name	|
+227292	|	Sinorhizobium/Ensifer group	|		|	scientific name	|
+227377	|	Coxiella burnetii RSA 493	|		|	scientific name	|
+233413	|	Mycobacterium bovis AF2122/97	|		|	scientific name	|
+242231	|	Neisseria gonorrhoeae FA 1090	|		|	scientific name	|
+243090	|	Rhodopirellula baltica SH 1	|		|	scientific name	|
+243160	|	Burkholderia mallei ATCC 23344	|		|	scientific name	|
+243230	|	Deinococcus radiodurans R1	|		|	scientific name	|
+243231	|	Geobacter sulfurreducens PCA	|		|	scientific name	|
+243274	|	Thermotoga maritima MSB8	|		|	scientific name	|
+243275	|	Treponema denticola ATCC 35405	|		|	scientific name	|
+243277	|	Vibrio cholerae O1 biovar El Tor str. N16961	|		|	scientific name	|
+246196	|	Mycobacterium smegmatis str. MC2 155	|		|	scientific name	|
+251221	|	Gloeobacter violaceus PCC 7421	|		|	scientific name	|
+251695	|	Pseudomonas syringae group genomosp. 1	|		|	scientific name	|
+251701	|	Pseudomonas syringae group genomosp. 3	|		|	scientific name	|
+256319	|	Chlorobaculum	|		|	scientific name	|
+257313	|	Bordetella pertussis Tohama I	|		|	scientific name	|
+260799	|	Bacillus anthracis str. Sterne	|		|	scientific name	|
+264732	|	Moorella thermoacetica ATCC 39073	|		|	scientific name	|
+265311	|	Mesoplasma florum L1	|		|	scientific name	|
+265488	|	Rhodopirellula	|		|	scientific name	|
+265606	|	Rhodopirellula baltica	|		|	scientific name	|
+266834	|	Sinorhizobium meliloti 1021	|		|	scientific name	|
+267890	|	Shewanellaceae	|		|	scientific name	|
+269796	|	Rhodospirillum rubrum ATCC 11170	|		|	scientific name	|
+272560	|	Burkholderia pseudomallei K96243	|		|	scientific name	|
+272561	|	Chlamydia trachomatis D/UW-3/CX	|		|	scientific name	|
+272562	|	Clostridium acetobutylicum ATCC 824	|		|	scientific name	|
+272563	|	Clostridioides difficile 630	|		|	scientific name	|
+272621	|	Lactobacillus acidophilus NCFM	|		|	scientific name	|
+272623	|	Lactococcus lactis subsp. lactis Il1403	|		|	scientific name	|
+272631	|	Mycobacterium leprae TN	|		|	scientific name	|
+272632	|	Mycoplasma mycoides subsp. mycoides SC str. PG1	|		|	scientific name	|
+272634	|	Mycoplasma pneumoniae M129	|		|	scientific name	|
+272943	|	Rhodobacter sphaeroides 2.4.1	|		|	scientific name	|
+272947	|	Rickettsia prowazekii str. Madrid E	|		|	scientific name	|
+278148	|	Mesorhizobium ciceri biovar biserrulae	|		|	scientific name	|
+281309	|	[Bacillus thuringiensis] serovar konkukian str. 97-27	|		|	scientific name	|
+289376	|	Thermodesulfovibrio yellowstonii DSM 11347	|		|	scientific name	|
+295405	|	Bacteroides fragilis YCH46	|		|	scientific name	|
+300267	|	Shigella dysenteriae Sd197	|		|	scientific name	|
+300852	|	Thermus thermophilus HB8	|		|	scientific name	|
+301447	|	Streptococcus pyogenes serotype M1	|		|	scientific name	|
+307595	|	Gloeobacterales	|		|	scientific name	|
+307596	|	Gloeobacteria	|		|	scientific name	|
+309807	|	Salinibacter ruber DSM 13855	|		|	scientific name	|
+312309	|	Vibrio fischeri ES114	|		|	scientific name	|
+321967	|	Lactobacillus paracasei ATCC 334	|		|	scientific name	|
+324602	|	Chloroflexus aurantiacus J-10-fl	|		|	scientific name	|
+333849	|	Enterococcus faecium DO	|		|	scientific name	|
+336306	|	Enterobacter cloacae subsp. cloacae	|		|	scientific name	|
+354276	|	Enterobacter cloacae complex	|		|	scientific name	|
+362948	|	Lactobacillus salivarius UCC118	|		|	scientific name	|
+365659	|	Streptococcus mitis B6	|		|	scientific name	|
+366394	|	Sinorhizobium medicae WSM419	|		|	scientific name	|
+380703	|	Aeromonas hydrophila subsp. hydrophila ATCC 7966	|		|	scientific name	|
+386585	|	Escherichia coli O157:H7 str. Sakai	|		|	scientific name	|
+388919	|	Streptococcus sanguinis SK36	|		|	scientific name	|
+393305	|	Yersinia enterocolitica subsp. enterocolitica 8081	|		|	scientific name	|
+402612	|	Flavobacterium psychrophilum JIP02/86	|		|	scientific name	|
+413999	|	Clostridium botulinum A str. ATCC 3502	|		|	scientific name	|
+441771	|	Clostridium botulinum A str. Hall	|		|	scientific name	|
+446465	|	Brachybacterium faecium DSM 4810	|		|	scientific name	|
+471472	|	Chlamydia trachomatis 434/Bu	|		|	scientific name	|
+508458	|	Synergistetes	|		|	scientific name	|
+511678	|	Aliivibrio	|		|	scientific name	|
+513050	|	Dictyoglomus turgidum	|		|	scientific name	|
+515635	|	Dictyoglomus turgidum DSM 6724	|		|	scientific name	|
+525284	|	Gardnerella vaginalis ATCC 14019	|		|	scientific name	|
+525903	|	Thermanaerovibrio acidaminovorans DSM 6589	|		|	scientific name	|
+544448	|	Tenericutes	|		|	scientific name	|
+563843	|	Rhodothermaceae	|		|	scientific name	|
+565050	|	Caulobacter crescentus NA1000	|		|	scientific name	|
+568707	|	Bordetella bronchiseptica 253	|		|	scientific name	|
+568814	|	Streptococcus suis BM407	|		|	scientific name	|
+585056	|	Escherichia coli UMN026	|		|	scientific name	|
+585057	|	Escherichia coli IAI39	|		|	scientific name	|
+649775	|	Synergistia	|		|	scientific name	|
+649776	|	Synergistales	|		|	scientific name	|
+649777	|	Synergistaceae	|		|	scientific name	|
+655183	|	Lactobacillus casei group	|		|	scientific name	|
+656088	|	Mycoplasma mycoides group	|		|	scientific name	|
+663276	|	Sinorhizobium fredii group	|		|	scientific name	|
+670506	|	Mycobacterium abscessus subgroup	|		|	scientific name	|
+670516	|	Mycobacterium chelonae group	|		|	scientific name	|
+685037	|	Escherichia coli O83:H1	|		|	scientific name	|
+685038	|	Escherichia coli O83:H1 str. NRG 857C	|		|	scientific name	|
+702459	|	Bifidobacterium bifidum PRL2010	|		|	scientific name	|
+716541	|	Enterobacter cloacae subsp. cloacae ATCC 13047	|		|	scientific name	|
+717610	|	Vibrio harveyi group	|		|	scientific name	|
+749927	|	Amycolatopsis mediterranei U32	|		|	scientific name	|
+759362	|	Ketogulonicigenium vulgare WSH-001	|		|	scientific name	|
+765698	|	Mesorhizobium ciceri biovar biserrulae WSM1271	|		|	scientific name	|
+871585	|	Acinetobacter pittii PHEA-2	|		|	scientific name	|
+909768	|	Acinetobacter calcoaceticus/baumannii complex	|		|	scientific name	|
+1028307	|	Enterobacter aerogenes KCTC 2190	|		|	scientific name	|
+1038927	|	Escherichia coli O104:H4	|		|	scientific name	|
+1100069	|	Bacteroidetes Order II. Incertae sedis	|		|	scientific name	|
+1113537	|	Chlamydia/Chlamydophila group	|		|	scientific name	|
+1125630	|	Klebsiella pneumoniae subsp. pneumoniae HS11286	|		|	scientific name	|
+1133852	|	Escherichia coli O104:H4 str. 2011C-3493	|		|	scientific name	|
+1176649	|	Agrobacterium fabrum	|		|	scientific name	|
+1183400	|	Agrobacterium tumefaciens complex	|		|	scientific name	|
+1208660	|	Bordetella parapertussis Bpp5	|		|	scientific name	|
+1355477	|	Bradyrhizobium diazoefficiens	|		|	scientific name	|
+1477431	|	Streptomyces albidoflavus group	|		|	scientific name	|
+1508594	|	Chloroflexineae	|		|	scientific name	|
+1643685	|	Borreliaceae	|		|	scientific name	|
+1643688	|	Leptospirales	|		|	scientific name	|
+1649845	|	Yersinia pseudotuberculosis complex	|		|	scientific name	|
+1783257	|	PVC group	|		|	scientific name	|
+1783270	|	FCB group	|		|	scientific name	|
+1783272	|	Terrabacteria group	|		|	scientific name	|
+1798711	|	Cyanobacteria/Melainabacteria group	|		|	scientific name	|
+1870884	|	Clostridioides	|		|	scientific name	|
+1890422	|	Gloeobacteraceae	|		|	scientific name	|
+1890424	|	Synechococcales	|		|	scientific name	|
+1890426	|	Synechococcaceae	|		|	scientific name	|
+1903411	|	Yersiniaceae	|		|	scientific name	|

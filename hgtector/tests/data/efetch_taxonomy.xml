@@ -1,0 +1,298 @@
+<?xml version="1.0" ?>
+<!DOCTYPE TaxaSet PUBLIC "-//NLM//DTD Taxon, 14th January 2002//EN" "https://www.ncbi.nlm.nih.gov/entrez/query/DTD/taxon.dtd">
+<TaxaSet><Taxon>
+    <TaxId>561</TaxId>
+    <ScientificName>Escherichia</ScientificName>
+    <OtherNames>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>Escherichia Castellani and Chalmers 1919</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>misspelling</ClassCDE>
+            <DispName>Escherchia</DispName>
+        </Name>
+    </OtherNames>
+    <ParentTaxId>543</ParentTaxId>
+    <Rank>genus</Rank>
+    <Division>Bacteria</Division>
+    <GeneticCode>
+        <GCId>11</GCId>
+        <GCName>Bacterial, Archaeal and Plant Plastid</GCName>
+    </GeneticCode>
+    <MitoGeneticCode>
+        <MGCId>0</MGCId>
+        <MGCName>Unspecified</MGCName>
+    </MitoGeneticCode>
+    <Lineage>cellular organisms; Bacteria; Proteobacteria; Gammaproteobacteria; Enterobacterales; Enterobacteriaceae</Lineage>
+    <LineageEx>
+        <Taxon>
+            <TaxId>131567</TaxId>
+            <ScientificName>cellular organisms</ScientificName>
+            <Rank>no rank</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>2</TaxId>
+            <ScientificName>Bacteria</ScientificName>
+            <Rank>superkingdom</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1224</TaxId>
+            <ScientificName>Proteobacteria</ScientificName>
+            <Rank>phylum</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1236</TaxId>
+            <ScientificName>Gammaproteobacteria</ScientificName>
+            <Rank>class</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>91347</TaxId>
+            <ScientificName>Enterobacterales</ScientificName>
+            <Rank>order</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>543</TaxId>
+            <ScientificName>Enterobacteriaceae</ScientificName>
+            <Rank>family</Rank>
+        </Taxon>
+    </LineageEx>
+    <CreateDate>1995/02/27 09:24:00</CreateDate>
+    <UpdateDate>2018/10/15 09:35:22</UpdateDate>
+    <PubDate>1993/04/26 01:00:00</PubDate>
+</Taxon>
+<Taxon>
+    <TaxId>1313</TaxId>
+    <ScientificName>Streptococcus pneumoniae</ScientificName>
+    <OtherNames>
+        <Synonym>Diplococcus pneumoniae</Synonym>
+        <Synonym>Micrococcus pneumoniae</Synonym>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>&quot;Diplococcus pneumoniae&quot; (Klein 1884) Weichselbaum 1886</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>&quot;Micrococcus pneumoniae&quot; Klein 1884</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>Streptococcus pneumoniae (Klein 1884) Chester 1901</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>ATCC:33400</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>BCCM/LMG:14545</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>CCUG:28588</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>CIP:102911</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>DSM:20566</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>NBRC:102642</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>NCTC:7465</DispName>
+        </Name>
+    </OtherNames>
+    <ParentTaxId>1301</ParentTaxId>
+    <Rank>species</Rank>
+    <Division>Bacteria</Division>
+    <GeneticCode>
+        <GCId>11</GCId>
+        <GCName>Bacterial, Archaeal and Plant Plastid</GCName>
+    </GeneticCode>
+    <MitoGeneticCode>
+        <MGCId>0</MGCId>
+        <MGCName>Unspecified</MGCName>
+    </MitoGeneticCode>
+    <Lineage>cellular organisms; Bacteria; Terrabacteria group; Firmicutes; Bacilli; Lactobacillales; Streptococcaceae; Streptococcus</Lineage>
+    <LineageEx>
+        <Taxon>
+            <TaxId>131567</TaxId>
+            <ScientificName>cellular organisms</ScientificName>
+            <Rank>no rank</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>2</TaxId>
+            <ScientificName>Bacteria</ScientificName>
+            <Rank>superkingdom</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1783272</TaxId>
+            <ScientificName>Terrabacteria group</ScientificName>
+            <Rank>no rank</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1239</TaxId>
+            <ScientificName>Firmicutes</ScientificName>
+            <Rank>phylum</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>91061</TaxId>
+            <ScientificName>Bacilli</ScientificName>
+            <Rank>class</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>186826</TaxId>
+            <ScientificName>Lactobacillales</ScientificName>
+            <Rank>order</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1300</TaxId>
+            <ScientificName>Streptococcaceae</ScientificName>
+            <Rank>family</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1301</TaxId>
+            <ScientificName>Streptococcus</ScientificName>
+            <Rank>genus</Rank>
+        </Taxon>
+    </LineageEx>
+    <CreateDate>1995/02/27 09:24:00</CreateDate>
+    <UpdateDate>2018/10/29 19:37:58</UpdateDate>
+    <PubDate>1993/06/12 01:00:00</PubDate>
+</Taxon>
+<Taxon>
+    <TaxId>1496</TaxId>
+    <ScientificName>Clostridioides difficile</ScientificName>
+    <OtherNames>
+        <GenbankSynonym>Clostridium difficile</GenbankSynonym>
+        <Synonym>Bacillus difficilis</Synonym>
+        <Synonym>Peptoclostridium difficile</Synonym>
+        <Includes>Clostridium sp. HMSC19D05</Includes>
+        <EquivalentName>[Clostridium] difficile</EquivalentName>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>&quot;Bacillus difficilis&quot; Hall and O'Toole 1935</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>&quot;Peptoclostridium difficile&quot; Yutin and Galperin 2013</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>Clostridioides difficile (Hall and O'Toole 1935) Lawson et al. 2016</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>authority</ClassCDE>
+            <DispName>Clostridium difficile (Hall and O'Toole 1935) Prevot 1938 (Approved Lists 1980)</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>AS:1.2184</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>ATCC:9689</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>BCCM/LMG:15861</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>BCRC:10642</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>CCUG:4938</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>CIP:104282</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>DSM:1296</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>JCM:1296</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>NCIMB:10666</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>type material</ClassCDE>
+            <DispName>NCTC:11209</DispName>
+        </Name>
+        <Name>
+            <ClassCDE>misspelling</ClassCDE>
+            <DispName>Clostridium difficle</DispName>
+        </Name>
+    </OtherNames>
+    <ParentTaxId>1870884</ParentTaxId>
+    <Rank>species</Rank>
+    <Division>Bacteria</Division>
+    <GeneticCode>
+        <GCId>11</GCId>
+        <GCName>Bacterial, Archaeal and Plant Plastid</GCName>
+    </GeneticCode>
+    <MitoGeneticCode>
+        <MGCId>0</MGCId>
+        <MGCName>Unspecified</MGCName>
+    </MitoGeneticCode>
+    <Lineage>cellular organisms; Bacteria; Terrabacteria group; Firmicutes; Clostridia; Clostridiales; Peptostreptococcaceae; Clostridioides</Lineage>
+    <LineageEx>
+        <Taxon>
+            <TaxId>131567</TaxId>
+            <ScientificName>cellular organisms</ScientificName>
+            <Rank>no rank</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>2</TaxId>
+            <ScientificName>Bacteria</ScientificName>
+            <Rank>superkingdom</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1783272</TaxId>
+            <ScientificName>Terrabacteria group</ScientificName>
+            <Rank>no rank</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1239</TaxId>
+            <ScientificName>Firmicutes</ScientificName>
+            <Rank>phylum</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>186801</TaxId>
+            <ScientificName>Clostridia</ScientificName>
+            <Rank>class</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>186802</TaxId>
+            <ScientificName>Clostridiales</ScientificName>
+            <Rank>order</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>186804</TaxId>
+            <ScientificName>Peptostreptococcaceae</ScientificName>
+            <Rank>family</Rank>
+        </Taxon>
+        <Taxon>
+            <TaxId>1870884</TaxId>
+            <ScientificName>Clostridioides</ScientificName>
+            <Rank>genus</Rank>
+        </Taxon>
+    </LineageEx>
+    <CreateDate>1995/02/27 09:24:00</CreateDate>
+    <UpdateDate>2018/10/29 20:02:17</UpdateDate>
+    <PubDate>1993/04/26 01:00:00</PubDate>
+</Taxon>
+
+</TaxaSet>
