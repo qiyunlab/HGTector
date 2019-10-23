@@ -3,7 +3,7 @@ Configuration
 
 ## Overview
 
-The default parameter settings are defined in a configuration file, `config.yml`. The original file is located in the program directory. The file is in [YAML](https://en.wikipedia.org/wiki/YAML) format, which is human-readable and editable. For example:
+The default parameter settings are defined in a configuration file, [`config.yml`](../hgtector/config.yml). The original file is located in the program directory. The file is in [YAML](https://en.wikipedia.org/wiki/YAML) format, which is human-readable and editable. For example:
 
 ```yaml
 ## Database locations
@@ -28,3 +28,9 @@ HGTector will sequentially look for this file in the following locations:
 3. Program directory
 
 Therefore one may prepare analysis-specific configuration files, if the same settings are to be executed multiple times and records are needed.
+
+Note: If you installed HGTector using Conda, this file may be located at:
+
+```
+<conda_dir>/envs/hgtector/lib/python3.7/site-packages/hgtector/config.yml
+```

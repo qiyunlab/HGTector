@@ -281,8 +281,8 @@ class Search(object):
                 self.method = 'precomp'
 
         # check local search executables and databases
-        diamond_db = self.check_diamond(self.cfg)
-        blast_db = self.check_blast(self.cfg)
+        diamond_db = self.check_diamond()
+        blast_db = self.check_blast()
 
         # choose a local search method if available, or do remote search
         if self.method == 'auto':

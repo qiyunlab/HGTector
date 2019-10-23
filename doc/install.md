@@ -5,9 +5,13 @@ Installation
 
 There is no restriction as far as I am aware of. Tested and working on Linux, macOS and Windows systems.
 
+(But Windows users will need extra configurations...)
+
+
 ## Software environment
 
 HGTector is written in Python 3. One needs at least Python 3.6 to run the program. I recommend [Conda](https://docs.conda.io/en/latest/) for managing Python version and packages.
+
 
 ## Installation
 
@@ -27,10 +31,10 @@ Download this [repository](https://github.com/DittmarLab/HGTector/archive/master
 python setup.py install
 ```
 
-
 Type `hgtector` to check if installation is successful, in which case command-line help information will be displayed on the screen.
 
 You may now read [first run](1strun.md) and [second run](2ndrun.md) before proceeding with aligner and database installation.
+
 
 ## Aligner
 
@@ -47,3 +51,12 @@ HGTector has a command `database` for automated database construction. See [deta
 A standard database built using the default protocol on 2019-11-22 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0), together with [instruction](database.md#Manual-compiling) for compiling.
 
 A small, pre-compiled test database is also available for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).
+
+
+## Compatibility
+
+If in the future some dependencies have changes that are not compatible with the current release of HGTector, the following "safe" command can be used to install the current versions of dependencies.
+
+```bash
+conda create -n hgtector -c bioconda python=3.7.4 pyyaml=5.1.2 pandas=0.25.1 matplotlib=3.1.1 scikit-learn=0.21.3 diamond=0.9.26 blast=2.9.0
+```
