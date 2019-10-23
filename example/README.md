@@ -13,4 +13,4 @@ hgtector analyze -i gsul.tsv -o .
 
 The sample output files are provided in `output`. They were generated on 2019-10-16, based on the NCBI nr database by time.
 
-Detailed instruction for running this example and interpreting outputs is provided in [1strun.md](../doc/1strun.md).
+Detailed instruction for running this example and interpreting outputs is provided in [first run](../doc/1strun.md).
