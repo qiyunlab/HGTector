@@ -11,8 +11,6 @@
 import sys
 import argparse
 from importlib import import_module
-from os.path import join, isfile, dirname, realpath, expanduser
-import yaml
 
 
 __version__ = '2.0b1'
@@ -32,20 +30,13 @@ def main():
             'hgtector.{}'.format(name)), name.capitalize())()
         modules.append([name, module])
 
-    # load configurations
-    cfg = None
-    cfgfile = locate_config_file()
-    if cfgfile is not None:
-        with open(cfgfile, 'r') as f:
-            cfg = yaml.load(f, Loader=yaml.SafeLoader)
-
     # parse command-line arguments
     args = parse_args(modules)
 
     # execute selected module
     for name, module in modules:
         if name == args.command:
-            module(args, cfg)
+            module(args)
             break
 
 
@@ -103,29 +94,6 @@ def parse_args(modules):
     except TypeError:
         parser.print_help()
         sys.exit(0)
-
-
-def locate_config_file():
-    """Get configuration file path.
-
-    Returns
-    -------
-    str or None
-        configuration file path, or None if not found
-    """
-    fname = 'config.yml'
-    # current directory
-    fp = fname
-    # home directory
-    if not isfile(fp):
-        fp = join(expanduser('~'), '.hgtector', fname)
-    # program directory
-    if not isfile(fp):
-        fp = join(dirname(realpath(__file__)), '..', fname)
-    # not found
-    if not isfile(fp):
-        fp = None
-    return fp
 
 
 if __name__ == '__main__':

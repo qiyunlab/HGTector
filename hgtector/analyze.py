@@ -27,8 +27,8 @@ from sklearn.metrics import silhouette_samples
 import matplotlib.pyplot as plt
 
 from hgtector.util import (
-    timestamp, file2id, id2file_map, get_config, arg2bool, read_taxdump,
-    read_file, list_from_param, dict_from_param, get_lineage,
+    timestamp, load_configs, get_config, file2id, id2file_map, arg2bool,
+    read_taxdump, read_file, list_from_param, dict_from_param, get_lineage,
     sort_by_hierarchy, refine_taxdump, add_children, describe_taxon, find_lca,
     taxid_at_rank, get_descendants, save_figure)
 
@@ -109,11 +109,14 @@ class Analyze(object):
         self.arguments = arguments
         self.description = description
 
-    def __call__(self, args, cfg):
+    def __call__(self, args):
         print('Analysis started at {}.'.format(timestamp()))
 
+        # load configurations
+        self.cfg = load_configs()
+
         # read and validate arguments
-        self.set_parameters(args, cfg)
+        self.set_parameters(args)
 
         # use existing score table
         score_file = join(self.output, 'scores.tsv')
@@ -155,15 +158,13 @@ class Analyze(object):
 
         print('Analysis finished at {}.'.format(timestamp()))
 
-    def set_parameters(self, args, cfg):
+    def set_parameters(self, args):
         """Validate and set parameters.
 
         Parameters
         ----------
         args : dict
             command-line arguments
-        cfg : dict
-            configurations from file
         """
         # load arguments
         for key, val in vars(args).items():
@@ -188,15 +189,15 @@ class Analyze(object):
         self.prev_map = id2file_map(self.output, 'tsv')
 
         # load configurations
-        get_config(self, 'evalue', cfg, 'analyze.evalue', float)
+        get_config(self, 'evalue', 'analyze.evalue', float)
         for key in ('maxhits', 'identity', 'coverage'):
-            get_config(self, key, cfg, 'analyze.{}'.format(key))
+            get_config(self, key, 'analyze.{}'.format(key))
         for key in ('input_cov', 'self_rank', 'close_size'):
-            get_config(self, key, cfg, 'grouping.{}'.format(key.replace(
+            get_config(self, key, 'grouping.{}'.format(key.replace(
                 '_', '')))
         for key in ('weighted', 'outliers', 'orphans', 'bandwidth', 'bw_steps',
                     'low_part', 'noise', 'fixed', 'silhouette', 'self_low'):
-            get_config(self, key, cfg, 'predict.{}'.format(key.replace(
+            get_config(self, key, 'predict.{}'.format(key.replace(
                 '_', '')))
 
         # convert boolean values

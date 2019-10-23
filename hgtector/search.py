@@ -19,7 +19,7 @@ from urllib.parse import quote
 from urllib.request import urlopen, HTTPError, URLError
 
 from hgtector.util import (
-    timestamp, get_config, arg2bool, list_from_param, file2id,
+    timestamp, load_configs, get_config, arg2bool, list_from_param, file2id,
     id2file_map, read_taxdump, read_input_prots, read_prot2taxid,
     get_product, seqid2accver, write_fasta, run_command, contain_words,
     is_latin, is_capital, is_ancestral, taxid_at_rank)
@@ -121,11 +121,14 @@ class Search(object):
         self.arguments = arguments
         self.description = description
 
-    def __call__(self, args, cfg):
+    def __call__(self, args):
         print('Homology search started at {}.'.format(timestamp()))
 
+        # load configurations
+        self.cfg = load_configs()
+
         # read and validate arguments
-        self.args_wf(args, cfg)
+        self.args_wf(args)
 
         # read and validate input data
         self.input_wf()
@@ -201,15 +204,13 @@ class Search(object):
 
     """master workflows"""
 
-    def args_wf(self, args, cfg):
+    def args_wf(self, args):
         """Workflow for validating and setting arguments.
 
         Parameters
         ----------
         args : dict
             command-line arguments
-        cfg : dict
-            configurations from file
 
         Notes
         -----
@@ -247,11 +248,11 @@ class Search(object):
         """determine search strategy"""
 
         # load search parameters
-        get_config(self, 'evalue', cfg, 'search.evalue', float)
+        get_config(self, 'evalue', 'search.evalue', float)
         for key in ('method', 'minsize', 'maxseqs', 'identity', 'coverage'):
-            get_config(self, key, cfg, 'search.{}'.format(key))
+            get_config(self, key, 'search.{}'.format(key))
         for key in ('diamond', 'blastp', 'blastdbcmd'):
-            get_config(self, key, cfg, 'program.{}'.format(key))
+            get_config(self, key, 'program.{}'.format(key))
 
         if self.method not in {'auto', 'diamond', 'blast', 'remote',
                                'precomp'}:
@@ -280,8 +281,8 @@ class Search(object):
                 self.method = 'precomp'
 
         # check local search executables and databases
-        diamond_db = self.check_diamond(cfg)
-        blast_db = self.check_blast(cfg)
+        diamond_db = self.check_diamond(self.cfg)
+        blast_db = self.check_blast(self.cfg)
 
         # choose a local search method if available, or do remote search
         if self.method == 'auto':
@@ -296,13 +297,13 @@ class Search(object):
 
         # load method-specific arguments
         for key in ('queries', 'maxchars', 'extrargs'):
-            get_config(self, key, cfg, '{}.{}'.format(self.method, key))
+            get_config(self, key, '{}.{}'.format(self.method, key))
 
         # load remote search settings
         if self.method == 'remote':
             for key in ('db', 'algorithm', 'delay', 'timeout', 'entrez'):
-                get_config(self, 'db', cfg, 'remote.{}'.format(key))
-            get_config(self, 'server', cfg, 'server.search')
+                get_config(self, 'db', 'remote.{}'.format(key))
+            get_config(self, 'server', 'server.search')
 
         # determine number of threads
         if self.method in ('diamond', 'blast') and not self.threads:
@@ -337,7 +338,7 @@ class Search(object):
 
         # assign taxonomy database
         for key in ('taxdump', 'taxmap'):
-            get_config(self, key, cfg, 'database.{}'.format(key))
+            get_config(self, key, 'database.{}'.format(key))
 
         if self.method != 'remote':
 
@@ -363,19 +364,18 @@ class Search(object):
         # load taxonomic filters and convert to lists
         for key in ('include', 'exclude', 'block'):
             attr = 'tax_{}'.format(key)
-            get_config(self, attr, cfg, 'taxonomy.{}'.format(key))
+            get_config(self, attr, 'taxonomy.{}'.format(key))
             setattr(self, attr, list_from_param(getattr(self, attr)))
 
         # load taxonomy switches
         for key in ('unique', 'unirank', 'capital', 'latin'):
-            get_config(self, 'tax_{}'.format(key),
-                       cfg, 'taxonomy.{}'.format(key))
+            get_config(self, 'tax_{}'.format(key), 'taxonomy.{}'.format(key))
 
         """determine self-alignment strategy"""
 
         # load configurations
-        get_config(self, 'aln_method', cfg, 'search.selfaln')
-        get_config(self, 'aln_server', cfg, 'server.selfaln')
+        get_config(self, 'aln_method', 'search.selfaln')
+        get_config(self, 'aln_server', 'server.selfaln')
         if self.aln_method not in {'auto', 'native', 'fast', 'lookup',
                                    'precomp'}:
             raise ValueError('Invalid self-alignment method: {}.'.format(
@@ -412,10 +412,9 @@ class Search(object):
         """determine fetch strategy"""
 
         # load configurations
-        get_config(self, 'fetch_server', cfg, 'server.fetch')
+        get_config(self, 'fetch_server', 'server.fetch')
         for key in ('enable', 'queries', 'retries', 'delay', 'timeout'):
-            get_config(self, 'fetch_{}'.format(key),
-                       cfg, 'fetch.{}'.format(key))
+            get_config(self, 'fetch_{}'.format(key), 'fetch.{}'.format(key))
 
         # determine remote or local fetching
         if self.fetch_enable == 'auto':
@@ -440,13 +439,8 @@ class Search(object):
         print('  Self-alignment method: {}.'.format(self.aln_method))
         print('  Remote fetch enabled: {}.'.format(self.fetch_enable))
 
-    def check_diamond(self, cfg):
+    def check_diamond(self):
         """Check if DIAMOND is available.
-
-        Parameters
-        ----------
-        cfg : dict
-            configurations
 
         Returns
         -------
@@ -463,7 +457,7 @@ class Search(object):
                 self.diamond = 'diamond'
             if which(self.diamond):
                 try:
-                    db_ = self.db or cfg['database']['diamond']
+                    db_ = self.db or self.cfg['database']['diamond']
                 except KeyError:
                     pass
                 if db_:
@@ -480,13 +474,8 @@ class Search(object):
                     self.diamond))
         return None
 
-    def check_blast(self, cfg):
+    def check_blast(self):
         """Check if BLAST is available.
-
-        Parameters
-        ----------
-        cfg : dict
-            configurations
 
         Returns
         -------
@@ -503,7 +492,7 @@ class Search(object):
                 self.blastp = 'blastp'
             if which(self.blastp):
                 try:
-                    db_ = self.db or cfg['database']['blast']
+                    db_ = self.db or self.cfg['database']['blast']
                 except KeyError:
                     pass
                 if db_:
