@@ -13,13 +13,13 @@ This page won't have much text, since most ingredients of HGTector were already 
 
 Species | TaxID | Genome
 --- | --- | ---
-_R. africae_ | 35788 | [GCF_000023005.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/023/005/GCF_000023005.1_ASM2300v1/)
-_R. akari_ | 786 | [GCF_000018205.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/018/205/GCF_000018205.1_ASM1820v1/)
-_R. conorii_ | 781 | [GCF_000007025.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/007/025/GCF_000007025.1_ASM702v1/)
-_R. felis_ | 42862 | [GCF_000012145.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/012/145/GCF_000012145.1_ASM1214v1/)
-_R. massiliae_ | 35791 | [GCF_000016625.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/016/625/GCF_000016625.1_ASM1662v1/)
-_R. rickettsii_ | 783 | [GCF_000018225.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/018/225/GCF_000018225.1_ASM1822v1/)
-_R. slovaca_ | 35794 | [GCF_000237845.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/237/845/GCF_000237845.1_ASM23784v1/)
+_R. africae_ | 35788 | [GCF_000023005.1](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/023/005/GCF_000023005.1_ASM2300v1/)
+_R. akari_ | 786 | [GCF_000018205.1](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/018/205/GCF_000018205.1_ASM1820v1/)
+_R. conorii_ | 781 | [GCF_000007025.1](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/007/025/GCF_000007025.1_ASM702v1/)
+_R. felis_ | 42862 | [GCF_000012145.1](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/012/145/GCF_000012145.1_ASM1214v1/)
+_R. massiliae_ | 35791 | [GCF_000016625.1](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/016/625/GCF_000016625.1_ASM1662v1/)
+_R. rickettsii_ | 783 | [GCF_000018225.1](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/018/225/GCF_000018225.1_ASM1822v1/)
+_R. slovaca_ | 35794 | [GCF_000237845.1](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/237/845/GCF_000237845.1_ASM23784v1/)
 
 
 ## Default workflow
