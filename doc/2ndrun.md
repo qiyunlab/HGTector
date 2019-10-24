@@ -103,6 +103,16 @@ hgtector analyze -i o55h7.tsv -o . -t <ref107>/taxdump
 
 We will go through the individual procedures behind this command, and explain what they mean and how you can further optimize them.
 
+
+### Multiple samples
+
+This demo only involves one sample (_E. coli_ O55:H7), but you may also provide multiple samples for a combined analysis. This is different from the `search` command which can also take multiple samples but each of which is searched _independently_. In this analysis, the multiple samples are considered evolutionarily related and their member genes are treated _as a whole_. The analysis will help to differentiate HGT patterns among those samples. For example, you may provide multiple _E. coli_ isolates that are extracted from healthy vs. sick subjects...
+
+```bash
+hgtector analyze -i <input_dir> -o <output_dir> ...
+```
+
+
 ### Hit filtering
 
 The `analyze` command also has search threshold parameters like `--maxhits`, `--evalue`, `--identity` and `--coverage`. Their meaning are the same as those for the `search` command (see [here](search.md#Search-thresholds)). For example:
@@ -112,7 +122,6 @@ hgtector analyze ... --maxhits 100 --evalue 1e-50 --identity 80 --coverage 80
 ```
 
 Why duplicate? That's because these values can notably impact the prediction result (which is conceivable since they matter how "homology" is defined), and when you feel the need for tuning those parameters, you don't want to re-run the expensive search step. Therefore, it is recommended to do `search` using relatively relaxed thresholds, then do (several rounds of) `analyze` using more stringent thresholds.
-
 
 
 ### Taxonomic inference

@@ -23,7 +23,7 @@ conda activate hgtector
 pip install git+https://github.com/DittmarLab/HGTector.git
 ```
 
-### Option 2: Native installtion
+### Option 2: Native installation
 
 Download this [repository](https://github.com/DittmarLab/HGTector/archive/master.zip). Unzip. Then execute:
 
@@ -48,7 +48,7 @@ conda install -c bioconda diamond blast
 
 HGTector has a command `database` for automated database construction. See [details](database.md).
 
-A standard database built using the default protocol on 2019-11-22 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0), together with [instruction](database.md#Manual-compiling) for compiling.
+A standard database built using the default protocol on 2019-10-21 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0), together with [instruction](database.md#Manual-compiling) for compiling.
 
 A small, pre-compiled test database is also available for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).
 
