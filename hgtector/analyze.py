@@ -10,7 +10,7 @@
 
 import re
 from os import makedirs
-from os.path import join, isdir, isfile
+from os.path import join, isdir, isfile, dirname
 from io import StringIO
 
 import numpy as np
@@ -68,6 +68,9 @@ arguments = [
                      'this rank'],
     ['--close-size', 'for auto-inference: "close" group must have at least '
                      'this number of taxa', {'type': int}],
+    ['--distal-top', 'find match in "distal" group which is LCA of hits with '
+                     'bit score at most this percentage lower than best hit',
+                     {'type': int}],
 
     'scoring',
     ['--weighted',   'score is sum of weighted bit scores; otherwise simple '
@@ -192,7 +195,7 @@ class Analyze(object):
         get_config(self, 'evalue', 'analyze.evalue', float)
         for key in ('maxhits', 'identity', 'coverage'):
             get_config(self, key, 'analyze.{}'.format(key))
-        for key in ('input_cov', 'self_rank', 'close_size'):
+        for key in ('input_cov', 'self_rank', 'close_size', 'distal_top'):
             get_config(self, key, 'grouping.{}'.format(key.replace(
                 '_', '')))
         for key in ('weighted', 'outliers', 'orphans', 'bandwidth', 'bw_steps',
@@ -205,10 +208,13 @@ class Analyze(object):
             setattr(self, key, arg2bool(getattr(self, key, None)))
 
         # convert fractions to percentages
-        for metric in ('input_cov', 'noise', 'fixed'):
+        for metric in ('input_cov', 'noise', 'fixed', 'distal_top'):
             val = getattr(self, metric)
             if val and val < 1:
                 setattr(self, metric, val * 100)
+
+        # convert distal top to a factor to save compute
+        self.match_th = 1 - self.distal_top / 100
 
         # force coverage >= 50 to ensure that candidates are sequential
         if (self.input_cov or 0) < 50:
@@ -226,6 +232,10 @@ class Analyze(object):
                 isfile(join(self.input, 'nodes.dmp'))):
             print('Reading custom taxonomy database...')
             self.taxdump = read_taxdump(self.input)
+        elif (isfile(join(dirname(self.input), 'names.dmp')) and
+                isfile(join(dirname(self.input), 'nodes.dmp'))):
+            print('Reading custom taxonomy database...')
+            self.taxdump = read_taxdump(dirname(self.input))
         else:
             raise ValueError('Missing taxonomy database.')
         print('Done. Read {} taxa.'.format(len(self.taxdump)))
@@ -480,9 +490,9 @@ class Analyze(object):
         self.groups['close'] = mems
 
     def calc_scores(self):
-        """Summarize search scores for each protein.
+        """Summarize search scores for proteins.
         """
-        print('Calculating protein scores by groups...', flush=True)
+        print('Calculating protein scores by group...', flush=True)
         for sid, prots in sorted(self.data.items()):
             for prot in prots:
                 # assign each hit to one of the three groups
@@ -496,8 +506,38 @@ class Analyze(object):
                           .sum() / prot['score']).to_dict()
                 for group in ('self', 'close', 'distal'):
                     prot[group] = scores[group] if group in scores else 0.0
+
+                # find best match taxId in distal group
+                prot['match'] = self.find_match(prot['hits'].query(
+                    'group == "distal"'))
             print('  {}'.format(sid))
         print('Done.')
+
+    def find_match(self, df):
+        """Find a taxId that best describes top hits.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            hit table
+
+        Returns
+        -------
+        str
+            taxId of match, or '0' if not found
+
+        Notes
+        -----
+        The best match TaxID is the LCA of top hits. The "top hits" are
+        defined as those whose bit scores are no less than a certain
+        percentage of that of the best hit. This behavior is similar to
+        DIAMOND's taxonomic classification function.
+        """
+        try:
+            th = df.iloc[0]['score'] * self.match_th
+        except IndexError:
+            return '0'
+        return find_lca(df[df['score'] >= th]['taxid'], self.taxdump)
 
     def make_score_table(self):
         """Make a data frame for the entire protein set.
@@ -507,11 +547,12 @@ class Analyze(object):
         data = []
         for sid, prots in self.data.items():
             for prot in prots:
-                data.append(
-                    [sid, prot['id'], prot['length'], prot['hits'].shape[0],
-                     prot['self'], prot['close'], prot['distal']])
+                data.append([sid, prot['id'], prot['length'],
+                             prot['hits'].shape[0], prot['self'],
+                             prot['close'], prot['distal'], prot['match']])
         self.df = pd.DataFrame(data, columns=[
-            'sample', 'protein', 'length', 'hits', 'self', 'close', 'distal'])
+            'sample', 'protein', 'length', 'hits', 'self', 'close', 'distal',
+            'match'])
         self.df.to_csv(join(self.output, 'scores.tsv'), sep='\t',
                        index=False, float_format='%g')
         print(' done.')

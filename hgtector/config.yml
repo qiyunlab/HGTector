@@ -212,6 +212,11 @@ grouping:
   # statistically informative, but consider biological question)
   closesize: 10
 
+  # find a taxId that best describes the potential donor of a gene if it is
+  # HGT-derived; it is the LCA of distal hits with bit score at most this
+  # percentage lower than the best distal hit
+  distaltop: 10
+
 
 ## HGT prediction statistics
 predict:

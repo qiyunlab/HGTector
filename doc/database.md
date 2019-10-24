@@ -128,7 +128,7 @@ done < <(tail -n+2 genomes.tsv)
 
 ### External databases
 
-It is totally okay to use databases from other sources for HGTector analyses. For example, the original [nr](ftp://ftp.ncbi.nlm.nih.gov/blast/db/), [taxdump](ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz) and [prot.accession2taxid.gz](ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz) one directly pulls from NCBI already constitute a valid database for HGTector. This combination may not be computationally optimized for the goal of HGT prediction, though, and the unbalanced taxonomic distribution of reference sequences also has potential impact on the analysis. The `search` command has multiple [taxonomic filtering](search.md#Taxonomic-filtering) functions which could help smoothing out this bias, and the program is designed to live with incompatibility between sequence and taxonomy databases by dropping out unidentified hits. Therefore, the conclusion is that it is technically fine to use external databases, but the database design and the research goal need to be carefully considered.
+It is totally okay to use databases from other sources for HGTector analyses. For example, the original [nr](https://ftp.ncbi.nlm.nih.gov/blast/db/), [taxdump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz) and [prot.accession2taxid.gz](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz) one directly pulls from NCBI already constitute a valid database for HGTector. This combination may not be computationally optimized for the goal of HGT prediction, though, and the unbalanced taxonomic distribution of reference sequences also has potential impact on the analysis. The `search` command has multiple [taxonomic filtering](search.md#Taxonomic-filtering) functions which could help smoothing out this bias, and the program is designed to live with incompatibility between sequence and taxonomy databases by dropping out unidentified hits. Therefore, the conclusion is that it is technically fine to use external databases, but the database design and the research goal need to be carefully considered.
 
 
 ## Command-line reference
@@ -144,7 +144,7 @@ Option | Default | Description
 Option | Default | Description
 --- | --- | ---
 `-o`, `--output` | - | Directory where the database will be stored.
-`-c`, `--cats` | microbe | Categories of genomes to include. Adopted from NCBI [RefSeq](ftp://ftp.ncbi.nlm.nih.gov/genomes/refseq/). Options are: archaea, bacteria, fungi, invertebrate, plant, protozoa, vertebrate_mammalian, vertebrate_other, and viral. The default value "microbe" represents archaea, bacteria, fungi, and protozoa. Additionally, enter "all" to include all categories.
+`-c`, `--cats` | microbe | Categories of genomes to include. Adopted from NCBI [RefSeq](https://ftp.ncbi.nlm.nih.gov/genomes/refseq/). Options are: archaea, bacteria, fungi, invertebrate, plant, protozoa, vertebrate_mammalian, vertebrate_other, and viral. The default value "microbe" represents archaea, bacteria, fungi, and protozoa. Additionally, enter "all" to include all categories.
 
 ### Custom list
 

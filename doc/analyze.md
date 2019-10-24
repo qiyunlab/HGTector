@@ -11,6 +11,31 @@ hgtector analyze -i sample.tsv -o <output_dir> <parameters...>
 
 The underlying procedures and the guideline for tuning parameters are explained in detail in [second run](2ndrun.md).
 
+### Input
+
+The input may be a file or a directory of files which are the output of the `search` command.
+
+### Output
+
+File | Description
+--- | ---
+`scores.tsv` | A single multi-Fasta file containing all protein sequences.
+`hgts/<sample>.txt` | Predicted HGT-derived genes and their silhouette scores.
+`<group>.hist.png` | Histogram of scores of a group.
+`<group>.kde.png` | Density function of scores of a group, and clustering threshold (grey line).
+`scatter.png` | Scatter plot of distal vs. close scores. Each point represents a gene (protein).
+
+Format of `scores.tsv`:
+
+Field | Description
+--- | ---
+`sample` | Sample ID
+`protein` | Protein ID
+`length` | Protein length (aa)
+`hits` | Total number of hits after filtering
+`self`, `close`, `distal` | Score (sum of normalized bit scores) of each group
+`match` | Best match in "distal" group which implicates potential donor for predicted HGTs
+
 
 ## Command-line reference
 
@@ -46,6 +71,8 @@ Option | Default | Description
 `--close-tax` | - | TaxIDs of "close" group (a comma-delimited string, or a file of one TaxID per line). Will auto-infer if omitted.
 `--self-rank` | - | For auto-inference: "self" group must be at or above this rank (e.g., species, genus, family...).
 `--close-size` | 10 | For auto-inference: "close" group must have at least this number of taxa.
+`--distal-top` | 10 | Find a match in "distal" group which is LCA of hits with bit score at most this percentage lower than the best hit. The behavior is consistent with DIAMOND's `--top` parameter. This match implicates the potential donor of an HGT-derived gene.
+
 
 ### Scoring
 

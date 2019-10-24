@@ -165,6 +165,35 @@ class AnalyzeTests(TestCase):
         # TODO
         pass
 
+    def test_find_match(self):
+        me = Analyze()
+        me.taxdump = _taxdump_from_text(taxdump_proteo)
+        add_children(me.taxdump)
+        df = pd.DataFrame(
+            [[100, '585056'],  # E. coli UMN026
+             [99, '1038927'],  # E. coli O104:H4
+             [97, '562'],      # Escherichia coli
+             [95, '622'],      # Shigella dysenteriae
+             [92, '543'],      # Enterobacteriaceae
+             [88, '548'],      # Klebsiella aerogenes
+             [80, '766']],     # Rickettsiales
+            columns=['score', 'taxid'])
+
+        # keep top 1% hits
+        me.match_th = 0.99
+        self.assertEqual(me.find_match(df), '562')
+
+        # keep top 10% hits
+        me.match_th = 0.9
+        self.assertEqual(me.find_match(df), '543')
+
+        # keep top 20% hits
+        me.match_th = 0.8
+        self.assertEqual(me.find_match(df), '1224')
+
+        # input DataFrame is empty
+        self.assertEqual(me.find_match(pd.DataFrame()), '0')
+
     def test_make_score_table(self):
         # TODO
         pass
