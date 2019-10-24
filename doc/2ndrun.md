@@ -396,3 +396,34 @@ fig.savefig('scatter.enhance.png')
 ![o55h7.auto.scatter.x](img/o55h7.auto.scatter.x.png "Distal vs. close scatter plot auto enhanced")
 
 This tutorial should have covered major elements of the HGTector workflow. Yet the small database limits the accuracy of the analysis. Next we will see a [real run](doc/realrun.md), using life-sized database and datasets.
+
+
+## Potential donors
+
+You may be interested in knowing which organism(s) are those predicted genes acquired from.
+
+HGTector provides implications of potential donors by summarizing the top several hits from the "distal" group of each gene. Specifically, it finds the lowest common ancestor (LCA) of hits whose bit scores are only lower than the top hit within a certain range (default: 10%, which is consistent with DIAMOND, controlled by parameter `--distal-top`). The resulting TaxID (or "0" for not found) is appended to the score table, as the last column "match".
+
+You can label HGT candidates with potential donor TaxIDs by:
+
+```bash
+join -t$'\t' -j1 <(sort hgts/o55h7.txt) <(tail -n+2 scores.tsv | grep ^o55h7$'\t' | cut -f2,8 | sort) > o55h7.donor.txt
+```
+
+You can further append taxon names to the table by:
+
+```bash
+join -t$'\t' -13 -21 -o 1.1,1.2,1.3,2.2 <(sort -k3,3 o55h7.donor.txt) <(grep 'scientific name' <taxdump_dir>/names.dmp | sed 's/\t|\t/\t/g' | cut -f1,2 | sort -k1,1) > o55h7.donor.name.txt
+```
+
+The output table will be like (taking the grid search result for example):
+
+Proten | Score | Donor TaxID | Donor name
+| --- | --- | --- | --- |
+WP_001285914.1 | 0.691785 | 1224 | Proteobacteria
+WP_000173226.1 | 0.82044 | 1239 | Firmicutes
+WP_000084086.1 | 0.764173 | 2 | Bacteria
+WP_000890958.1 | 0.826649 | 214092 | Yersinia pestis CO92
+WP_000026143.1 | 0.748203 | 286 | Pseudomonas
+WP_000064228.1 | 0.819306 | 393305 | Yersinia enterocolitica subsp. enterocolitica 8081
+WP_001296814.1 | 0.770322 | 629 | Yersinia
