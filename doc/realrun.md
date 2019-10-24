@@ -12,7 +12,7 @@ This page won't have much text, since most ingredients of HGTector were already 
 ## Input data
 
 Species | TaxID | Genome
---- | --- | --- | --- | --- | --- | --- | ---
+--- | --- | ---
 _R. africae_ | 35788 | [GCF_000023005.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/023/005/GCF_000023005.1_ASM2300v1/)
 _R. akari_ | 786 | [GCF_000018205.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/018/205/GCF_000018205.1_ASM1820v1/)
 _R. conorii_ | 781 | [GCF_000007025.1](ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/007/025/GCF_000007025.1_ASM702v1/)
