@@ -14,6 +14,7 @@ HGTector2
 Tutorials
 - [First Run](doc/1strun.md)
 - [Second Run](doc/2ndrun.md)
+- [Real Runs](doc/realrun.md)
 
 References
 - [Search](doc/search.md)

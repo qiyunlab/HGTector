@@ -63,47 +63,47 @@ class UtilTests(TestCase):
 
         # one-level entry
         key = 'threshold'
-        cfg = {key: 10}
-        get_config(obj, key, cfg, key)
+        obj.cfg = {key: 10}
+        get_config(obj, key, key)
         self.assertEqual(getattr(obj, key), 10)
 
         # two-level entry
-        cfg['search'] = {'evalue': 1e-5}
-        get_config(obj, 'evalue', cfg, 'search.evalue')
+        obj.cfg['search'] = {'evalue': 1e-5}
+        get_config(obj, 'evalue', 'search.evalue')
         self.assertEqual(getattr(obj, 'evalue'), 1e-5)
 
         # three-level entry
-        cfg['search']['taxonomy'] = {'rank': 'genus'}
-        get_config(obj, 'taxrank', cfg, 'search.taxonomy.rank')
+        obj.cfg['search']['taxonomy'] = {'rank': 'genus'}
+        get_config(obj, 'taxrank', 'search.taxonomy.rank')
         self.assertEqual(getattr(obj, 'taxrank'), 'genus')
 
         # attribute already has value
-        cfg['evalue'] = 1e-10
-        get_config(obj, 'evalue', cfg, 'evalue')
+        obj.cfg['evalue'] = 1e-10
+        get_config(obj, 'evalue', 'evalue')
         self.assertEqual(getattr(obj, 'evalue'), 1e-5)
 
         # attribute present but is None:
         obj.evalue = None
-        get_config(obj, 'evalue', cfg, 'evalue')
+        get_config(obj, 'evalue', 'evalue')
         self.assertEqual(getattr(obj, 'evalue'), 1e-10)
 
         # entry that does not exist
-        get_config(obj, 'identity', cfg, 'search.identity')
+        get_config(obj, 'identity', 'search.identity')
         self.assertFalse(hasattr(obj, 'identity'))
 
         # entry that is None
-        cfg['search']['identity'] = None
-        get_config(obj, 'identity', cfg, 'search.identity')
+        obj.cfg['search']['identity'] = None
+        get_config(obj, 'identity', 'search.identity')
         self.assertFalse(hasattr(obj, 'identity'))
 
         # variable type conversion
-        cfg['coverage'] = '95'
-        get_config(obj, 'coverage', cfg, 'coverage', float)
+        obj.cfg['coverage'] = '95'
+        get_config(obj, 'coverage', 'coverage', float)
         self.assertEqual(getattr(obj, 'coverage'), 95)
 
         # string manipulation
-        cfg['rank'] = 'genus'
-        get_config(obj, 'code', cfg, 'rank', lambda x: x[0])
+        obj.cfg['rank'] = 'genus'
+        get_config(obj, 'code', 'rank', lambda x: x[0])
         self.assertEqual(getattr(obj, 'code'), 'g')
 
     def test_run_command(self):
