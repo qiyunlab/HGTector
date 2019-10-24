@@ -394,3 +394,5 @@ fig.savefig('scatter.enhance.png')
 ```
 
 ![o55h7.auto.scatter.x](img/o55h7.auto.scatter.x.png "Distal vs. close scatter plot auto enhanced")
+
+This tutorial should have covered major elements of the HGTector workflow. Yet the small database limits the accuracy of the analysis. Next we will see a [real run](doc/realrun.md), using life-sized database and datasets.
