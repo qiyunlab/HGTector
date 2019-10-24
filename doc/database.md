@@ -56,7 +56,7 @@ hgtector search -i sample.faa -o . -d <db_dir>/diamond/db -t <db_dir>/taxdump
 hgtector analyze -i sample.tsv -o . -t <db_dir>/taxdump
 ```
 
-The protein-to-TaxID map is already integrated into the compiled databases, so one does not need `taxon.map.gz` except for special, custom situations.
+The protein-to-TaxID map is already integrated into the compiled databases, so one does not need `taxon.map.gz` except for some special situations.
 
 Feel free to delete (e.g., `download/`) or compress the intermediate files (e.g., `db.faa`) to save disk space.
 
@@ -79,7 +79,6 @@ hgtector database -g gids.txt -o .
 ```
 
 This will only download genomes specified in the file `gids.txt`. Useful for controlled tests.
-
 
 ### Break and resume
 
@@ -116,7 +115,7 @@ rm taxon.map
 
 ### Other genome files
 
-The `database` command only downloads protein sequences. If for other purposes you also want additional database files for the same genomes, for example, the GenBank files (those ending with `genomic.gbff.gz`), you can do this:
+The `database` command only downloads protein sequences. If for other purposes you also want additional database files of the same genomes, for example, the GenBank-format annotation files (those ending with `genomic.gbff.gz`), you can do this:
 
 ```bash
 ext=genomic.gbff.gz
@@ -124,9 +123,12 @@ while IFS=$'\t' read -r -a a
 do
     path=${a[@]: -1}
     wget -O ${a[0]}.${ext#*.} $path/${path##*/}_$ext
-    break
 done < <(tail -n+2 genomes.tsv)
 ```
+
+### External databases
+
+It is totally okay to use databases from other sources for HGTector analyses. For example, the original [nr](ftp://ftp.ncbi.nlm.nih.gov/blast/db/), [taxdump](ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz) and [prot.accession2taxid.gz](ftp://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz) one directly pulls from NCBI already constitute a valid database for HGTector. This combination may not be computationally optimized for the goal of HGT prediction, though, and the unbalanced taxonomic distribution of reference sequences also has potential impact on the analysis. The `search` command has multiple [taxonomic filtering](search.md#Taxonomic-filtering) functions which could help smoothing out this bias, and the program is designed to live with incompatibility between sequence and taxonomy databases by dropping out unidentified hits. Therefore, the conclusion is that it is technically fine to use external databases, but the database design and the research goal need to be carefully considered.
 
 
 ## Command-line reference

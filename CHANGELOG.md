@@ -26,6 +26,7 @@ Change Log
   - Built-in algorithm for progressive kernel bandwidth calculation.
   - Grid search with cross validation for bandwidth optimization.
 - Automated refinement of prediction result using silhouette scores in 2D space.
+- Database download workflow can resume from an interrupted run.
 - New plotting features.
 
 ### Fixed
@@ -35,7 +36,6 @@ Change Log
 
 ### Removed
 - Dependency on R
-- Dependency on particular Perl and R modules.
 - Modules: reporter, treer, orthologer.
 - HTML user interface.
 - Step-by-step wizard.
