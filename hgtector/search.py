@@ -450,7 +450,7 @@ class Search(object):
         Raises
         ------
         ValueError
-            if settings conflict
+            If settings conflict.
         """
         if self.method in ('diamond', 'auto'):
             if not self.diamond:
@@ -485,7 +485,7 @@ class Search(object):
         Raises
         ------
         ValueError
-            if settings conflict
+            If settings conflict.
         """
         if self.method in ('blast', 'auto'):
             if not self.blastp:
@@ -1014,12 +1014,13 @@ class Search(object):
 
         Returns
         -------
-        list
+        list of list of tuple
             subsets
 
         Raises
         ------
-        If any sequence exceeds maxchars.
+        ValueError
+            If any sequence exceeds maxchars.
         """
         if not maxchars:
 
@@ -1258,8 +1259,9 @@ class Search(object):
 
         Raises
         ------
-        - All sequence Ids are invalid.
-        - Failed to retrieve info from server.
+        ValueError
+            All sequence Ids are invalid.
+            Failed to retrieve info from server.
         """
         return self.parse_fasta_xml(self.remote_fetches(
             ids, 'db=protein&rettype=fasta&retmode=xml&id={}'))
@@ -1332,7 +1334,7 @@ class Search(object):
         Raises
         ------
         ValueError
-            fetch failed
+            Fetch failed.
         """
         url = '{}?{}'.format(self.fetch_server, urlapi)
         for i in range(self.fetch_retries):
@@ -1408,18 +1410,19 @@ class Search(object):
 
         Returns
         -------
-        list of [str, str, str, str]
-            id, taxid, product, sequence
+        list of str
+            [id, taxid, product, sequence]
 
         Notes
         -----
         NCBI EFectch record type = TinySeq XML
-        Refer to:
-        - https://www.ncbi.nlm.nih.gov/books/NBK25499/table/chapter4.T._valid_
-        values_of__retmode_and/?report=objectonly
-        Example RESTful API:
-        - https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein
-        &rettype=fasta&retmode=xml&id=NP_454622.1,NP_230502.1,NP_384288.1
+
+        .. _NCBI RESTful API:
+            https://www.ncbi.nlm.nih.gov/books/NBK25499/table/chapter4.T._valid_
+            values_of__retmode_and/?report=objectonly
+        .. _NCBI RESTful API example:
+            https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=protein
+            &rettype=fasta&retmode=xml&id=NP_454622.1,NP_230502.1,NP_384288.1
         """
         seqs = []
         for m in re.finditer(r'<TSeq>(.+?)<\/TSeq>', xml, re.DOTALL):
@@ -1449,7 +1452,8 @@ class Search(object):
 
         Raises
         ------
-        - If BLAST run fails.
+        ValueError
+            If BLAST run fails.
 
         Notes
         -----
@@ -1505,7 +1509,8 @@ class Search(object):
 
         Raises
         ------
-        - If DIAMOND run fails.
+        ValueError
+            If DIAMOND run fails.
 
         Notes
         -----
@@ -1551,19 +1556,15 @@ class Search(object):
         dict of list of dict
             hit table per query sequence
 
-        Notes
-        -----
-        - NCBI's official reference of RESTful APIs:
+        .. _NCBI's official reference of RESTful APIs:
             https://ncbi.github.io/blast-cloud/dev/using-url-api.html
-        - NCBI's official sample Perl script:
+        .. _NCBI's official sample Perl script:
             https://blast.ncbi.nlm.nih.gov/docs/web_blast.pl
-        - NCBI has restrictions on the frequency and bandwidth of remote BLAST
-          searches. See this page:
+        .. _NCBI has restrictions on the frequency and bandwidth of remote
+            BLAST searches. See this page:
             https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=
             BlastDocs&DOC_TYPE=DeveloperInfo
-        - As of 2018, using the NCBI server for genome-scale searches is
-          typically slow.
-        - Instead, NCBI recommends setting up custom BLAST servers. See:
+        .. _Instead, NCBI recommends setting up custom BLAST servers. See:
             https://ncbi.github.io/blast-cloud/
         """
         # generate query URL
@@ -1757,7 +1758,8 @@ class Search(object):
 
         Raises
         ------
-        - Query Id not found in length map.
+        ValueError
+            Query Id not found in length map.
         """
         res = {}
         ths = {x: getattr(self, x, 0) for x in (
@@ -1867,8 +1869,9 @@ class Search(object):
 
         Raises
         ------
-        - taxId list is invalid.
-        - Failed to retrieve info from server.
+        ValueError
+            TaxId list is invalid.
+            Failed to retrieve info from server.
         """
         res = self.remote_fetches(ids, 'db=taxonomy&id={}')
 
@@ -1984,7 +1987,7 @@ class Search(object):
 
     @staticmethod
     def fast_selfaln(seq):
-        """Calculate self-alignment statistics using built-in Python code.
+        """Calculate self-alignment statistics using built-in algorithm.
 
         Parameters
         ----------
@@ -1998,12 +2001,16 @@ class Search(object):
 
         Notes
         -----
-        - Statistics are calculated following the official BLAST documentation:
+        Statistics are calculated following:
+
+        .. _Official BLAST documentation:
             https://www.ncbi.nlm.nih.gov/BLAST/tutorial/Altschul-1.html
-        - Default BLASTp parameters are assumed (matrix = BLOSUM62, gapopen
+
+        Default BLASTp parameters are assumed (matrix = BLOSUM62, gapopen
         = 11, gapextend = 1), except for that the composition based statistics
         is switched off (comp-based-stats = 0).
-        - Result should be identical to that by DIAMOND, but will be slightly
+
+        Result should be identical to that by DIAMOND, but will be slightly
         different from that by BLAST.
         """
         # BLOSUM62 is the default aa substitution matrix for BLAST / DIAMOND

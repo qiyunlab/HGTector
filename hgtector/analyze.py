@@ -585,18 +585,47 @@ class Analyze(object):
 
     def relevant_groups(self):
         """Get groups that are relevant in HGT prediction.
+
+        Returns
+        -------
+        list of str
+            relevant groups
         """
         return (['self'] if self.self_low else []) + ['close', 'distal']
 
     @staticmethod
     def outliers_zscore(df, keys):
         """Remove outliers using the Z-score method.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            input dataframe
+        keys : list of str
+            relevant columns of dataframe
+
+        Returns
+        -------
+        pd.DataFrame
+            output dataframe with outliers removed
         """
         return df[(zscore(df[keys]) < 3).all(axis=1)]
 
     @staticmethod
     def outliers_boxplot(df, keys):
         """Remove outliers using the boxplot (IQR) method.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            input dataframe
+        keys : list of str
+            relevant columns of dataframe
+
+        Returns
+        -------
+        pd.DataFrame
+            output dataframe with outliers removed
         """
         return df[(df[keys] <= df[keys].quantile(0.75) * 2.5 -
                    df[keys].quantile(0.25) * 1.5).all(axis=1)]
@@ -721,13 +750,14 @@ class Analyze(object):
         np.array, np.array, float
             x values, y values, bandwidth
 
-        Notes
-        -----
-        https://scikit-learn.org/stable/auto_examples/neighbors/plot_kde_1d
-        .html
-        https://scikit-learn.org/stable/auto_examples/neighbors/plot_digits_
-        kde_sampling.html
-        https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
+        .. _scikit-learn tutorial 1:
+            https://scikit-learn.org/stable/auto_examples/neighbors/plot_kde_1d
+            .html
+        .. _scikit-learn tutorial 2:
+            https://scikit-learn.org/stable/auto_examples/neighbors/plot_digits_
+            kde_sampling.html
+        .. _A useful article:
+            https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
         """
         bw = self.bandwidth
         data_ = data[:, np.newaxis]
@@ -737,11 +767,7 @@ class Analyze(object):
 
         # grid search optimization
         if bw == 'grid':
-            bwspace = np.logspace(-1, 0, self.bw_steps)
-            params = {'bandwidth': bwspace}
-            grid = GridSearchCV(estimator, params, cv=5, iid=False)
-            grid.fit(data_)
-            kde = grid.best_estimator_
+            kde = self.grid_kde(data_, estimator, self.bw_steps)
             bw = kde.bandwidth
             print('  Grid search-optimized bandwidth: {:g}.'.format(bw))
 
@@ -765,6 +791,84 @@ class Analyze(object):
         x = scaler.inverse_transform(x)
         y = scaler.inverse_transform(y)
         return x, y, bw
+
+    @staticmethod
+    def grid_kde(data, estimator, steps):
+        """Perform kernel density estimation using grid search with cross
+        validations.
+
+        Parameters
+        ----------
+        data : np.array
+            input data
+        estimator : sklearn.neighbors.KernelDensity
+            kernel density estimator
+        steps : int
+            number of bandwidths to test
+
+        Returns
+        -------
+        sklearn.neighbors.KernelDensity
+            estimator trained on data
+
+        Raises
+        ------
+        ValueError
+            if data size < 5 (number of splits)
+        """
+        n = data.size
+        if n < 5:
+            raise ValueError('Cannot perform grid search on {} data point(s).'
+                             .format(n))
+        bwspace = np.logspace(-1, 0, steps)
+        params = {'bandwidth': bwspace}
+        grid = GridSearchCV(estimator, params, cv=5, iid=False)
+        grid.fit(data)
+        return grid.best_estimator_
+
+    @staticmethod
+    def silverman_bw(data):
+        """Calculate kernel bandwidth using Silverman's rule-of-thumb.
+
+        Parameters
+        ----------
+        data : iterable of float
+            input data
+
+        Returns
+        -------
+        float
+            bandwidth
+
+        Raises
+        ------
+        ValueError
+            if data size < 2
+
+        Notes
+        -----
+        bw = 0.9 * min(std, IQR / 1.34) * n ^ (-1/5)
+
+        .. _Wikipedia:
+            https://en.wikipedia.org/wiki/Kernel_density_estimation
+        """
+        n = len(data)
+        if n < 2:
+            raise ValueError('Cannot calculate bandwidth on {} data point.'
+                             .format(n))
+        iqr = np.subtract(*np.percentile(data, [75, 25]))
+        std = np.std(data, ddof=1)
+        if not std and not iqr:
+            bw = 1.0
+        elif not std:
+            bw = iqr / 1.34
+        elif not iqr:
+            bw = std
+        elif std <= iqr / 1.34:
+            bw = std
+        else:
+            bw = iqr / 1.34
+        return bw * 0.9 * len(data) ** -0.2
 
     @staticmethod
     def density_func(data, kde, num=10000):
@@ -794,10 +898,8 @@ class Analyze(object):
 
         Parameters
         ----------
-        x : np.array
-            x values
-        y : np.array
-            y values
+        x, y : np.array
+            x and y values
 
         Returns
         -------
@@ -807,19 +909,19 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            Cannot identify any peak or valley
-        ValueError
-            Peak is larger than valley
+            Cannot identify at least two peaks.
+            Cannot identify at least one valley (unlikely).
+            Peak is larger than valley.
         """
         # find peaks
         peaks = find_peaks(y)[0]
-        if not peaks.size:
-            raise ValueError('Cannot identify any peak.')
+        if peaks.size < 2:
+            raise ValueError('Cannot identify at least two peaks.')
 
         # find valleys
         valleys = find_peaks(np.negative(y))[0]
         if not valleys.size:
-            raise ValueError('Cannot identify any valley.')
+            raise ValueError('Cannot identify at least one valley.')
 
         # get first peak and first valley
         peak, valley = peaks[0], valleys[0]
@@ -851,38 +953,6 @@ class Analyze(object):
         plt.xlabel('Score')
         plt.ylabel('Frequency')
         save_figure(fig, file)
-
-    @staticmethod
-    def silverman_bw(data):
-        """Calculate kernel bandwidth using Silverman's rule-of-thumb.
-
-        Parameters
-        ----------
-        data : iterable of float
-            input data
-
-        Returns
-        -------
-        float
-            bandwidth
-
-        Notes
-        -----
-        https://en.wikipedia.org/wiki/Kernel_density_estimation
-        """
-        iqr = np.subtract(*np.percentile(data, [75, 25]))
-        std = np.std(data, ddof=1)
-        if not std and not iqr:
-            bw = 1.0
-        elif not std:
-            bw = iqr / 1.34
-        elif not iqr:
-            bw = std
-        elif std <= iqr / 1.34:
-            bw = std
-        else:
-            bw = iqr / 1.34
-        return bw * 0.9 * len(data) ** -0.2
 
     def smart_kde(self, group):
         """Automatically determine kernel bandwidth for the goal of this
