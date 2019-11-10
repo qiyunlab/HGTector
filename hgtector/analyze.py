@@ -168,6 +168,11 @@ class Analyze(object):
         ----------
         args : dict
             command-line arguments
+
+        Raises
+        ------
+        ValueError
+            found invalid parameter(s)
         """
         # load arguments
         for key, val in vars(args).items():
@@ -640,8 +645,8 @@ class Analyze(object):
         print('Calculating thresholds for clustering...')
         for group in groups:
             print('{} group:'.format(group.capitalize()))
-            self.plot_histogram(self.df[group].tolist(),
-                                join(self.output, '{}.hist.png'.format(group)))
+            self.plot_hist(self.df[group].tolist(),
+                           join(self.output, '{}.hist.png'.format(group)))
 
             # cannot cluster constant data
             if self.df[group].std() == 0.0:
@@ -696,7 +701,7 @@ class Analyze(object):
             df_[['protein', 'silh']].to_csv(
                 join(self.output, 'hgts', '{}.txt'.format(sample)),
                 sep='\t', index=False, header=False, float_format='%g')
-        print('Prediction results saved to hgts.')
+        print('Prediction results saved to hgts/.')
 
         # plot prediction results
         self.plot_hgts()
@@ -932,8 +937,15 @@ class Analyze(object):
         return x[peak], x[valley]
 
     @staticmethod
-    def plot_histogram(data, file):
+    def plot_hist(data, file):
         """Plot histogram.
+
+        Parameters
+        ----------
+        data : iterable of float
+            data to plot histogram
+        file : str
+            filename to save plot
         """
         fig = plt.figure(figsize=(5, 5))
         plt.hist(data)
@@ -944,6 +956,17 @@ class Analyze(object):
     @staticmethod
     def plot_density(x, y, peak, valley, th, file):
         """Plot kernel density function.
+
+        Parameters
+        ----------
+        x, y : np.array
+            data points of density function
+        peak, valley : float
+            x-coordinate of first peak or valley
+        th : float
+            x-coordinate of threshold
+        file : str
+            filename to save plot
         """
         fig = plt.figure(figsize=(5, 5))
         plt.plot(x, y)

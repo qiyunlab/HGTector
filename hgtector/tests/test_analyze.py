@@ -41,11 +41,11 @@ class AnalyzeTests(TestCase):
         # TODO
         pass
 
-    def test_read_input(self):
+    def test_set_parameters(self):
         # TODO
         pass
 
-    def test_assign_taxonomy(self):
+    def test_read_input(self):
         # TODO
         pass
 
@@ -64,6 +64,10 @@ class AnalyzeTests(TestCase):
         # maximum number of hits
         obs = Analyze.read_search_results(file, 5)
         self.assertEqual(len(obs[0]['hits']), 5)
+
+    def test_assign_taxonomy(self):
+        # TODO
+        pass
 
     def test_infer_genome_tax(self):
         taxdump = _taxdump_from_text(taxdump_proteo)
@@ -89,6 +93,10 @@ class AnalyzeTests(TestCase):
         obs = Analyze.infer_genome_tax(prots, taxdump, 75)
         exp = ('543', 100.0)  # 3 / 3 best hits assigned to Enterobacteriaceae
         self.assertTupleEqual(obs, exp)
+
+    def test_sum_taxids(self):
+        # TODO
+        pass
 
     def test_define_groups(self):
         me = Analyze()
@@ -208,6 +216,15 @@ class AnalyzeTests(TestCase):
         # TODO
         pass
 
+    def test_remove_orphans(self):
+        me = Analyze()
+        me.df = pd.DataFrame([
+            [1.0, 0.2], [0.5, 0.4], [0.0, 0.0], [0.8, 0.0], [0.0, 0.7]],
+            columns=['close', 'distal'])
+        me.remove_orphans()
+        self.assertListEqual(me.df.values.tolist(), [
+            [1.0, 0.2], [0.5, 0.4], [0.8, 0.0], [0.0, 0.7]])
+
     def test_remove_outliers(self):
         me = Analyze()
         me.self_low = False
@@ -247,6 +264,10 @@ class AnalyzeTests(TestCase):
                           columns=['close', 'distal'])
         obs = Analyze.outliers_boxplot(df, ['close', 'distal'])
         self.assertEqual(obs.shape[0], 710)
+
+    def test_predict_hgt(self):
+        # TODO
+        pass
 
     def test_cluster_kde(self):
         me = Analyze()
@@ -370,7 +391,7 @@ class AnalyzeTests(TestCase):
                          0.00150463, 0.00053637]))
         np.testing.assert_array_almost_equal(obs, exp)
 
-    def test_find_hill(self):
+    def test_first_hill(self):
         # typical bimodal distribution
         data = np.concatenate([
             self.dist_norm1, self.dist_norm2])[:, np.newaxis]
@@ -400,6 +421,25 @@ class AnalyzeTests(TestCase):
         msg = 'Cannot identify at least two peaks.'
         self.assertEqual(str(ctx.exception), msg)
 
+    def test_plot_hist(self):
+        fp = join(self.tmpdir, 'tmp.png')
+        Analyze.plot_hist(self.dist_gamma, fp)
+        self.assertTrue(isfile(fp))
+        remove(fp)
+
+    def test_plot_density(self):
+        data = np.concatenate([
+            self.dist_norm1, self.dist_norm2])[:, np.newaxis]
+        estimator = KernelDensity(kernel='gaussian', bandwidth=0.5)
+        kde = estimator.fit(data)
+        x, y = Analyze.density_func(data, kde, 100)
+        peak, valley = Analyze.first_hill(x, y)
+        th = valley - (valley - peak) * 0.5 / 100
+        fp = join(self.tmpdir, 'tmp.png')
+        Analyze.plot_density(x, y, peak, valley, th, fp)
+        self.assertTrue(isfile(fp))
+        remove(fp)
+
     def test_smart_kde(self):
         me = Analyze()
         data = np.concatenate([self.dist_norm1, self.dist_norm2])
@@ -413,6 +453,44 @@ class AnalyzeTests(TestCase):
         file = join(self.tmpdir, 'group.kde.png')
         self.assertTrue(isfile(file))
         remove(file)
+
+    def test_calc_cluster_props(self):
+        me = Analyze()
+        me.self_low = False
+        me.df = pd.DataFrame(np.array(
+            [self.dist_gamma, self.dist_lognorm[:800]]).T,
+            columns=['close', 'distal'])
+        me.df['hgt'] = (me.df['close'] < 2) & (me.df['distal'] > 2)
+        obs = me.calc_cluster_props()
+        self.assertAlmostEqual(obs[0], 1.094658052928843)
+        self.assertAlmostEqual(obs[1], 4.30076698399293)
+        obs = me.df['silh'].describe()
+        self.assertAlmostEqual(obs['mean'], 0.312495082044277)
+        self.assertAlmostEqual(obs['std'], 0.21945541659155993)
+        self.assertEqual(me.df.query('hgt & silh < 0.5').shape[0], 35)
+
+    def test_refine_cluster(self):
+        me = Analyze()
+        me.self_low = False
+        me.silhouette = 0.5
+        me.df = pd.DataFrame(np.array(
+            [self.dist_gamma, self.dist_lognorm[:800]]).T,
+            columns=['close', 'distal'])
+        me.df['hgt'] = (me.df['close'] < 2) & (me.df['distal'] > 2)
+        me.refine_cluster(me.calc_cluster_props())
+        self.assertEqual(me.df[me.df['hgt']].shape[0], 11)
+
+    def test_plot_hgts(self):
+        me = Analyze()
+        me.output = self.tmpdir
+        me.df = pd.DataFrame(np.array(
+            [self.dist_gamma, self.dist_lognorm[:800]]).T,
+            columns=['close', 'distal'])
+        me.df['hgt'] = (me.df['close'] < 2) & (me.df['distal'] > 2)
+        me.plot_hgts()
+        fp = join(self.tmpdir, 'scatter.png')
+        self.assertTrue(isfile(fp))
+        remove(fp)
 
 
 """Constants"""

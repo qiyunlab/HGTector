@@ -103,4 +103,4 @@ Option | Default | Description
 
 Option | Default | Description
 --- | --- | ---
-`--from-scores` | - | If score table already exists, use it and skip search result parsing and taxonomy inference. Otherwise overwrite it.
+`--from-scores` | - | If a score table already exists, use it and skip search result parsing and taxonomy inference. Otherwise overwrite it.

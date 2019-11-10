@@ -34,3 +34,5 @@ Note: If you installed HGTector using Conda, this file may be located at:
 ```
 <conda_dir>/envs/hgtector/lib/python3.7/site-packages/hgtector/config.yml
 ```
+
+Note for HGTector1 users: the configuration file used to be a must and a headache. But for HGTector2, you can completely ignore it! It is only relevant when you want to save typing commands.

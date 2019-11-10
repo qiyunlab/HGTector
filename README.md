@@ -1,7 +1,7 @@
 HGTector2
 =========
 
-**HGTector2** is a completely re-engineered software tool, featuring a fully-automated analytical pipeline with smart determination of parameters which requires minimum human involvement, a re-designed command-line interface which facilitates standardized scientific computing, and a high-quality Python 3 codebase.
+**HGTector2** is a completely re-engineered software tool, featuring a fully automated analytical pipeline with smart determination of parameters which requires minimum human involvement, a re-designed command-line interface which facilitates standardized scientific computing, and a high-quality Python 3 codebase.
 
 **HGTector** is a computational pipeline for genome-wide detection of putative horizontal gene transfer (HGT) events based on sequence homology search hit distribution statistics.
 
@@ -20,7 +20,7 @@ References
 - [Search](doc/search.md)
 - [Analyze](doc/analyze.md)
 - [Database](doc/database.md)
-- [Configuration](doc/config.md)
+- [Configure](doc/config.md)
 
 
 ## License
