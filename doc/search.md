@@ -44,8 +44,8 @@ Code | Description
 `pident` | Percentage of identical matches
 `evalue` | Expect value
 `bitscore` | Bit score
-`qcovhsp` | Query Coverage Per HSP
-`staxids` | unique Subject Taxonomy ID(s)
+`qcovhsp` | Query coverage per HSP
+`staxids` | Unique subject taxonomy ID(s)
 
 ### Search thresholds
 
@@ -100,7 +100,7 @@ diamond blastp --query sample.fa --db <diamond_db> --outfmt 6
 blastp -query sample.fa -db <blast_db> -outfmt 6
 ```
 
-HGTector will automatically recognize and parse this format. Note that subject TaxID is not part of the standard tabular output, so the taxon map file is necessary in this case.
+HGTector automatically recognizes and parses this format. Note that subject TaxID is not part of the standard tabular output, so a taxon map file is necessary in this case.
 
 ### Self-alignment
 
@@ -129,7 +129,7 @@ hgtector search ... -m precomp -s sample.b6 --aln-method precomp --aln-precomp s
 One can perform search on multiple samples under the same directory:
 
 ```bash
-hgtector search -i <input_dir> -o <output_dir> [-s precompute_dir] <parameters...>
+hgtector search -i <input_dir> -o <output_dir> [-s <precompute_dir>] <parameters...>
 ```
 
 This will generate one output file per input file. The filename without extension (e.g., "Bin1" of `Bin1.faa`) will be considered as sample ID and carried to the output file (`Bin1.tsv`).
@@ -183,7 +183,7 @@ Option | Default | Description
 `--tax-unirank` | - | Ignore more than one hit under same taxon at this rank (species, genus, family, etc.). Recommended if the database is highly taxonomically imbalanced (e.g., contains thousands of _E. coli_ strains).
 `--tax-capital` | yes | Ignore taxon names that are not capitalized.
 `--tax-latin` | no | Ignore species names that are not Latinate.
-`--tax-block` | unknown,uncultured,<br>unidentified,unclassified,<br>unresolved,environmental,<br>plasmid,vector,<br>synthetic,phage | Ignore taxon names containing those words.
+`--tax-block` | unknown,<br>uncultured,<br>unidentified,<br>unclassified,<br>unresolved,<br>environmental,<br>plasmid,<br>vector,<br>synthetic,<br>phage | Ignore taxon names containing any of these words.
 
 ### Local search behaviors
 

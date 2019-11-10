@@ -8,7 +8,7 @@ Now let's go through a bit more sophisticated sample, with more practical progra
 
 HGTector should ideally work with a local database and a local program for sequence homology search. This is to ensure fast, controllable and repeatable bioinformatic analyses.
 
-Two protein sequence aligners are supported: **DIAMOND** and **BLAST** . By default, HGTector first looks for `diamond`, then `blastp`, in the current environment. If you need, here is a one-line installation [instruction](install.md#Aligner).
+Two protein sequence aligners are supported: **DIAMOND** and **BLAST**. Here is a one-line installation [instruction](install.md#Aligner) in case you need. By default, HGTector first looks for `diamond`, then `blastp`, in the current environment. 
 
 
 ## Database
@@ -17,7 +17,7 @@ A reference protein sequence database should ideally contain a significant bread
 
 If you are already convinced that you will invest a dozen hours of computer time and several dozens of GB disk space to build the default database, please read [database](database.md).
 
-Otherwise, let's now make a very small test database to for this quick demo. This database will only contain protein sequences extracted from NCBI-defined microbial "reference genomes".
+Otherwise, let's now make a very small test database for this quick demo. This database will only contain protein sequences extracted from NCBI-defined microbial "reference genomes".
 
 ```
 hgtector database -c microbe -t 2 -s 1 -r superkingdom --reference --compile diamond -o <output_dir>
@@ -115,7 +115,7 @@ hgtector analyze -i <input_dir> -o <output_dir> ...
 
 ### Hit filtering
 
-The `analyze` command also has search threshold parameters like `--maxhits`, `--evalue`, `--identity` and `--coverage`. Their meaning are the same as those for the `search` command (see [here](search.md#Search-thresholds)). For example:
+The `analyze` command also has search threshold parameters such as `--maxhits`, `--evalue`, `--identity` and `--coverage`. Their meanings are the same as those in the `search` command (see [here](search.md#Search-thresholds)). For example:
 
 ```bash
 hgtector analyze ... --maxhits 100 --evalue 1e-50 --identity 80 --coverage 80
@@ -230,7 +230,7 @@ Here is the core step of the entire workflow. HGTector attempts to separate the 
 
 ![o55h7.close.hist](img/o55h7.close.hist.png "Close score histogram")
 
-This is actually a question of 1D data clustering, with certain assumption on the direction and location of the target cluster. The original HGTector used **kernel density estimation** ([KDE](https://en.wikipedia.org/wiki/Kernel_density_estimation)) to resolve this question. HGTector2 adopted this strategy for consistency, and added a few functions to make this process more robust and automatic.
+This is actually a question of 1D data clustering, with certain assumption on the direction and location of the target cluster. The original HGTector used **kernel density estimation** ([KDE](https://en.wikipedia.org/wiki/Kernel_density_estimation)) to solve this question. HGTector2 adopts this strategy for consistency, and adds a few functions to make this process more robust and automatic.
 
 The most important and tricky parameter in KDE is the [**bandwidth**](https://en.wikipedia.org/wiki/Kernel_density_estimation#Bandwidth_selection) of the kernel. It is positively correlated with the smoothness of the density function. An overly large bandwidth (too smooth) may cloak the desired cluster, whereas an overly small bandwidth (too sharp) may divide the data into too many clusters.
 
@@ -306,7 +306,7 @@ Optionally, one can designate a third criterion:
 
 3. **"Self" score is also in the lower cluster (atypical).**
 
-This additional criterion is only relevant when there are multiple closely related input genomes, and the biological assumption is that HGT took place in some particular lineage, so that the rest of the "self" group do not possess the gene. The criterion can be enabled using the flag `--self-low`.
+This additional criterion is only relevant when there are multiple closely related input genomes, and the biological assumption is that HGT took place in some particular lineage(s), so that the rest of the "self" group do not possess the gene. The criterion can be enabled using the flag `--self-low`.
 
 It does not apply to this demo, since there is only one input genome.
 
@@ -328,7 +328,7 @@ The refined list of putatively HGT-derived genes is printed to `hgts/o55h7.txt`.
 
 But it is important not to over-interpret the silhouette scores. They are NOT likelihoods of genes being horizontally derived. They are measurements of how well particular candidate genes are clustered with other candidate genes.
 
-Therefore, if multiple genes got horizontally transferred in a bulk, i.e., a "[genomic island](https://en.wikipedia.org/wiki/Genomic_island)", there is higher chance for them to cluster tightly, and high silhouette scores will be evident. In contrast, individual HGT-derived genes may be located far from the cluster core (hence moderate silhouette scores), but in the right direction, and that is still a strong implication of HGT.
+Therefore, if multiple genes got horizontally transferred in a bulk, i.e., a "[genomic island](https://en.wikipedia.org/wiki/Genomic_island)", there is higher chance for them to cluster tightly, and high silhouette scores are expected. In contrast, individual HGT-derived genes may be located far from the cluster core (hence moderate silhouette scores), but in the right direction (low close, high distal), and that is still a strong implication of HGT.
 
 
 ## Final output
@@ -395,14 +395,12 @@ fig.savefig('scatter.enhance.png')
 
 ![o55h7.auto.scatter.x](img/o55h7.auto.scatter.x.png "Distal vs. close scatter plot auto enhanced")
 
-This tutorial should have covered major elements of the HGTector workflow. Yet the small database limits the accuracy of the analysis. Next we will see a [real run](doc/realrun.md), using life-sized database and datasets.
-
 
 ## Potential donors
 
-You may be interested in knowing which organism(s) are those predicted genes acquired from.
+You may be interested in knowing which organism(s) did those predicted genes come from.
 
-HGTector provides implications of potential donors by summarizing the top several hits from the "distal" group of each gene. Specifically, it finds the lowest common ancestor (LCA) of hits whose bit scores are only lower than the top hit within a certain range (default: 10%, which is consistent with DIAMOND, controlled by parameter `--distal-top`). The resulting TaxID (or "0" for not found) is appended to the score table, as the last column "match".
+HGTector reports potential donors by summarizing the top several hits from the "distal" group of each gene. Specifically, it finds the lowest common ancestor (LCA) of hits whose bit scores are only lower than the top hit within a certain range (default: 10%, which is consistent with DIAMOND, controlled by parameter `--distal-top`). The resulting TaxID (or "0" if not found) is appended to the score table, as the last column "match".
 
 You can label HGT candidates with potential donor TaxIDs by:
 
@@ -427,3 +425,5 @@ WP_000890958.1 | 0.826649 | 214092 | Yersinia pestis CO92
 WP_000026143.1 | 0.748203 | 286 | Pseudomonas
 WP_000064228.1 | 0.819306 | 393305 | Yersinia enterocolitica subsp. enterocolitica 8081
 WP_001296814.1 | 0.770322 | 629 | Yersinia
+
+This tutorial should have covered major elements of the HGTector workflow. Yet the small database limits the accuracy of the analysis. Next we will see a [real run](realrun.md), using life-sized database and datasets.

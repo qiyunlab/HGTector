@@ -23,7 +23,7 @@ This will download all protein sequences of NCBI RefSeq genomes of bacteria, arc
 hgtector database --output <output_dir> --cats microbe --sample 1 --rank species --reference --representative --compile diamond
 ```
 
-A pre-build default database as of 2019-10-21 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0). It needs to be [compiled](#Manual-compiling) using choice of aligner.
+A pre-built default database as of 2019-10-21 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0). It needs to be [compiled](#Manual-compiling) using choice of aligner.
 
 ### Procedures
 

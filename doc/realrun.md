@@ -34,7 +34,7 @@ hgtector search -i input -o search -m diamond -p 16 -d hgtdb/diamond/db -t hgtdb
 hgtector analyze -i search -o analyze -t hgtdb/taxdump
 ```
 
-The automated workflow correctly figured that all seven genomes belong to the **spotted fever group** (even though it is not a standard taxonomic rank!), and assigns it as the "self" group. It then moves up one level to genus _Rickettsia_, and let it be the "close" group.
+The automated workflow correctly figured that all seven genomes belong to the **spotted fever group** (even though it is not a standard taxonomic rank!), and let it be the "self" group. It then moves up one level to genus _Rickettsia_, and let it be the "close" group.
 
 In this realistic analysis, both "close" and "distal" groups are sufficiently sampled, and the distributions of scores are apparently bimodal.
 
@@ -55,16 +55,16 @@ The predicted HGT activity is differential across species (right). For example [
 
 ## Customization
 
-Now we will specify a few parameters to best mimick the 2014 analysis.
+Now we will customize a few parameters so as to mimick the 2014 analysis.
 
 ```bash
 hgtector analyze -i search -o analyze -t hgtdb/taxdump \
   --bandwidth grid --self-tax 114277 --close-tax 766
 ```
 
-Here the "self" group is still the spotted fever group (the same as HGTector's inference), but the "close" group is raised to order Rickettsiales (TaxID: [766](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=766)). The enlarged "close" group allows for more robust clustering. Meanwhile, the kernel bandwidth is to be optimized using grid search with cross validation (this is new).
+Here the "self" group is still the spotted fever group (the same as HGTector's guess), but the "close" group is raised to order Rickettsiales (TaxID: [766](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=766)). The enlarged "close" group allows for more robust clustering. Meanwhile, the kernel bandwidth is to be optimized using grid search with cross validation (this is new).
 
-This protocol predicts 268 HGT-derived genes.
+This setting predicts 268 HGT-derived genes.
 
 ![ricket.ori.hist](img/ricket.ori.hist.png "Replicate histogram")
 
