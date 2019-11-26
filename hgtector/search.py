@@ -302,7 +302,7 @@ class Search(object):
         # load remote search settings
         if self.method == 'remote':
             for key in ('db', 'algorithm', 'delay', 'timeout', 'entrez'):
-                get_config(self, 'db', 'remote.{}'.format(key))
+                get_config(self, key, 'remote.{}'.format(key))
             get_config(self, 'server', 'server.search')
 
         # determine number of threads
