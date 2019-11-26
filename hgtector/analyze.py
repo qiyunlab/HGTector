@@ -309,7 +309,13 @@ class Analyze(object):
         """
         # take user-defined taxIds of input genomes
         if self.input_tax:
-            self.input_tax = dict_from_param(self.input_tax)
+            try:
+                self.input_tax = dict_from_param(self.input_tax)
+            except ValueError:
+                if len(self.data) > 1:
+                    raise ValueError('Invalid input taxonomy format.')
+                # for single-sample analysis, one can simply enter a taxId
+                self.input_tax = {max(self.data.keys()): self.input_tax}
             print('User-specified TaxIDs of input genomes:')
             for sid, tid in sorted(self.input_tax.items()):
                 if tid not in self.taxdump:
