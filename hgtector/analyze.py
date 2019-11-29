@@ -270,7 +270,7 @@ class Analyze(object):
         list of dict
             search results
         """
-        p = re.compile(r'# (\S+): (.+)')
+        p = re.compile(r'# (\S+): (.*)')
         data = []
         with read_file(file) as f:
             for line in f:
@@ -381,7 +381,7 @@ class Analyze(object):
         # collect taxIds of best hits of all proteins
         bestids = []
         for prot in prots:
-            if (prot['hits'].shape[0]):
+            if prot['hits'].shape[0]:
                 bestids.append(prot['hits']['taxid'].iloc[0])
 
         # count proteins that have at least one hit
