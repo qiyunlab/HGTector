@@ -596,7 +596,7 @@ class Database(object):
                 fin = gzip.open(file, 'r')
             cp = None
             for line in fin:
-                line = line.rstrip('\r\n')
+                line = line.rstrip()
                 if line.startswith('>'):
                     write_prot()
                     p, name = line[1:].split(None, 1)
@@ -708,7 +708,7 @@ class Database(object):
             fo = open(join(dir_, fname), 'w')
             fi = open(join(self.tmpdir, fname), 'r')
             for line in fi:
-                x = line.rstrip('\r\n').replace('\t|', '').split('\t')
+                x = line.rstrip().replace('\t|', '').split('\t')
                 if x[0] in ancs:
                     if key == 'nodes' or 'scientific name' in x:
                         fo.write(line)
