@@ -12,12 +12,8 @@ import sys
 import argparse
 from importlib import import_module
 
+import hgtector.__init__ as init
 
-__version__ = '2.0b1'
-
-description = """HGTector: Genome-wide detection of putative horizontal gene \
-transfer (HGT) events based on sequence homology search hit distribution \
-statistics."""
 
 module_names = ('search', 'analyze', 'database')
 
@@ -55,8 +51,8 @@ def parse_args(modules):
         arguments
     """
     parser = argparse.ArgumentParser(
-        description=description, add_help=False,
-        epilog='version: {}'.format(__version__),
+        description=init.__description__, add_help=False,
+        epilog=f'version: {init.__version__}',
         formatter_class=argparse.RawDescriptionHelpFormatter)
     subparsers = parser.add_subparsers(
         title='commands', dest='command', required=True)
