@@ -159,6 +159,7 @@ def list_from_param(param):
     Returns
     -------
     list
+        list of entries
     """
     if not param:
         return []
@@ -184,6 +185,7 @@ def dict_from_param(param):
     Returns
     -------
     dict
+        dict of keys to values
     """
     if not param:
         return {}
@@ -211,13 +213,10 @@ def run_command(cmd, capture=True, merge=True):
 
     Returns
     -------
-    int, list or None
+    int
         exit code
+    list or None
         screen output split by line, or None if not capture
-
-    Raises
-    ------
-    - non-zero exit code
     """
     res = subprocess.run(
         cmd, shell=True,
@@ -379,8 +378,8 @@ def write_fasta(seqs, f):
     f : file handle
         file to write
     """
-    for id, seq in seqs:
-        f.write('>{}\n{}\n'.format(id, seq))
+    for id_, seq in seqs:
+        f.write('>{}\n{}\n'.format(id_, seq))
 
 
 def _get_taxon(tid, taxdump):
@@ -401,7 +400,7 @@ def _get_taxon(tid, taxdump):
     Raises
     ------
     ValueError
-        if taxId is not found in taxonomy database
+        If taxId is not found in taxonomy database.
     """
     try:
         return taxdump[tid]
@@ -427,7 +426,8 @@ def describe_taxon(tid, taxdump):
 
     Raises
     ------
-    if taxId is not found in taxonomy database
+    ValueError
+        If taxId is not found in taxonomy database.
     """
     taxon = _get_taxon(tid, taxdump)
     name, rank = taxon['name'], taxon['rank']
@@ -593,10 +593,11 @@ def read_prot2taxid(file):
     Notes
     -----
     Two formats are supported:
-    . "plain": name <tab> taxId
-    . "ncbi": accn <tab> accn.ver <tab> taxId ...
+    - "plain": name <tab> taxId
+    - "ncbi": accn <tab> accn.ver <tab> taxId ...
     """
     isncbi = None
+    header = ['accession', 'accession.version', 'taxid']
     res = {}
     with read_file(file) as f:
         for line in f:
@@ -604,8 +605,7 @@ def read_prot2taxid(file):
             if len(x) == 1:
                 continue
             if isncbi is None:
-                if len(x) >= 3 and x[:3] == ['accession', 'accession.version',
-                                             'taxid']:
+                if len(x) >= 3 and x[:3] == header:
                     isncbi = True
                     continue
                 else:

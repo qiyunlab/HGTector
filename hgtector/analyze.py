@@ -172,7 +172,7 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            found invalid parameter(s)
+            Found invalid parameter(s).
         """
         # load arguments
         for key, val in vars(args).items():
@@ -375,8 +375,8 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            cannot infer taxon (e.g., none of taxIds cover more best hits than
-            threshold)
+            Cannot infer taxon (e.g., none of taxIds cover more best hits than
+            threshold).
         """
         # collect taxIds of best hits of all proteins
         bestids = []
@@ -825,7 +825,7 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            if data size < 5 (number of splits)
+            If data size < 5 (number of splits).
         """
         n = data.size
         if n < 5:
@@ -854,7 +854,7 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            if data size < 2
+            If data size < 2.
 
         Notes
         -----
@@ -921,7 +921,9 @@ class Analyze(object):
         ------
         ValueError
             Cannot identify at least two peaks.
+        ValueError
             Cannot identify at least one valley (unlikely).
+        ValueError
             Peak is larger than valley.
         """
         # find peaks

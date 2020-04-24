@@ -1871,6 +1871,7 @@ class Search(object):
         ------
         ValueError
             TaxId list is invalid.
+        ValueError
             Failed to retrieve info from server.
         """
         res = self.remote_fetches(ids, 'db=taxonomy&id={}')
