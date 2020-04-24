@@ -750,7 +750,7 @@ class Database(object):
                    join(self.output, 'blast', 'db'),
                    join(self.output, 'taxon.map')))
         print('Build BLAST database...', flush=True)
-        ec, out = run_command(cmd, capture=False)
+        ec, out = run_command(cmd, capture=False, merge=False)
         if ec:
             raise ValueError('makeblastdb failed with error code {}.'
                              .format(ec))

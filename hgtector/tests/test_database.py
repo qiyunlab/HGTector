@@ -63,12 +63,15 @@ class DatabaseTests(TestCase):
         makedirs(join(self.tmpdir, 'taxdump'))
         copyfile(join(self.datadir, 'DnaK', 'taxdump', 'nodes.dmp'),
                  join(self.tmpdir, 'taxdump', 'nodes.dmp'))
+        copyfile(join(self.datadir, 'DnaK', 'taxdump', 'names.dmp'),
+                 join(self.tmpdir, 'taxdump', 'names.dmp'))
         me.build_diamond_db()
         self.assertTrue(isdir(join(self.tmpdir, 'diamond')))
         self.assertTrue(isfile(join(self.tmpdir, 'diamond', 'db.dmnd')))
         rmtree(join(self.tmpdir, 'diamond'))
         remove(join(self.tmpdir, 'db.faa'))
         remove(join(self.tmpdir, 'taxdump', 'nodes.dmp'))
+        remove(join(self.tmpdir, 'taxdump', 'names.dmp'))
 
     def test_check_local_file(self):
         me = Database()
