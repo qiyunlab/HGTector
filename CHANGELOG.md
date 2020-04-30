@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+## Version 2.0b2 (WIP)
+
+### Added
+- Instructions for using the GTDB database.
+
+
 ## Version 2.0b1 (complete rework) (10/23/2019)
 
 ### Changed

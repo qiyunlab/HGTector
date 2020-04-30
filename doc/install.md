@@ -46,7 +46,7 @@ conda install -c bioconda diamond blast
 
 ## Database
 
-HGTector has a command `database` for automated database construction. See [details](database.md).
+HGTector has a command `database` for automated database construction. It defaults to the **NCBI** RefSeq microbial genomes and taxonomy. Meanwhile, we also provide instructions for using **GTDB** and custom databases. See [details](database.md).
 
 A standard database built using the default protocol on 2019-10-21 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0), together with [instruction](database.md#Manual-compiling) for compiling.
 
