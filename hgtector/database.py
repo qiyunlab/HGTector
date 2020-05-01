@@ -750,7 +750,7 @@ class Database(object):
                    join(self.output, 'blast', 'db'),
                    join(self.output, 'taxon.map')))
         print('Build BLAST database...', flush=True)
-        ec, out = run_command(cmd, capture=False, merge=False)
+        ec, out = run_command(cmd)
         if ec:
             raise ValueError('makeblastdb failed with error code {}.'
                              .format(ec))
@@ -775,7 +775,7 @@ class Database(object):
                    join(self.output, 'taxdump', 'names.dmp'),
                    join(self.output, 'diamond', 'db'), self.tmpdir))
         print('Build DIAMOND database...', flush=True)
-        ec, out = run_command(cmd, capture=False, merge=False)
+        ec, out = run_command(cmd)
         if ec:
             raise ValueError('diamond failed with error code {}.'.format(ec))
 
