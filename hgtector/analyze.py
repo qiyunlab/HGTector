@@ -345,7 +345,7 @@ class Analyze(object):
 
         # refine taxonomy database
         print('Refining taxonomy database...')
-        refine_taxdump(self.sum_taxids(), self.taxdump)
+        self.taxdump = refine_taxdump(self.sum_taxids(), self.taxdump)
         add_children(self.taxdump)
         print('Done. Retained {} taxa.'.format(len(self.taxdump)))
 

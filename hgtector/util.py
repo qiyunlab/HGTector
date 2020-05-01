@@ -42,7 +42,6 @@ def load_configs():
     if file is not None:
         with open(file, 'r') as f:
             return yaml.load(f, Loader=yaml.SafeLoader)
-    return None
 
 
 def find_config_file():
@@ -62,10 +61,9 @@ def find_config_file():
     # program directory
     if not isfile(fp):
         fp = join(dirname(realpath(__file__)), fname)
-    # not found
-    if not isfile(fp):
-        fp = None
-    return fp
+    # final check
+    if isfile(fp):
+        return fp
 
 
 def get_config(obj, attr, entry, func=None):
@@ -87,16 +85,21 @@ def get_config(obj, attr, entry, func=None):
     if getattr(obj, attr, None) is not None:
         return
     keys = entry.split('.')
+
+    # go down hierarchies till last level
     d_ = obj.cfg
     for key in keys[:-1]:
         try:
             d_ = d_[key]
         except KeyError:
             return
+
+    # get value of last level
     try:
         val = d_[keys[-1]]
     except KeyError:
         return
+
     if val is None:
         return
     if func:
@@ -185,7 +188,14 @@ def dict_from_param(param):
     Returns
     -------
     dict
-        dict of keys to values
+        dictionary of keys to values
+
+    Raises
+    ------
+    ValueError
+        If any section in string is not in "key:value" format.
+    ValueError
+        In any line in file is not in "key<tab>value" format.
     """
     if not param:
         return {}
@@ -194,9 +204,15 @@ def dict_from_param(param):
     elif isinstance(param, str):
         if isfile(param):
             with read_file(param) as f:
-                return dict(x.split('\t') for x in f.read().splitlines())
+                try:
+                    return dict(x.split('\t') for x in f.read().splitlines())
+                except ValueError:
+                    raise ValueError(f'Invalid dictionary file: "{param}".')
         else:
-            return dict(x.split(':') for x in param.split(','))
+            try:
+                return dict(x.split(':') for x in param.split(','))
+            except ValueError:
+                raise ValueError(f'Invalid dictionary string: "{param}".')
 
 
 def run_command(cmd, capture=True, merge=True):
@@ -601,7 +617,7 @@ def read_prot2taxid(file):
     res = {}
     with read_file(file) as f:
         for line in f:
-            x = line.rstrip().split()
+            x = line.rstrip().split('\t')
             if len(x) == 1:
                 continue
             if isncbi is None:
@@ -837,12 +853,17 @@ def refine_taxdump(tids, taxdump):
     taxdump : dict
         taxonomy database
 
+    Returns
+    -------
+    dict
+        refined taxonomy database
+
     Notes
     -----
     `children` is a list of immediate child taxIds of current taxId.
     """
     ancs = set().union(*[get_lineage(x, taxdump) for x in tids])
-    taxdump = {k: v for k, v in taxdump.items() if k in ancs}
+    return {k: v for k, v in taxdump.items() if k in ancs}
 
 
 def add_children(taxdump):
@@ -860,14 +881,10 @@ def add_children(taxdump):
     children = {}
     for tid, taxon in taxdump.items():
         pid = taxon['parent']
-        if pid == tid or pid == '0':
-            continue
-        children.setdefault(pid, []).append(tid)
+        if pid != tid and pid != '0':
+            children.setdefault(pid, []).append(tid)
     for tid, taxon in taxdump.items():
-        try:
-            taxon['children'] = children[tid]
-        except KeyError:
-            taxon['children'] = []
+        taxon['children'] = children.get(tid, [])
 
 
 def get_descendants(tid, taxdump):
