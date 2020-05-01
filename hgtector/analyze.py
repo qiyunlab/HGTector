@@ -833,7 +833,7 @@ class Analyze(object):
                              .format(n))
         bwspace = np.logspace(-1, 0, steps)
         params = {'bandwidth': bwspace}
-        grid = GridSearchCV(estimator, params, cv=5, iid=False)
+        grid = GridSearchCV(estimator, params, cv=5)
         grid.fit(data)
         return grid.best_estimator_
 
