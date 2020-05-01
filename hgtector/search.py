@@ -122,7 +122,7 @@ class Search(object):
         self.description = description
 
     def __call__(self, args):
-        print('Homology search started at {}.'.format(timestamp()))
+        print(f'Homology search started at {timestamp()}.')
 
         # load configurations
         self.cfg = load_configs()
@@ -139,8 +139,7 @@ class Search(object):
                 continue
             prots = sample['prots']
 
-            print('Batch homology search of {} started at {}.'.format(
-                sid, timestamp()))
+            print(f'Batch homology search of {sid} started at {timestamp()}.')
 
             # collect sequences to search
             id2idx = {}
@@ -151,7 +150,7 @@ class Search(object):
                 id_ = prot['id']
                 seqs.append((id_, prot['seq']))
                 id2idx[id_] = i
-            print('Number of queries: {}.'.format(len(seqs)))
+            print(f'Number of queries: {len(seqs)}.')
 
             # divide sequences into batches
             batches = ([seqs] if self.method == 'precomp' else
@@ -187,20 +186,20 @@ class Search(object):
                         prots[id2idx[id_]]['score'] = score
 
                 # write search results to file
-                with open(join(self.output, '{}.tsv'.format(sid)), 'a') as f:
+                with open(join(self.output, f'{sid}.tsv'), 'a') as f:
                     self.write_search_results(f, prots, indices)
 
                 n += len(batch)
-                print('  {} queries completed.'.format(n))
+                print(f'  {n} queries completed.')
 
-            print('Batch homology search of {} ({} proteins) ended at {}.'
-                  .format(sid, len(prots), timestamp()))
+            print(f'Batch homology search of {sid} ({len(prots)} proteins) '
+                  f'ended at {timestamp()}.')
 
         # clean up
         if hasattr(self, 'mkdtemp'):
             rmtree(self.tmpdir)
 
-        print('Batch homology search finished at {}.'.format(timestamp()))
+        print(f'Batch homology search finished at {timestamp()}.')
 
     """master workflows"""
 
@@ -235,11 +234,11 @@ class Search(object):
             self.input_map = {k: join(self.input, v) for k, v in id2file_map(
                 self.input).items()}
             if len(self.input_map) == 0:
-                raise ValueError('No input data are found under: {}.'
-                                 .format(self.input))
+                raise ValueError(
+                    f'No input data are found under: {self.input}.')
         else:
-            raise ValueError('Invalid input data file or directory: {}.'
-                             .format(self.input))
+            raise ValueError(
+                f'Invalid input data file or directory: {self.input}.')
 
         # check / create output directory
         makedirs(self.output, exist_ok=True)
@@ -250,13 +249,13 @@ class Search(object):
         # load search parameters
         get_config(self, 'evalue', 'search.evalue', float)
         for key in ('method', 'minsize', 'maxseqs', 'identity', 'coverage'):
-            get_config(self, key, 'search.{}'.format(key))
+            get_config(self, key, f'search.{key}')
         for key in ('diamond', 'blastp', 'blastdbcmd'):
-            get_config(self, key, 'program.{}'.format(key))
+            get_config(self, key, f'program.{key}')
 
         if self.method not in {'auto', 'diamond', 'blast', 'remote',
                                'precomp'}:
-            raise ValueError('Invalid search method: {}.'.format(self.method))
+            raise ValueError(f'Invalid search method: {self.method}.')
 
         # look for precomputed search results
         if self.method == 'precomp' and not self.precomp:
@@ -273,10 +272,10 @@ class Search(object):
                     self.precomp).items()}
                 if len(self.pcmap) == 0:
                     raise ValueError('Cannot locate any pre-computed search '
-                                     'results at: {}.'.format(self.precomp))
+                                     f'results at: {self.precomp}.')
             else:
                 raise ValueError('Invalid pre-computed search result file or '
-                                 'directory: {}.'.format(self.precomp))
+                                 f'directory: {self.precomp}.')
             if self.method == 'auto':
                 self.method = 'precomp'
 
@@ -297,12 +296,12 @@ class Search(object):
 
         # load method-specific arguments
         for key in ('queries', 'maxchars', 'extrargs'):
-            get_config(self, key, '{}.{}'.format(self.method, key))
+            get_config(self, key, f'{self.method}.{key}')
 
         # load remote search settings
         if self.method == 'remote':
             for key in ('db', 'algorithm', 'delay', 'timeout', 'entrez'):
-                get_config(self, key, 'remote.{}'.format(key))
+                get_config(self, key, f'remote.{key}')
             get_config(self, 'server', 'server.search')
 
         # determine number of threads
@@ -324,12 +323,12 @@ class Search(object):
 
         # check / create temporary directory
         if self.method in ('diamond', 'blast'):
-            if not self.tmpdir:
+            dir_ = self.tmpdir
+            if not dir_:
                 self.tmpdir = mkdtemp()
                 setattr(self, 'mkdtemp', True)  # mark for cleanup
-            if not isdir(self.tmpdir):
-                raise ValueError('Invalid temporary directory: {}.'.format(
-                    self.tmpdir))
+            if not isdir(dir_):
+                raise ValueError(f'Invalid temporary directory: {dir_}.')
 
         """determine taxonomy database and filters"""
 
@@ -338,7 +337,7 @@ class Search(object):
 
         # assign taxonomy database
         for key in ('taxdump', 'taxmap'):
-            get_config(self, key, 'database.{}'.format(key))
+            get_config(self, key, f'database.{key}')
 
         if self.method != 'remote':
 
@@ -348,65 +347,63 @@ class Search(object):
                       'Will try to retrieve taxonomic information from remote '
                       'server.')
             elif not isdir(self.taxdump):
-                raise ValueError('Invalid taxonomy database directory: {}.'
-                                 .format(self.taxdump))
+                raise ValueError(
+                    f'Invalid taxonomy database directory: {self.taxdump}.')
             else:
                 for fname in ('names.dmp', 'nodes.dmp'):
                     if not isfile(join(self.taxdump, fname)):
-                        raise ValueError('Taxonomy database file {} is not '
-                                         'found.'.format(fname))
+                        raise ValueError(
+                            f'Taxonomy database file {fname} is not found.')
 
             # check local taxonomy map
             if self.taxmap and not isfile(self.taxmap):
-                raise ValueError('Invalid protein-to-taxId map: {}.'.format(
-                    self.taxmap))
+                raise ValueError(
+                    f'Invalid protein-to-taxId map: {self.taxmap}.')
 
         # load taxonomic filters and convert to lists
         for key in ('include', 'exclude', 'block'):
-            attr = 'tax_{}'.format(key)
-            get_config(self, attr, 'taxonomy.{}'.format(key))
+            attr = f'tax_{key}'
+            get_config(self, attr, f'taxonomy.{key}')
             setattr(self, attr, list_from_param(getattr(self, attr)))
 
         # load taxonomy switches
         for key in ('unique', 'unirank', 'capital', 'latin'):
-            get_config(self, 'tax_{}'.format(key), 'taxonomy.{}'.format(key))
+            get_config(self, f'tax_{key}', f'taxonomy.{key}')
 
         """determine self-alignment strategy"""
 
         # load configurations
         get_config(self, 'aln_method', 'search.selfaln')
         get_config(self, 'aln_server', 'server.selfaln')
-        if self.aln_method not in {'auto', 'native', 'fast', 'lookup',
-                                   'precomp'}:
-            raise ValueError('Invalid self-alignment method: {}.'.format(
-                self.aln_method))
+        met_ = self.aln_method
+        if met_ not in ('auto', 'native', 'fast', 'lookup', 'precomp'):
+            raise ValueError(f'Invalid self-alignment method: {met_}.')
 
         # look for precomputed self-alignment results
-        if self.aln_method == 'precomp' and not self.aln_precomp:
+        if met_ == 'precomp' and not self.aln_precomp:
             raise ValueError('Must specify location of pre-computed self-'
                              'alignment scores.')
-        if self.aln_precomp:
-            if isfile(self.aln_precomp):
+        pre_ = self.aln_precomp
+        if pre_:
+            if isfile(pre_):
                 if len(self.input_map) > 1:
                     raise ValueError('A directory of multiple pre-computed '
                                      'self-alignment result files is needed.')
-                self.aln_pcmap = {file2id(self.aln_precomp): self.aln_precomp}
-            elif isdir(self.aln_precomp):
-                self.aln_pcmap = {k: join(self.aln_precomp, v) for k, v in
-                                  id2file_map(self.aln_precomp).items()}
+                self.aln_pcmap = {file2id(pre_): pre_}
+            elif isdir(pre_):
+                self.aln_pcmap = {k: join(pre_, v) for k, v in
+                                  id2file_map(pre_).items()}
                 if len(self.aln_pcmap) == 0:
                     raise ValueError('Cannot locate any pre-computed self-'
-                                     'alignment results at: {}.'.format(
-                                         self.aln_precomp))
+                                     f'alignment results at: {pre_}.')
             else:
                 raise ValueError('Invalid pre-computed self-alignment result '
-                                 'file or directory: {}.'.format(
-                                     self.aln_precomp))
-            if self.aln_method == 'auto':
+                                 f'file or directory: {pre_}.')
+            if met_ == 'auto':
                 self.aln_method = 'precomp'
 
         # use the same search method for self-alignment, otherwise use fast
-        if self.aln_method in ('auto', 'native'):
+        if met_ in ('auto', 'native'):
             self.aln_method = 'fast' if self.method == 'precomp' else 'native'
 
         """determine fetch strategy"""
@@ -414,7 +411,7 @@ class Search(object):
         # load configurations
         get_config(self, 'fetch_server', 'server.fetch')
         for key in ('enable', 'queries', 'retries', 'delay', 'timeout'):
-            get_config(self, 'fetch_{}'.format(key), 'fetch.{}'.format(key))
+            get_config(self, f'fetch_{key}', f'fetch.{key}')
 
         # determine remote or local fetching
         if self.fetch_enable == 'auto':
@@ -435,9 +432,9 @@ class Search(object):
 
         # print major settings
         print('Settings:')
-        print('  Search method: {}.'.format(self.method))
-        print('  Self-alignment method: {}.'.format(self.aln_method))
-        print('  Remote fetch enabled: {}.'.format(self.fetch_enable))
+        print(f'  Search method: {self.method}.')
+        print(f'  Self-alignment method: {self.aln_method}.')
+        print(f'  Remote fetch enabled: {self.fetch_enable}.')
 
     def check_diamond(self):
         """Check if DIAMOND is available.
@@ -461,17 +458,16 @@ class Search(object):
                 except KeyError:
                     pass
                 if db_:
-                    if isfile(db_) or isfile('{}.dmnd'.format(db_)):
+                    if isfile(db_) or isfile(f'{db_}.dmnd'):
                         return db_
                     elif self.method == 'diamond':
-                        raise ValueError('Invalid DIAMOND database: {}.'
-                                         .format(db_))
+                        raise ValueError(f'Invalid DIAMOND database: {db_}.')
                 elif self.method == 'diamond':
-                    raise ValueError('A protein database is required for '
-                                     'DIAMOND search.')
+                    raise ValueError(
+                        'A protein database is required for DIAMOND search.')
             elif self.method == 'diamond':
-                raise ValueError('Invalid diamond executable: {}.'.format(
-                    self.diamond))
+                raise ValueError(
+                    f'Invalid diamond executable: {self.diamond}.')
         return None
 
     def check_blast(self):
@@ -498,19 +494,17 @@ class Search(object):
                 if db_:
                     found = True
                     for ext in ('phr', 'pin', 'psq'):
-                        if not isfile('{}.{}'.format(db_, ext)):
+                        if not isfile(f'{db_}.{ext}'):
                             found = False
                     if found:
                         return db_
                     elif self.method == 'blast':
-                        raise ValueError('Invalid BLAST database: {}.'
-                                         .format(db_))
+                        raise ValueError(f'Invalid BLAST database: {db_}.')
                 elif self.method == 'blastp':
-                    raise ValueError('A protein database is required for '
-                                     'BLAST search.')
+                    raise ValueError(
+                        'A protein database is required for BLAST search.')
             elif self.method == 'blastp':
-                raise ValueError('Invalid blastp executable: {}.'.format(
-                    self.blastp))
+                raise ValueError(f'Invalid blastp executable: {self.blastp}.')
         return None
 
     def input_wf(self):
@@ -537,13 +531,11 @@ class Search(object):
             prots = read_input_prots(fname)
             n = len(prots)
             if n == 0:
-                raise ValueError('No protein entries are found for {}.'
-                                 .format(id_))
-            print('  {}: {} proteins.'.format(id_, n))
+                raise ValueError(f'No protein entries are found for {id_}.')
+            print(f'  {id_}: {n} proteins.')
             self.data[id_] = {'prots': prots}
             nprot += n
-        print('Done. Read {} proteins from {} samples.'
-              .format(nprot, len(self.data)))
+        print(f'Done. Read {nprot} proteins from {len(self.data)} samples.')
 
         # process search results from previous runs
         ndone = 0
@@ -559,8 +551,8 @@ class Search(object):
                 if m == n:
                     self.data[id_]['done'] = True
                 ndone += m
-            print('Done. Found results for {} proteins, remaining {} to '
-                  'search.'.format(ndone, nprot - ndone))
+            print(f'Done. Found results for {ndone} proteins, remaining '
+                  f'{nprot - ndone} to search.')
 
         # check if search is already completed
         if (ndone == nprot):
@@ -594,43 +586,42 @@ class Search(object):
                     except KeyError:
                         pass
             print(' done.')
-            print('  Imported scores for {} proteins.'.format(n))
+            print(f'  Imported scores for {n} proteins.')
             dif = n - m
             if dif > 0:
-                raise ValueError('Missing scores for {} proteins.'.format(dif))
+                raise ValueError(f'Missing scores for {dif} proteins.')
 
         # fetch sequences for unsearched proteins
         seqs2q = self.check_missing_seqs(self.data)
         n = len(seqs2q)
         if n > 0:
-            print('Sequences of {} proteins are to be retrieved.'.format(n))
+            print(f'Sequences of {n} proteins are to be retrieved.')
             if self.method == 'blast':
                 print('Fetching sequences from local BLAST database...',
                       end='')
                 seqs = self.blast_seqinfo(seqs2q)
                 n = self.update_prot_seqs(seqs)
                 print(' done.')
-                print('  Obtained sequences of {} proteins.'.format(n))
+                print(f'  Obtained sequences of {n} proteins.')
                 seqs2q = self.check_missing_seqs(self.data)
                 n = len(seqs2q)
                 if n > 0:
-                    print('  Remaining {} proteins.'.format(n))
+                    print(f'  Remaining {n} proteins.')
             if n > 0 and self.fetch_enable == 'yes':
-                print('Fetching {} sequences from remote server...'.format(n),
+                print(f'Fetching {n} sequences from remote server...',
                       flush=True)
                 seqs = self.remote_seqinfo(seqs2q)
                 n = self.update_prot_seqs(seqs)
-                print('Done. Obtained sequences of {} proteins.'.format(n))
+                print(f'Done. Obtained sequences of {n} proteins.')
                 seqs2q = self.check_missing_seqs(self.data)
                 n = len(seqs2q)
             if n > 0:
-                raise ValueError(
-                    '  Cannot obtain sequences of {} proteins.'.format(n))
+                raise ValueError(f'  Cannot obtain sequences of {n} proteins.')
 
         # drop short sequences
         if self.minsize:
-            print('Dropping sequences shorter than {} aa...'.format(
-                self.minsize), end='')
+            print(f'Dropping sequences shorter than {self.minsize} aa...',
+                  end='')
             for sid, sample in self.data.items():
                 for i in reversed(range(len(sample['prots']))):
                     if len(sample['prots'][i]['seq']) < self.minsize:
@@ -643,7 +634,7 @@ class Search(object):
             print('Reading local taxonomy database...', end='')
             self.taxdump = read_taxdump(self.taxdump)
             print(' done.')
-            print('  Read {} taxa.'.format(len(self.taxdump)))
+            print(f'  Read {len(self.taxdump)} taxa.')
 
         # read taxdump generated by previous runs
         elif (isfile(join(self.output, 'names.dmp')) and
@@ -651,7 +642,7 @@ class Search(object):
             print('Reading custom taxonomy database...', end='')
             self.taxdump = read_taxdump(self.output)
             print(' done.')
-            print('  Read {} taxa.'.format(len(self.taxdump)))
+            print(f'  Read {len(self.taxdump)} taxa.')
 
         # build taxdump from scratch
         else:
@@ -694,7 +685,7 @@ class Search(object):
             print('Importing pre-computed search results...', end='')
             res = self.parse_hit_table(file, lenmap)
             print(' done.')
-            print('  Found hits for {} proteins.'.format(len(res)))
+            print(f'  Found hits for {len(res)} proteins.')
 
         # run de novo search
         elif self.method == 'remote':
@@ -740,7 +731,7 @@ class Search(object):
                       'memory-hungry)...', end='', flush=True)
                 self.taxmap = read_prot2taxid(self.taxmap)
                 print(' done.')
-                print('  Read {} records.'.format(len(self.taxmap)))
+                print(f'  Read {len(self.taxmap)} records.')
 
             ids2q, added = self.update_hit_taxids(prots, self.taxmap)
             added_taxids.update(added)
@@ -754,18 +745,18 @@ class Search(object):
 
         # attempt to look up taxIds from remote server
         if ids2q and self.fetch_enable == 'yes':
-            print('Fetching taxIds of {} sequences from remote server...'
-                  .format(len(ids2q)), flush=True)
+            print(f'Fetching taxIds of {len(ids2q)} sequences from remote '
+                  'server...', flush=True)
             newmap = {x[0]: x[1] for x in self.remote_seqinfo(ids2q)}
-            print('Done. Obtained taxIds of {} sequences.'.format(len(newmap)))
+            print(f'Done. Obtained taxIds of {len(newmap)} sequences.')
             ids2q, added = self.update_hit_taxids(prots, newmap)
             added_taxids.update(added)
 
         # drop hits whose taxIds cannot be identified
         n = len(ids2q)
         if n > 0:
-            print('WARNING: Cannot obtain taxIds for {} sequences. These hits '
-                  'will be dropped.'.format(n))
+            print(f'WARNING: Cannot obtain taxIds for {n} sequences. These '
+                  'hits will be dropped.')
             for hits in prots.values():
                 for i in reversed(range(len(hits))):
                     if hits[i]['id'] in ids2q:
@@ -799,18 +790,18 @@ class Search(object):
 
         # retrieve information for these taxIds
         if tids2q and self.fetch_enable == 'yes':
-            print('Fetching {} taxIds and ancestors from remote server...'
-                  .format(len(tids2q)), flush=True)
+            print(f'Fetching {len(tids2q)} taxIds and ancestors from remote '
+                  'server...', flush=True)
             xml = self.remote_taxinfo(tids2q)
             added = self.parse_taxonomy_xml(xml)
-            print('Done. Obtained taxonomy of {} taxIds.'.format(len(tids2q)))
+            print(f'Done. Obtained taxonomy of {len(tids2q)} taxIds.')
             self.update_dmp_files(added)
             tids2q = [x for x in tids2q if x not in added]
 
         # drop taxIds whose information cannot be obtained
         if tids2q:
-            print('WARNING: Cannot obtain information of {} taxIds. These '
-                  'hits will be dropped.')
+            print(f'WARNING: Cannot obtain information of {len(tids2q)} '
+                  'taxIds. These hits will be dropped.')
             tids2q = set(tids2q)
             for hits in prots.values():
                 for i in reversed(range(len(hits))):
@@ -963,7 +954,7 @@ class Search(object):
         if left:
             print('WARNING: The following sequences cannot be self-aligned '
                   'in a batch. Do individual alignments instead.')
-            print('  {}'.format(', '.join(left)))
+            print('  ' + ', '.join(left))
             for id_, seq in seqs:
                 if id_ not in left:
                     continue
@@ -980,9 +971,9 @@ class Search(object):
 
                 # if failed, do built-in alignment
                 if not res_:
-                    print('WARNING: Sequence {} cannot be self-aligned '
+                    print(f'WARNING: Sequence {id_} cannot be self-aligned '
                           'using the native method. Do fast alignment '
-                          'instead.'.format(id_))
+                          'instead.')
                     bitscore, evalue = self.fast_selfaln(seq)
                     res_ = [(id_, bitscore, evalue)]
 
@@ -993,8 +984,8 @@ class Search(object):
             left = set([x[0] for x in seqs]) - set([x[0] for x in res])
             if left:
                 raise ValueError('Cannot calculate self-alignment metrics for '
-                                 'the following sequences:\n  {}'.format(
-                                     ', '.join(sorted(left))))
+                                 'the following sequences:\n  ' + ', '.join(
+                                     sorted(left)))
         return {x[0]: x[1] for x in res}
 
     """input/output functions"""
@@ -1040,8 +1031,8 @@ class Search(object):
         for id_, seq in seqs:
             chars = len(seq)
             if chars > maxchars:
-                raise ValueError('Sequence {} exceeds maximum allowed length '
-                                 '{} for search.'.format(id_, maxchars))
+                raise ValueError(f'Sequence {id_} exceeds maximum allowed '
+                                 f'length {maxchars} for search.')
             if cchars + chars > maxchars or queries == cquery > 0:
                 subsets.append([])
                 cquery, cchars = 0, 0
@@ -1095,15 +1086,15 @@ class Search(object):
         """
         for i in indices if indices else range(len(prots)):
             prot = prots[i]
-            f.write('# ID: {}\n'.format(prot['id']))
-            f.write('# Length: {}\n'.format(len(prot['seq'])))
-            f.write('# Product: {}\n'.format(prot['product']))
-            f.write('# Score: {}\n'.format(prot['score']))
-            f.write('# Hits: {}\n'.format(len(prot['hits'])))
+            f.write(f'# ID: {prot["id"]}\n')
+            f.write(f'# Length: {len(prot["seq"])}\n')
+            f.write(f'# Product: {prot["product"]}\n')
+            f.write(f'# Score: {prot["score"]}\n')
+            f.write(f'# Hits: {len(prot["hits"])}\n')
             for hit in prot['hits']:
-                f.write('{}\n'.format('\t'.join([hit[x] for x in (
+                f.write('\t'.join([hit[x] for x in (
                     'id', 'identity', 'evalue', 'score', 'coverage',
-                    'taxid')])))
+                    'taxid')]) + '\n')
 
     @staticmethod
     def parse_prev_results(fp, prots):
@@ -1169,14 +1160,16 @@ class Search(object):
         Taxonomic information will be appended to nodes.dmp and names.dmp in
         the working directory.
         """
-        with open(join(self.output, 'nodes.dmp'), 'a') as fo:
-            with open(join(self.output, 'names.dmp'), 'a') as fa:
-                for id_ in sorted(ids, key=int):
-                    fo.write('{}\t|\t{}\t|\t{}\t|\n'.format(
-                        id_, self.taxdump[id_]['parent'],
-                        self.taxdump[id_]['rank']))
-                    fa.write('{}\t|\t{}\t|\n'.format(
-                        id_, self.taxdump[id_]['name']))
+        fo = open(join(self.output, 'nodes.dmp'), 'a')
+        fa = open(join(self.output, 'names.dmp'), 'a')
+        for id_ in sorted(ids, key=int):
+            fo.write('\t|\t'.join((
+                id_, self.taxdump[id_]['parent'],
+                self.taxdump[id_]['rank'])) + '\t|\n')
+            fa.write('\t|\t'.join((
+                id_, self.taxdump[id_]['name'])) + '\t|\n')
+        fo.close()
+        fa.close()
 
     """sequence query functions"""
 
@@ -1201,8 +1194,11 @@ class Search(object):
         """
         # run blastdbcmd
         # fields: accession, taxid, sequence, title
-        cmd = '{} -db {} -entry {} -outfmt "%a %T %s %t"'.format(
-            self.blastdbcmd, self.db, ','.join(ids))
+        cmd = ' '.join((
+            self.blastdbcmd,
+            '-db', self.db,
+            '-entry', ','.join(ids),
+            '-outfmt', '"%a %T %s %t"'))
         out = run_command(cmd)[1]
 
         # parse output
@@ -1213,8 +1209,7 @@ class Search(object):
             if header:
                 # letter case is dependent on BLAST version
                 if line.lower().startswith('blast database error'):
-                    raise ValueError('Invalid BLAST database: {}.'
-                                     .format(self.db))
+                    raise ValueError(f'Invalid BLAST database: {self.db}.')
                 header = False
 
             # if one sequence Id is not found, program will print:
@@ -1274,7 +1269,7 @@ class Search(object):
         ids : list of str
             query entries (e.g., accessions)
         urlapi : str
-            URL API
+            URL API, with placeholder for query entries
 
         Returns
         -------
@@ -1299,8 +1294,8 @@ class Search(object):
             for batch in batches:
                 try:
                     res += self.remote_fetch(urlapi.format(','.join(batch)))
-                    print('  Fetched information of {} entries.'.format(
-                        len(batch)), flush=True)
+                    print(f'  Fetched information of {len(batch)} entries.',
+                          flush=True)
                     sleep(self.fetch_delay)
                 except ValueError:
                     failed.extend(batch)
@@ -1314,8 +1309,8 @@ class Search(object):
                 cids = []
                 break
         if cids:
-            print('WARNING: Cannot retrieve information of {} entries.'
-                  .format(len(cids)))
+            print(f'WARNING: Cannot retrieve information of {len(cids)} '
+                  'entries.')
         return res
 
     def remote_fetch(self, urlapi):
@@ -1336,7 +1331,7 @@ class Search(object):
         ValueError
             Fetch failed.
         """
-        url = '{}?{}'.format(self.fetch_server, urlapi)
+        url = f'{self.fetch_server}?{urlapi}'
         for i in range(self.fetch_retries):
             if i:
                 print('Retrying...', end=' ', flush=True)
@@ -1345,7 +1340,7 @@ class Search(object):
                 with urlopen(url, timeout=self.fetch_timeout) as response:
                     return response.read().decode('utf-8')
             except (HTTPError, URLError) as e:
-                print('{} {}.'.format(e.code, e.reason), end=' ', flush=True)
+                print(f'{e.code} {e.reason}.', end=' ', flush=True)
         print('', flush=True)
         raise ValueError('Failed to fetch information from remote server.')
 
@@ -1473,25 +1468,27 @@ class Search(object):
         tmpin = join(self.tmpdir, 'tmp.in')
         with open(tmpin, 'w') as f:
             write_fasta(seqs, f)
-        cmd = '{} -query {} -db {}'.format(self.blastp, tmpin, self.db)
+        cmd = [self.blastp,
+               '-query', tmpin,
+               '-db', self.db]
         args = {x: getattr(self, x, None) for x in (
             'evalue', 'coverage', 'maxseqs', 'threads', 'extrargs')}
         if args['evalue']:
-            cmd += ' -evalue {}'.format(args['evalue'])
+            cmd.extend(['-evalue', str(args['evalue'])])
         if args['coverage']:
-            cmd += ' -qcov_hsp_perc {}'.format(args['coverage'])
+            cmd.extend(['-qcov_hsp_perc', str(args['coverage'])])
         if args['maxseqs']:
-            cmd += ' -max_target_seqs {}'.format(args['maxseqs'])
+            cmd.extend(['-max_target_seqs', str(args['maxseqs'])])
         if args['threads'] is not None:
-            cmd += ' -num_threads {}'.format(args['threads'])
+            cmd.extend(['-num_threads', str(args['threads'])])
         if args['extrargs']:
-            cmd += ' {}'.format(args['extrargs'])
-        cmd += (' -outfmt "6 qaccver saccver pident evalue bitscore qcovhsp'
-                ' staxids"')
-        ec, out = run_command(cmd)
-        if ec:
-            raise ValueError('blastp failed with error code {}.'.format(ec))
+            cmd.append(args['extrargs'])
+        cmd.append('-outfmt "6 qaccver saccver pident evalue bitscore qcovhsp'
+                   ' staxids"')
+        ec, out = run_command(' '.join(cmd))
         remove(tmpin)
+        if ec:
+            raise ValueError(f'blastp failed with error code {ec}.')
         return self.parse_def_table(out)
 
     def diamond_search(self, seqs):
@@ -1521,26 +1518,29 @@ class Search(object):
         tmpin = join(self.tmpdir, 'tmp.in')
         with open(tmpin, 'w') as f:
             write_fasta(seqs, f)
-        cmd = '{} blastp --query {} --db {} --threads {} --tmpdir {}'.format(
-            self.diamond, tmpin, self.db, self.threads, self.tmpdir)
+        cmd = [self.diamond, 'blastp',
+               '--query', tmpin,
+               '--db', self.db,
+               '--threads', str(self.threads),
+               '--tmpdir', self.tmpdir]
         args = {x: getattr(self, x, None) for x in (
             'evalue', 'identity', 'coverage', 'maxseqs', 'extrargs')}
         if args['evalue']:
-            cmd += ' --evalue {}'.format(args['evalue'])
+            cmd.extend(['--evalue', str(args['evalue'])])
         if args['identity']:
-            cmd += ' --id {}'.format(args['identity'])
+            cmd.extend(['--id', str(args['identity'])])
         if args['coverage']:
-            cmd += ' --query-cover {}'.format(args['coverage'])
+            cmd.extend([' --query-cover', str(args['coverage'])])
         if args['maxseqs']:
-            cmd += ' --max-target-seqs {}'.format(args['maxseqs'])
+            cmd.extend(['--max-target-seqs', str(args['maxseqs'])])
         if args['extrargs']:
-            cmd += ' {}'.format(args['extrargs'])
-        cmd += (' --outfmt 6 qseqid sseqid pident evalue bitscore qcovhsp'
-                ' staxids')
-        ec, out = run_command(cmd, merge=False)
-        if ec:
-            raise ValueError('diamond failed with error code {}.'.format(ec))
+            cmd.append(args['extrargs'])
+        cmd.extend(['--outfmt',
+                    '6 qseqid sseqid pident evalue bitscore qcovhsp staxids'])
+        ec, out = run_command(' '.join(cmd), merge=False)
         remove(tmpin)
+        if ec:
+            raise ValueError(f'diamond failed with error code {ec}.')
         return self.parse_def_table(out)
 
     def remote_search(self, seqs):
@@ -1568,30 +1568,29 @@ class Search(object):
             https://ncbi.github.io/blast-cloud/
         """
         # generate query URL
-        query = ''.join(['>{}\n{}\n'.format(id_, seq) for id_, seq in seqs])
-        url = ('{}?CMD=Put&PROGRAM=blastp&DATABASE={}'
-               .format(self.server, self.db))
+        query = ''.join([f'>{id_}\n{seq}\n' for id_, seq in seqs])
+        url = f'{self.server}?CMD=Put&PROGRAM=blastp&DATABASE={self.db}'
         if self.algorithm:
-            url += '&BLAST_PROGRAMS={}'.format(self.algorithm)
+            url += '&BLAST_PROGRAMS=' + self.algorithm
         if self.evalue:
-            url += '&EXPECT={}'.format(self.evalue)
+            url += '&EXPECT=' + str(self.evalue)
         if self.maxseqs:
-            url += '&MAX_NUM_SEQ={}'.format(self.maxseqs)
+            url += '&MAX_NUM_SEQ=' + str(self.maxseqs)
         if self.entrez:
-            url += '&EQ_TEXT={}'.format(quote(self.entrez))
+            url += '&EQ_TEXT=' + quote(self.entrez)
         if self.extrargs:
-            url += '&{}'.format(self.extrargs.lstrip('&'))
-        url += '&QUERY={}'.format(quote(query))
-        print('Submitting {} queries for search.'.format(len(seqs)),
-              end='', flush=True)
+            url += '&' + self.extrargs.lstrip('&')
+        url += '&QUERY=' + quote(query)
+        print(f'Submitting {len(seqs)} queries for search.', end='',
+              flush=True)
 
         trial = 0
         while True:
             if trial:
                 if trial == (self.retries or 0) + 1:
-                    raise ValueError('Remote search failed after {} '
-                                     'trials.'.format(trial))
-                print('Retry {} times.'.format(trial), end='', flush=True)
+                    raise ValueError(
+                        f'Remote search failed after {trial} trials.')
+                print(f'Retry {trial} times.', end='', flush=True)
                 sleep(self.delay)
             trial += 1
 
@@ -1603,12 +1602,11 @@ class Search(object):
                 print('WARNING: Failed to obtain RID.')
                 continue
             rid = m.group(1)
-            print(' RID: {}.'.format(rid), end='', flush=True)
+            print(f' RID: {rid}.', end='', flush=True)
             sleep(1)
 
             # check status
-            url_ = '{}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID={}'.format(
-                self.server, rid)
+            url_ = f'{self.server}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID={rid}'
             starttime = time()
             success = False
             while True:
@@ -1636,19 +1634,18 @@ class Search(object):
                     success = True
                     break
                 else:
-                    print('WARNING: Unknown remote search status: {}.'
-                          .format(status))
+                    print(f'WARNING: Unknown remote search status: {status}.')
                     break
             if not success:
                 continue
             sleep(1)
 
             # retrieve result
-            url_ = ('{}?CMD=Get&ALIGNMENT_VIEW=Tabular&FORMAT_TYPE=Text&RID={}'
-                    .format(self.server, rid))
+            url_ = (f'{self.server}?CMD=Get&ALIGNMENT_VIEW=Tabular'
+                    f'&FORMAT_TYPE=Text&RID={rid}')
             if self.maxseqs:
-                url_ += '&MAX_NUM_SEQ={}&DESCRIPTIONS={}'.format(
-                    self.maxseqs, self.maxseqs)
+                url_ += (f'&MAX_NUM_SEQ={self.maxseqs}'
+                         f'&DESCRIPTIONS={self.maxseqs}')
             with urlopen(url_) as response:
                 res = response.read().decode('utf-8')
             if '# blastp' not in res or '# Query: ' not in res:
@@ -1772,7 +1769,7 @@ class Search(object):
 
             # calculate coverage
             if x[0] not in lenmap:
-                raise ValueError('Invalid query sequence Id: {}.'.format(x[0]))
+                raise ValueError(f'Invalid query sequence Id: {x[0]}.')
             try:
                 cov = (int(x[7]) - int(x[6]) + 1) / lenmap[x[0]] * 100
             except ValueError:
@@ -1797,7 +1794,7 @@ class Search(object):
             # add hit to list
             res.setdefault(x[0], []).append({
                 'id': seqid2accver(x[1]), 'identity': x[2], 'evalue': x[10],
-                'score': x[11], 'coverage': '{:.2f}'.format(cov), 'taxid': ''})
+                'score': x[11], 'coverage': f'{cov:.2f}', 'taxid': ''})
         return res
 
     """taxonomy query functions"""
@@ -1938,8 +1935,8 @@ class Search(object):
                 if pid == '':
                     self.taxdump[tid]['parent'] = tid_
                 elif pid != tid_:
-                    raise ValueError('Broken lineage for {}: {} <=> {}.'
-                                     .format(tid, pid, tid_))
+                    raise ValueError(
+                        f'Broken lineage for {tid}: {pid} <=> {tid_}.')
                 tid = tid_
                 if tid in self.taxdump:
                     continue
@@ -1972,8 +1969,8 @@ class Search(object):
         """
         res = []
         for id_, seq in seqs:
-            msg = ('Cannot find a self-hit for sequence {}. Consider setting '
-                   'self-alignment method to other than "lookup".'.format(id_))
+            msg = (f'Cannot find a self-hit for sequence {id_}. Consider '
+                   'setting self-alignment method to other than "lookup".')
             if id_ not in hits:
                 raise ValueError(msg)
             found = False
@@ -2041,7 +2038,7 @@ class Search(object):
         # calculate e-value (E)
         e = n ** 2 * 2 ** -bit
 
-        return '{:.1f}'.format(bit), '{:.3g}'.format(e)
+        return f'{bit:.1f}', f'{e:.3g}'
 
     def blast_selfaln(self, seqs):
         """Run BLAST to align sequences to themselves.
@@ -2059,14 +2056,18 @@ class Search(object):
         tmpin = join(self.tmpdir, 'tmp.in')
         with open(tmpin, 'w') as f:
             write_fasta(seqs, f)
-        cmd = '{} -query {} -subject {} -num_threads {} -outfmt 6'.format(
-            self.blastp, tmpin, tmpin, self.threads)
+        cmd = ' '.join((
+            self.blastp,
+            '-query', tmpin,
+            '-subject', tmpin,
+            '-num_threads', str(self.threads),
+            '-outfmt', '6'))
         extrargs = getattr(self, 'extrargs', None)
         if extrargs:
-            cmd += ' {}'.format(extrargs)
+            cmd += ' ' + extrargs
         ec, out = run_command(cmd)
         if ec:
-            raise ValueError('blastp failed with error code {}.'.format(ec))
+            raise ValueError(f'blastp failed with error code {ec}.')
         remove(tmpin)
         return(self.parse_self_m8(out))
 
@@ -2090,21 +2091,29 @@ class Search(object):
 
         # generate temporary database
         tmpdb = join(self.tmpdir, 'tmp.dmnd')
-        cmd = '{} makedb --in {} --db {} --threads {} --tmpdir {}'.format(
-            self.diamond, tmpin, tmpdb, self.threads, self.tmpdir)
+        cmd = ' '.join((
+            self.diamond, 'makedb',
+            '--in', tmpin,
+            '--db', tmpdb,
+            '--threads', str(self.threads),
+            '--tmpdir', self.tmpdir))
         ec, out = run_command(cmd, merge=False)
         if ec:
-            raise ValueError('diamond failed with error code {}.'.format(ec))
+            raise ValueError(f'diamond failed with error code {ec}.')
 
         # perform search
-        cmd = '{} blastp --query {} --db {} --threads {} --tmpdir {}'.format(
-            self.diamond, tmpin, tmpdb, self.threads, self.tmpdir)
+        cmd = ' '.join((
+            self.diamond, 'blastp',
+            '--query', tmpin,
+            '--db', tmpdb,
+            '--threads', str(self.threads),
+            '--tmpdir', self.tmpdir))
         extrargs = getattr(self, 'extrargs', None)
         if extrargs:
-            cmd += ' {}'.format(extrargs)
+            cmd += ' ' + extrargs
         ec, out = run_command(cmd, merge=False)
         if ec:
-            raise ValueError('diamond failed with error code {}.'.format(ec))
+            raise ValueError(f'diamond failed with error code {ec}.')
 
         remove(tmpin)
         remove(tmpdb)
@@ -2130,23 +2139,22 @@ class Search(object):
         for batch in batches:
 
             # generate query URL
-            query = ''.join(['>{}\n{}\n'.format(id_, seq)
-                             for id_, seq in batch])
+            query = ''.join([f'>{id_}\n{seq}\n' for id_, seq in batch])
             query = quote(query)
-            url = ('{}?CMD=Put&PROGRAM=blastp&DATABASE={}&QUERY={}&SUBJECTS={}'
-                   .format(self.aln_server, self.db, query, query))
+            url = (f'{self.aln_server}?CMD=Put&PROGRAM=blastp&'
+                   f'DATABASE={self.db}&QUERY={query}&SUBJECTS={query}')
             if self.extrargs:
-                url += '&{}'.format(self.extrargs.lstrip('&'))
-            print('Submitting {} queries for self-alignment.'.format(
-                len(batch)), end='', flush=True)
+                url += '&' + self.extrargs.lstrip('&')
+            print(f'Submitting {len(batch)} queries for self-alignment.',
+                  end='', flush=True)
 
             trial = 0
             while True:
                 if trial:
                     if trial == (self.retries or 0) + 1:
                         raise ValueError('Remote self-alignment failed after '
-                                         '{} trials.'.format(trial))
-                    print('Retry {} times.'.format(trial), end='', flush=True)
+                                         f'{trial} trials.')
+                    print(f'Retry {trial} times.', end='', flush=True)
                     sleep(self.delay)
                 trial += 1
 
@@ -2158,12 +2166,12 @@ class Search(object):
                     print('WARNING: Failed to obtain RID.')
                     continue
                 rid = m.group(1)
-                print(' RID: {}.'.format(rid), end='', flush=True)
+                print(f' RID: {rid}.', end='', flush=True)
                 sleep(1)
 
                 # check status
-                url_ = '{}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID={}'.format(
-                    self.aln_server, rid)
+                url_ = (f'{self.aln_server}?CMD=Get&FORMAT_OBJECT=SearchInfo&'
+                        f'RID={rid}')
                 starttime = time()
                 success = False
                 while True:
@@ -2194,15 +2202,15 @@ class Search(object):
                         break
                     else:
                         print('WARNING: Unknown remote self-alignment status: '
-                              '{}.'.format(status))
+                              f'{status}.')
                         break
                 if not success:
                     continue
                 sleep(1)
 
                 # retrieve result
-                url_ = ('{}?CMD=Get&ALIGNMENT_VIEW=Tabular&FORMAT_TYPE=Text&'
-                        'RID={}'.format(self.aln_server, rid))
+                url_ = (f'{self.aln_server}?CMD=Get&ALIGNMENT_VIEW=Tabular&'
+                        f'FORMAT_TYPE=Text&RID={rid}')
                 with urlopen(url_) as response:
                     res = response.read().decode('utf-8')
                 if '# blastp' not in res or '# Query: ' not in res:

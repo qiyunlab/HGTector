@@ -113,7 +113,7 @@ class Analyze(object):
         self.description = description
 
     def __call__(self, args):
-        print('Analysis started at {}.'.format(timestamp()))
+        print(f'Analysis started at {timestamp()}.')
 
         # load configurations
         self.cfg = load_configs()
@@ -159,7 +159,7 @@ class Analyze(object):
         # predict HGTs
         self.predict_hgt()
 
-        print('Analysis finished at {}.'.format(timestamp()))
+        print(f'Analysis finished at {timestamp()}.')
 
     def set_parameters(self, args):
         """Validate and set parameters.
@@ -186,11 +186,11 @@ class Analyze(object):
                 self.input_map = {k: join(self.input, v) for k, v in
                                   id2file_map(self.input, ext='tsv').items()}
             else:
-                raise ValueError('Invalid input data file or directory: {}.'
-                                 .format(self.input))
+                raise ValueError(
+                    f'Invalid input data file or directory: {self.input}.')
             if len(self.input_map) == 0:
-                raise ValueError('No input data are found under: {}.'
-                                 .format(self.input))
+                raise ValueError(
+                    f'No input data are found under: {self.input}.')
 
         # check / create output directory
         makedirs(self.output, exist_ok=True)
@@ -199,14 +199,12 @@ class Analyze(object):
         # load configurations
         get_config(self, 'evalue', 'analyze.evalue', float)
         for key in ('maxhits', 'identity', 'coverage'):
-            get_config(self, key, 'analyze.{}'.format(key))
+            get_config(self, key, f'analyze.{key}')
         for key in ('input_cov', 'self_rank', 'close_size', 'distal_top'):
-            get_config(self, key, 'grouping.{}'.format(key.replace(
-                '_', '')))
+            get_config(self, key, f'grouping.{key.replace("_", "")}')
         for key in ('weighted', 'outliers', 'orphans', 'bandwidth', 'bw_steps',
                     'low_part', 'noise', 'fixed', 'silhouette', 'self_low'):
-            get_config(self, key, 'predict.{}'.format(key.replace(
-                '_', '')))
+            get_config(self, key, f'predict.{key.replace("_", "")}')
 
         # convert boolean values
         for key in ('weighted', 'orphans', 'self_low'):
@@ -243,16 +241,15 @@ class Analyze(object):
             self.taxdump = read_taxdump(dirname(self.input))
         else:
             raise ValueError('Missing taxonomy database.')
-        print('Done. Read {} taxa.'.format(len(self.taxdump)))
+        print(f'Done. Read {len(self.taxdump)} taxa.')
 
         # read search results
         print('Reading homology search results...')
         self.data = {}
         for sid, fname in self.input_map.items():
             self.data[sid] = self.read_search_results(fname)
-            print('  {}: {} proteins.'.format(sid, len(self.data[sid])))
-        print('Done. Read search results of {} samples.'
-              .format(len(self.data)))
+            print(f'  {sid}: {len(self.data[sid])} proteins.')
+        print(f'Done. Read search results of {len(self.data)} samples.')
 
     @staticmethod
     def read_search_results(file, maxhits=None):
@@ -320,10 +317,9 @@ class Analyze(object):
             for sid, tid in sorted(self.input_tax.items()):
                 if tid not in self.taxdump:
                     # TODO: read from both temp and master taxdump
-                    raise ValueError('TaxID {} is not present in taxonomy '
-                                     'database.'.format(tid))
-                print('  {}: {} ({}).'. format(
-                    sid, tid, self.taxdump[tid]['name']))
+                    raise ValueError(
+                        f'TaxID {tid} is not present in taxonomy database.')
+                print(f'  {sid}: {tid} ({self.taxdump[tid]["name"]}).')
         else:
             self.input_tax = {}
 
@@ -338,21 +334,21 @@ class Analyze(object):
                         self.data[sid], self.taxdump, self.input_cov)
                     self.input_tax[sid] = tid
                 except ValueError:
-                    raise ValueError('Cannot auto-infer taxonomy for {}. '
-                                     'Please specify manually.'.format(sid))
-                print('  {}: {} ({}) (covering {:2g}% best hits).'.format(
-                    sid, tid, self.taxdump[tid]['name'], cov))
+                    raise ValueError(f'Cannot auto-infer taxonomy for {sid}.'
+                                     ' Please specify manually.')
+                print(f'  {sid}: {tid} ({self.taxdump[tid]["name"]}) '
+                      f'(covering {cov:2g}% best hits).')
 
         # refine taxonomy database
         print('Refining taxonomy database...')
         self.taxdump = refine_taxdump(self.sum_taxids(), self.taxdump)
         add_children(self.taxdump)
-        print('Done. Retained {} taxa.'.format(len(self.taxdump)))
+        print(f'Done. Retained {len(self.taxdump)} taxa.')
 
         # find lowest common ancestor (LCA) of all genomes
         self.lca = find_lca(self.input_tax.values(), self.taxdump)
-        print('All input genomes belong to {} ({}).'.format(
-            self.lca, describe_taxon(self.lca, self.taxdump)))
+        print(f'All input genomes belong to {self.lca} '
+              f'({describe_taxon(self.lca, self.taxdump)}).')
 
     @staticmethod
     def infer_genome_tax(prots, taxdump, coverage):
@@ -432,20 +428,20 @@ class Analyze(object):
         """
         self.groups = {}
         for key in ('self', 'close'):
-            tids = getattr(self, '{}_tax'.format(key))
+            tids = getattr(self, f'{key}_tax')
 
             # user-defined group
             if tids:
-                setattr(self, '{}_tax'.format(key), list_from_param(tids))
-                print('User-defined {} group:'.format(key))
+                setattr(self, f'{key}_tax', list_from_param(tids))
+                print(f'User-defined {key} group:')
 
             # auto-infer group
             else:
-                getattr(self, 'infer_{}_group'.format(key))()
-                print('Auto-inferred {} group:'.format(key))
+                getattr(self, f'infer_{key}_group')()
+                print(f'Auto-inferred {key} group:')
 
             # collect taxIds that belong to group
-            tids = getattr(self, '{}_tax'.format(key))
+            tids = getattr(self, f'{key}_tax')
             if key not in self.groups:
                 self.groups[key] = set().union(*[[x] + get_descendants(
                     x, self.taxdump) for x in tids])
@@ -457,10 +453,9 @@ class Analyze(object):
 
             # report group content
             for tid in tids:
-                print('  {} ({})'.format(tid, describe_taxon(
-                    tid, self.taxdump)))
-            print('{} group has {} taxa.'.format(
-                key.capitalize(), len(self.groups[key])))
+                print(f'  {tid} ({describe_taxon(tid, self.taxdump)})')
+            print(f'{key.capitalize()} group has {len(self.groups[key])} '
+                  'taxa.')
 
     def infer_self_group(self):
         """Infer self group automatically.
@@ -521,7 +516,7 @@ class Analyze(object):
                 # find best match taxId in distal group
                 prot['match'] = self.find_match(prot['hits'].query(
                     'group == "distal"'))
-            print('  {}'.format(sid))
+            print(f'  {sid}')
         print('Done.')
 
     def find_match(self, df):
@@ -574,7 +569,7 @@ class Analyze(object):
         """
         n = self.df.shape[0]
         self.df.query('close + distal > 0', inplace=True)
-        print('Removed {} ORFans.'.format(n - self.df.shape[0]))
+        print(f'Removed {n - self.df.shape[0]} ORFans.')
 
     def remove_outliers(self):
         """Remove outliers from selected groups of scores.
@@ -592,7 +587,7 @@ class Analyze(object):
         elif self.outliers == 'boxplot':
             self.df = self.outliers_boxplot(self.df, groups)
 
-        print('Removed {} outliers.'.format(n - self.df.shape[0]))
+        print(f'Removed {n - self.df.shape[0]} outliers.')
 
     def relevant_groups(self):
         """Get groups that are relevant in HGT prediction.
@@ -650,14 +645,14 @@ class Analyze(object):
         groups = self.relevant_groups()
         print('Calculating thresholds for clustering...')
         for group in groups:
-            print('{} group:'.format(group.capitalize()))
+            print(f'{group.capitalize()} group:')
             self.plot_hist(self.df[group].tolist(),
-                           join(self.output, '{}.hist.png'.format(group)))
+                           join(self.output, f'{group}.hist.png'))
 
             # cannot cluster constant data
             if self.df[group].std() == 0.0:
-                print('WARNING: {} group is constant. Cannot predict HGTs.'
-                      .format(group.capitalize()))
+                print(f'WARNING: {group.capitalize()} group is constant. '
+                      'Cannot predict HGTs.')
                 return
 
             # calculate threshold using KDE
@@ -665,11 +660,11 @@ class Analyze(object):
 
             # use a fixed global threshold if KDE fails
             if not ths[group] and self.fixed:
-                print('WARNING: Cannot cluster {} group using KDE. Use fixed '
-                      'threshold {} instead.'.format(group, self.fixed))
+                print(f'WARNING: Cannot cluster {group} group using KDE. '
+                      f'Use fixed threshold {self.fixed} instead.')
                 ths[group] = self.df[group].quantile(self.fixed / 100)
 
-            print('  Threshold: {:g}.'.format(ths[group]))
+            print(f'  Threshold: {ths[group]:g}.')
         print('Done.')
 
         # identify atypical cluster
@@ -679,7 +674,7 @@ class Analyze(object):
                          (not self.self_low or self.df['self'] <= ths['self'])
         print(' done.')
         n = self.df[self.df['hgt']].shape[0]
-        print('  Total predicted HGTs: {:g}.'.format(n))
+        print(f'  Total predicted HGTs: {n:g}.')
         if not n:
             return
 
@@ -693,8 +688,8 @@ class Analyze(object):
             print('Refining cluster...', end='')
             self.refine_cluster(cent)
             print(' done.')
-            print('  Total predicted HGTs after refinement: {:g}.'.format(
-                self.df[self.df['hgt']].shape[0]))
+            print('  Total predicted HGTs after refinement: '
+                  f'{self.df[self.df["hgt"]].shape[0]:g}.')
             if not n:
                 return
 
@@ -703,9 +698,9 @@ class Analyze(object):
         makedirs(join(self.output, 'hgts'), exist_ok=True)
         for sample in self.df['sample'].unique():
             df_ = self.df[self.df['hgt'] & (self.df['sample'] == sample)]
-            print('  {}: {}.'.format(sample, df_.shape[0]))
+            print(f'  {sample}: {df_.shape[0]}.')
             df_[['protein', 'silh']].to_csv(
-                join(self.output, 'hgts', '{}.txt'.format(sample)),
+                join(self.output, 'hgts', f'{sample}.txt'),
                 sep='\t', index=False, header=False, float_format='%g')
         print('Prediction results saved to hgts/.')
 
@@ -742,7 +737,7 @@ class Analyze(object):
 
             # plot density function and thresholds
             self.plot_density(x, y, peak, valley, th,
-                              join(self.output, '{}.kde.png'.format(group)))
+                              join(self.output, f'{group}.kde.png'))
 
             return th
         else:
@@ -780,13 +775,12 @@ class Analyze(object):
         if bw == 'grid':
             kde = self.grid_kde(data_, estimator, self.bw_steps)
             bw = kde.bandwidth
-            print('  Grid search-optimized bandwidth: {:g}.'.format(bw))
+            print(f'  Grid search-optimized bandwidth: {bw:g}.')
 
         # Silverman's rule-of-thumb
         elif bw == 'silverman':
             bw = self.silverman_bw(data)
-            print('  Bandwidth by Silverman\'s rule-of-thumb: {:g}.'.format(
-                bw))
+            print(f'  Bandwidth by Silverman\'s rule-of-thumb: {bw:g}.')
             setattr(estimator, 'bandwidth', bw)
             kde = estimator.fit(data_)
 
@@ -795,7 +789,7 @@ class Analyze(object):
             setattr(estimator, 'bandwidth', bw)
             kde = estimator.fit(data_)
         else:
-            raise ValueError('Invalid bandwidth: {}.'.format(bw))
+            raise ValueError(f'Invalid bandwidth: {bw}.')
 
         # get density function
         x, y = self.density_func(data_, kde)
@@ -829,10 +823,14 @@ class Analyze(object):
         """
         n = data.size
         if n < 5:
-            raise ValueError('Cannot perform grid search on {} data point(s).'
-                             .format(n))
+            raise ValueError(
+                f'Cannot perform grid search on {n} data point(s).')
         bwspace = np.logspace(-1, 0, steps)
         params = {'bandwidth': bwspace}
+
+        # removed parameter "iid=False" because it is deprecated since scikit-
+        # learn 0.22; however in older versions it was true by default so be
+        # cautious
         grid = GridSearchCV(estimator, params, cv=5)
         grid.fit(data)
         return grid.best_estimator_
@@ -865,8 +863,7 @@ class Analyze(object):
         """
         n = len(data)
         if n < 2:
-            raise ValueError('Cannot calculate bandwidth on {} data point.'
-                             .format(n))
+            raise ValueError(f'Cannot calculate bandwidth on {n} data point.')
         iqr = np.subtract(*np.percentile(data, [75, 25]))
         std = np.std(data, ddof=1)
         if not std and not iqr:
@@ -1016,16 +1013,15 @@ class Analyze(object):
             try:
                 peak, valley = self.first_hill(x, y)
             except ValueError:
-                print('  {:.3f}: n/a'.format(bw))
+                print(f'  {bw:.3f}: n/a')
                 continue
             th = valley - (valley - peak) * self.noise / 100
             ratio = data[data < th].size / data.size * 100
-            print('  {:.3f}: {:g} - {:.2f}%'.format(bw, th, ratio))
+            print(f'  {bw:.3f}: {th:g} - {ratio:.2f}%')
             if not self.low_part or ratio <= self.low_part:
-                print('  Auto-determined bandwidth: {:g}.'.format(bw))
-                self.plot_density(
-                    x, y, peak, valley, th,
-                    join(self.output, '{}.kde.png'.format(group)))
+                print(f'  Auto-determined bandwidth: {bw:g}.')
+                self.plot_density(x, y, peak, valley, th,
+                                  join(self.output, f'{group}.kde.png'))
                 return th
         return 0.0
 

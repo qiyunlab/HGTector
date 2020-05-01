@@ -237,39 +237,39 @@ class UtilTests(TestCase):
 
         # regular Fasta files
         for id_ in ids:
-            open(join(self.tmpdir, '{}.faa'.format(id_)), 'a').close()
+            open(join(self.tmpdir, f'{id_}.faa'), 'a').close()
         obs = id2file_map(self.tmpdir)
-        exp = {x: '{}.faa'.format(x) for x in ids}
+        exp = {x: f'{x}.faa' for x in ids}
         self.assertDictEqual(obs, exp)
         for id_ in ids:
-            remove(join(self.tmpdir, '{}.faa'.format(id_)))
+            remove(join(self.tmpdir, f'{id_}.faa'))
 
         # gzipped Fasta files
         for id_ in ids:
-            open(join(self.tmpdir, '{}.faa.gz'.format(id_)), 'a').close()
+            open(join(self.tmpdir, f'{id_}.faa.gz'), 'a').close()
         obs = id2file_map(self.tmpdir)
-        exp = {x: '{}.faa.gz'.format(x) for x in ids}
+        exp = {x: f'{x}.faa.gz' for x in ids}
         self.assertDictEqual(obs, exp)
         for id_ in ids:
-            remove(join(self.tmpdir, '{}.faa.gz'.format(id_)))
+            remove(join(self.tmpdir, f'{id_}.faa.gz'))
 
         # user-defined extension filename
         for id_ in ids:
-            open(join(self.tmpdir, '{}.faa'.format(id_)), 'a').close()
+            open(join(self.tmpdir, f'{id_}.faa'), 'a').close()
         open(join(self.tmpdir, 'readme.txt'), 'a').close()
         open(join(self.tmpdir, 'taxdump'), 'a').close()
         obs = id2file_map(self.tmpdir, ext='faa')
-        exp = {x: '{}.faa'.format(x) for x in ids}
+        exp = {x: f'{x}.faa' for x in ids}
         self.assertDictEqual(obs, exp)
         remove(join(self.tmpdir, 'readme.txt'))
         remove(join(self.tmpdir, 'taxdump'))
 
         # user-defined ID list
         obs = id2file_map(self.tmpdir, ids=['a', 'b'])
-        exp = {x: '{}.faa'.format(x) for x in ['a', 'b']}
+        exp = {x: f'{x}.faa' for x in ['a', 'b']}
         self.assertDictEqual(obs, exp)
         for id_ in ids:
-            remove(join(self.tmpdir, '{}.faa'.format(id_)))
+            remove(join(self.tmpdir, f'{id_}.faa'))
 
         # duplicated IDs
         open(join(self.tmpdir, 'x.faa'), 'a').close()

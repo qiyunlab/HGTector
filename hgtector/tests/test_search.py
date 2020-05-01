@@ -24,7 +24,7 @@ class SearchTests(TestCase):
 
         # whether to test remote functions, which highly depends on network
         # connection and current status of NCBI server
-        self.test_remote = False
+        self.test_remote = True
 
     def tearDown(self):
         rmtree(self.tmpdir)
@@ -138,7 +138,7 @@ class SearchTests(TestCase):
         me.method = 'precomp'
         me.taxmap = None
 
-        # this case has two hits that miss taxIds: one is available from taxom
+        # this case has two hits that miss taxIds: one is available from taxon
         # map and one needs to be looked-up from database; and another hit with
         # invalid sequence Id
         prots = {'WP_000516135.1': [
@@ -1088,8 +1088,7 @@ class SearchTests(TestCase):
         me.parse_taxonomy_xml(xml)
         obs = []
         for tid, d in sorted(me.taxdump.items(), key=lambda x: int(x[0])):
-            obs.append('{}:{},{},{}'.format(
-                tid, d['name'], d['parent'], d['rank']))
+            obs.append(f'{tid}:{d["name"]},{d["parent"]},{d["rank"]}')
         exp = ['2:Bacteria,131567,superkingdom',
                '543:Enterobacteriaceae,91347,family',
                '561:Escherichia,543,genus',
@@ -1123,8 +1122,7 @@ class SearchTests(TestCase):
         self.assertListEqual(obs, exp)
         obs = []
         for tid, d in sorted(me.taxdump.items(), key=lambda x: int(x[0])):
-            obs.append('{}:{},{},{}'.format(
-                tid, d['name'], d['parent'], d['rank']))
+            obs.append(f'{tid}:{d["name"]},{d["parent"]},{d["rank"]}')
         exp = ['2:Bacteria,131567,superkingdom',
                '543:Enterobacteriaceae,91347,family',
                '561:Escherichia,543,genus',

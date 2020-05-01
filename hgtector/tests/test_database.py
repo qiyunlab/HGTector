@@ -44,8 +44,7 @@ class DatabaseTests(TestCase):
         me.build_blast_db()
         self.assertTrue(isdir(join(self.tmpdir, 'blast')))
         for ext in ('phr', 'pin', 'pog', 'psd', 'psi', 'psq'):
-            self.assertTrue(isfile(join(self.tmpdir, 'blast', 'db.{}'.format(
-                ext))))
+            self.assertTrue(isfile(join(self.tmpdir, 'blast', f'db.{ext}')))
         rmtree(join(self.tmpdir, 'blast'))
         remove(join(self.tmpdir, 'db.faa'))
         remove(join(self.tmpdir, 'taxon.map'))
