@@ -382,14 +382,15 @@ class Database(object):
         self.df['genome'] = 'G' + self.df['accnov'].str.split('_', 1).str[-1]
         self.df.drop_duplicates(subset=['genome'], inplace=True)
 
-        # include/exclude genome IDs
+        # include/exclude genome Ids
         if self.genoids:
             self.genoids = set(list_from_param(self.genoids))
             print(f'{"Ex" if self.exclude else "In"}cluding '
                   f'{len(self.genoids)} custom genome IDs...')
-            self.df = self.df[(self.df['accession'].isin(self.genoids)) |
-                              (self.df['accnov'].isin(self.genoids)) |
-                              (self.df['genome'].isin(self.genoids))]
+            self.df = self.df[(self.df['accession'].isin(self.genoids) |
+                               self.df['accnov'].isin(self.genoids) |
+                               self.df['genome'].isin(self.genoids)) !=
+                              self.exclude]
             report_diff('Dropped {} genomes.')
         print('Done.')
 
@@ -428,7 +429,7 @@ class Database(object):
         self.df = self.df[self.df['taxid'].isin(self.taxdump)]
         report_diff('Dropped {} genomes without valid taxId.')
 
-        # assign genomes to species
+        # assign genomes to species (represented by taxId not name)
         self.df['species'] = self.df['taxid'].apply(
             taxid_at_rank, rank='species', taxdump=self.taxdump)
 
@@ -562,29 +563,32 @@ class Database(object):
 
     def extract_genomes(self):
         """Extract proteins from genomes.
+
+        Notes
+        -----
+        Write protein sequences of all genomes into db.faa.
+        Write protein to genomes(s) map to genome.map.gz.
         """
-        print('Extracting downloaded genomic data...', end='',
-              flush=True)
+        print('Extracting downloaded genomic data...', end='', flush=True)
         dir_ = join(self.output, 'download', 'faa')
         prots = {}
         cp = None
         fout = open(join(self.output, 'db.faa'), 'w')
 
         def write_prot():
-            if not cp:
-                return
-            fout.write(f'>{cp} {prots[cp]["name"]}\n{prots[cp]["seq"]}\n')
+            if cp:
+                fout.write(f'>{cp} {prots[cp]["name"]}\n{prots[cp]["seq"]}\n')
 
         g2n, g2aa = {}, {}
         for row in self.df.itertuples():
             g, tid = row.genome, row.taxid
             g2n[g], g2aa[g] = 0, 0
-            file = join(dir_, '{}_protein.faa.gz'.format(
-                row.ftp_path.rsplit('/', 1)[-1]))
+            stem = row.ftp_path.rsplit('/', 1)[-1]
+            fp = join(dir_, f'{stem}_protein.faa.gz')
             try:
-                fin = gzip.open(file, 'rt')
+                fin = gzip.open(fp, 'rt')
             except TypeError:
-                fin = gzip.open(file, 'r')
+                fin = gzip.open(fp, 'r')
             cp = None
             for line in fin:
                 line = line.rstrip()
@@ -633,6 +637,10 @@ class Database(object):
 
     def genome_lineages(self):
         """Generate lineage information for genomes.
+
+        Notes
+        -----
+        Write genome lineages to lineages.txt.
         """
         # identify taxa at standard ranks
         ranks = ['superkingdom', 'kingdom', 'phylum', 'class', 'order',
@@ -663,6 +671,10 @@ class Database(object):
 
     def genome_metadata(self):
         """Write and report genome metadata.
+
+        Notes
+        -----
+        Write genome metadata to genomes.tsv.
         """
         self.df.set_index('genome', inplace=True)
         self.df = self.df[[
@@ -676,6 +688,10 @@ class Database(object):
 
     def build_taxdump(self):
         """Build taxonomy database.
+
+        Notes
+        -----
+        Write refined taxonomy database to taxdump/nodes.dmp and names.dmp.
         """
         tids = self.df['taxid'].unique().tolist()
 
@@ -693,14 +709,13 @@ class Database(object):
         # shrink taxdump files
         dir_ = join(self.output, 'taxdump')
         makedirs(dir_, exist_ok=True)
-        for key in ('nodes', 'names'):
-            fname = '{}.dmp'.format(key)
+        for fname in ('nodes.dmp', 'names.dmp'):
             fo = open(join(dir_, fname), 'w')
             fi = open(join(self.tmpdir, fname), 'r')
             for line in fi:
-                x = line.rstrip().replace('\t|', '').split('\t')
-                if x[0] in ancs:
-                    if key == 'nodes' or 'scientific name' in x:
+                row = line.rstrip().replace('\t|', '').split('\t')
+                if row[0] in ancs:
+                    if fname == 'nodes.dmp' or 'scientific name' in row:
                         fo.write(line)
             fi.close()
             fo.close()

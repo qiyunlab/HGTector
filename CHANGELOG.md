@@ -16,6 +16,7 @@ Note: The command-line interface and the format and content of input, output and
 
 ### Fixed
 - Removed deprecated parameter "iid" for grid search since scikit-learn 0.22.
+- Fixed a bug in custom genome exclusion during database building.
 
 
 ## Version 2.0b1 (complete rework) (10/23/2019)
