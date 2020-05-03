@@ -24,7 +24,7 @@ class SearchTests(TestCase):
 
         # whether to test remote functions, which highly depends on network
         # connection and current status of NCBI server
-        self.test_remote = True
+        self.test_remote = False
 
     def tearDown(self):
         rmtree(self.tmpdir)

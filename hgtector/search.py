@@ -65,7 +65,7 @@ arguments = [
     'taxonomic filters',
     ['--tax-include', 'include taxa under those taxIds'],
     ['--tax-exclude', 'exclude taxa under those taxIds'],
-    ['--tax-unique',  'ignore more than one hit with same taxId',
+    ['--tax-unique',  'ignore more than one hit with same taxID',
                       {'choices': ['yes', 'no']}],
     ['--tax-unirank', 'ignore more than one hit under same taxon at this '
                       'rank'],
@@ -1867,7 +1867,7 @@ class Search(object):
         Raises
         ------
         ValueError
-            TaxId list is invalid.
+            TaxID list is invalid.
         ValueError
             Failed to retrieve info from server.
         """

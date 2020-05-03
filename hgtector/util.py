@@ -297,7 +297,7 @@ def id2file_map(dir_, ext=None, ids=None):
         if ids is not None and id_ not in ids:
             continue
         if id_ in res:
-            raise ValueError('Ambiguous files for Id: {}.'.format(id_))
+            raise ValueError(f'Ambiguous files for Id: {id_}.')
         res[id_] = fname
     return res
 
@@ -395,7 +395,7 @@ def write_fasta(seqs, f):
         file to write
     """
     for id_, seq in seqs:
-        f.write('>{}\n{}\n'.format(id_, seq))
+        f.write(f'>{id_}\n{seq}\n')
 
 
 def _get_taxon(tid, taxdump):
@@ -421,8 +421,7 @@ def _get_taxon(tid, taxdump):
     try:
         return taxdump[tid]
     except KeyError:
-        raise ValueError(
-            'TaxID {} is not found in taxonomy database.'.format(tid))
+        raise ValueError(f'TaxID {tid} is not found in taxonomy database.')
 
 
 def describe_taxon(tid, taxdump):
@@ -447,8 +446,8 @@ def describe_taxon(tid, taxdump):
     """
     taxon = _get_taxon(tid, taxdump)
     name, rank = taxon['name'], taxon['rank']
-    return ('{} (no rank)'.format(name) if not rank or rank == 'no rank'
-            else '{} {}'.format(rank, name))
+    return (f'{name} (no rank)' if not rank or rank == 'no rank'
+            else f'{rank} {name}')
 
 
 def is_capital(name):
@@ -920,3 +919,24 @@ def save_figure(fig, file):
     """
     fig.tight_layout()
     fig.savefig(file, bbox_inches='tight')
+
+
+def taxdump_from_text(text):
+    """Read taxdump from comma-delimited text.
+
+    Parameters
+    ----------
+    text : list of str
+        multi-line, comma-delimited text
+        columns: taxId, name, parent taxId, rank
+
+    Returns
+    -------
+    dict of dict
+        taxonomy database
+    """
+    res = {}
+    for line in text:
+        x = line.split(',')
+        res[x[0]] = {'name': x[1], 'parent': x[2], 'rank': x[3]}
+    return res

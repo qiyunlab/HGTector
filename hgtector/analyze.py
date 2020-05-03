@@ -226,6 +226,11 @@ class Analyze(object):
 
     def read_input(self):
         """Workflow for reading input data.
+
+        Notes
+        -----
+        1. Read taxonomy database into `taxdump`.
+        2. Read homology search results into `data`.
         """
         # read taxonomy database
         if self.taxdump is not None:
@@ -389,7 +394,7 @@ class Analyze(object):
             for tid in get_lineage(bestid, taxdump):
                 freqs[tid] = freqs.get(tid, 0) + 1
 
-        # loop frquencies from low to high, and select taxId(s) at the lowest
+        # loop frequencies from low to high, and select taxId(s) at the lowest
         # frequency
         lowfreq = 0
         candidates = []
@@ -415,7 +420,12 @@ class Analyze(object):
             return res, freqs[res] / n * 100
 
     def sum_taxids(self):
-        """Generate a list of taxIds mentioned in all sets and hit tables.
+        """Get all taxIds mentioned in all sets and hit tables.
+
+        Returns
+        -------
+        set of str
+            all taxIds
         """
         res = set(self.input_tax.values())
         for sid, prots in self.data.items():
@@ -425,6 +435,13 @@ class Analyze(object):
 
     def define_groups(self):
         """Define the three (actually two) groups: "self" and "close".
+
+        Notes
+        -----
+        Assign these attributes:
+        1. `self_tax`: top-level taxId(s) of the self group.
+        2. `close_tax`: top-level taxId(s) of the close group.
+        3. `groups` (keys: self, close, distal): all taxIds under each group.
         """
         self.groups = {}
         for key in ('self', 'close'):
@@ -459,6 +476,10 @@ class Analyze(object):
 
     def infer_self_group(self):
         """Infer self group automatically.
+
+        Notes
+        -----
+        Assign `self_tax` as top-level taxId(s) of the self group.
         """
         # just use LCA
         if not self.self_rank:
@@ -472,6 +493,11 @@ class Analyze(object):
 
     def infer_close_group(self):
         """Infer close group automatically.
+
+        Notes
+        -----
+        1. Assign `close_tax` as top-level taxId(s) of the close group.
+        2. Assign `groups['close']` as all taxIds under the close group.
         """
         mems = []
 
@@ -497,6 +523,13 @@ class Analyze(object):
 
     def calc_scores(self):
         """Summarize search scores for proteins.
+
+        Notes
+        -----
+        1. Append column `group` to the hit table of each protein based on the
+          `taxid` column.
+        2. Calculate scores of `self`, `close` and `distal` for each protein.
+        3. Infer `match` for each protein based on its distal hits.
         """
         print('Calculating protein scores by group...', flush=True)
         for sid, prots in sorted(self.data.items()):
@@ -534,7 +567,7 @@ class Analyze(object):
 
         Notes
         -----
-        The best match TaxID is the LCA of top hits. The "top hits" are
+        The best match taxId is the LCA of top hits. The "top hits" are
         defined as those whose bit scores are no less than a certain
         percentage of that of the best hit. This behavior is similar to
         DIAMOND's taxonomic classification function.
@@ -547,6 +580,11 @@ class Analyze(object):
 
     def make_score_table(self):
         """Make a data frame for the entire protein set.
+
+        Notes
+        -----
+        1. Generate score table (pd.DataFrame) and assign to `df`.
+        2. Write score table to file `scores.tsv` (tab-delimited).
         """
         print('Summarizing scores of all proteins...', end='', flush=True)
         self.df = {}
@@ -566,6 +604,10 @@ class Analyze(object):
 
     def remove_orphans(self):
         """Remove ORFans (genes without non-self hits).
+
+        Notes
+        -----
+        Remove ORFan rows from the score table `df` in-place.
         """
         n = self.df.shape[0]
         self.df.query('close + distal > 0', inplace=True)
@@ -576,6 +618,7 @@ class Analyze(object):
 
         Notes
         -----
+        Remove outlier rows from the score table `df` in-place.
         Only outliers at the right (high) side will be removed.
         """
         # TODO: add other methods
@@ -595,7 +638,12 @@ class Analyze(object):
         Returns
         -------
         list of str
-            relevant groups
+            relevant groups in order
+
+        Notes
+        -----
+        The `self` group is relevant only when `self_low` is True, otherwise
+        only `close` and `distal` groups are relevant.
         """
         return (['self'] if self.self_low else []) + ['close', 'distal']
 
@@ -614,6 +662,10 @@ class Analyze(object):
         -------
         pd.DataFrame
             output dataframe with outliers removed
+
+        Notes
+        -----
+        Z-score >= 3 is the criterion for outliers.
         """
         return df[(zscore(df[keys]) < 3).all(axis=1)]
 
@@ -632,11 +684,30 @@ class Analyze(object):
         -------
         pd.DataFrame
             output dataframe with outliers removed
+
+        Notes
+        -----
+        Criterion for outliers: < Q1 - 1.5 * IQR or > Q3 + 1.5 * IQR.
         """
         return df[(df[keys] <= df[keys].quantile(0.75) * 2.5 -
                    df[keys].quantile(0.25) * 1.5).all(axis=1)]
 
     def predict_hgt(self):
+        """Predict HGTs.
+
+        Returns
+        -------
+        int
+            number of predicted HGTs
+
+        Notes
+        -----
+        Central pipeline of this script.
+        - Report threshold for each group.
+        - Generate one scatter plot for close vs distal, and one density plot
+          for each group.
+        - Generate one text file for putative HGTs of each sample under `hgt/`.
+        """
         print('Predicting HGTs...')
 
         # perform kernel density estimation (KDE), identify "atypical"
@@ -653,7 +724,7 @@ class Analyze(object):
             if self.df[group].std() == 0.0:
                 print(f'WARNING: {group.capitalize()} group is constant. '
                       'Cannot predict HGTs.')
-                return
+                return 0
 
             # calculate threshold using KDE
             ths[group] = self.cluster_kde(group)
@@ -676,7 +747,7 @@ class Analyze(object):
         n = self.df[self.df['hgt']].shape[0]
         print(f'  Total predicted HGTs: {n:g}.')
         if not n:
-            return
+            return 0
 
         # calculate silhouette scores and centroid
         print('Calculating cluster properties...', end='')
@@ -688,10 +759,10 @@ class Analyze(object):
             print('Refining cluster...', end='')
             self.refine_cluster(cent)
             print(' done.')
-            print('  Total predicted HGTs after refinement: '
-                  f'{self.df[self.df["hgt"]].shape[0]:g}.')
+            n = self.df[self.df['hgt']].shape[0]
+            print(f'  Total predicted HGTs after refinement: {n:g}.')
             if not n:
-                return
+                return 0
 
         # summarize prediction results
         print('Predicted HGTs by sample:')
@@ -706,6 +777,7 @@ class Analyze(object):
 
         # plot prediction results
         self.plot_hgts()
+        return self.df[self.df['hgt']].shape[0]
 
     def cluster_kde(self, group):
         """Cluster data by KDE.
@@ -718,7 +790,7 @@ class Analyze(object):
         Returns
         -------
         float
-            threshold
+            clustering threshold, or 0 if not determined
         """
         if self.bandwidth != 'auto':
             data = self.df[group].values
@@ -744,7 +816,7 @@ class Analyze(object):
             return self.smart_kde(group)
 
     def perform_kde(self, data):
-        """Perform kernel density estimation (KDE)
+        """Perform kernel density estimation (KDE) on data.
 
         Parameters
         ----------
@@ -957,6 +1029,7 @@ class Analyze(object):
         plt.xlabel('Score')
         plt.ylabel('Frequency')
         save_figure(fig, file)
+        plt.close()
 
     @staticmethod
     def plot_density(x, y, peak, valley, th, file):
@@ -972,6 +1045,12 @@ class Analyze(object):
             x-coordinate of threshold
         file : str
             filename to save plot
+
+        Notes
+        -----
+        1. Generate a density plot, with 1st peak and 1st valley circled, and
+           threshold indicated by a vertical dashed line.
+        2. Export density plot to image file `file`.
         """
         fig = plt.figure(figsize=(5, 5))
         plt.plot(x, y)
@@ -981,6 +1060,7 @@ class Analyze(object):
         plt.xlabel('Score')
         plt.ylabel('Frequency')
         save_figure(fig, file)
+        plt.close()
 
     def smart_kde(self, group):
         """Automatically determine kernel bandwidth for the goal of this
@@ -993,8 +1073,8 @@ class Analyze(object):
 
         Returns
         -------
-        float or None
-            threshold, or None if unable to determine
+        float
+            threshold, or 0 if unable to determine
         """
         data = self.df[group].values
         scaler = StandardScaler()
@@ -1031,11 +1111,11 @@ class Analyze(object):
         Returns
         -------
         tuple of float
-            centroid
+            centroid of prediction results
 
         Notes
         -----
-        Add column `silh` to DataFrame.
+        Add column `silh` to score table as silhouette scores.
         """
         data = self.df[self.relevant_groups()]
         scaler = StandardScaler()
@@ -1058,6 +1138,13 @@ class Analyze(object):
         ----------
         cent : tuple of float
             centroid
+
+        Notes
+        -----
+        1. Append boolean column `far` to score table indicating whether data
+           points fall beyond cluster boundaries.
+        2. Refine predictions based on 1) position relative to centroid and 2)
+           whether beyond cluster boundaries.
         """
         # protect data on far side of centroid in all groups
         if self.self_low:
@@ -1075,9 +1162,15 @@ class Analyze(object):
 
     def plot_hgts(self):
         """Plot HGT prediction results.
+
+        Notes
+        -----
+        1. Generate a scatter plot with putative HGTs colored.
+        2. Export scatter plot to image file `scatter.png`.
         """
         fig = plt.figure(figsize=(5, 5))
         plt.scatter('close', 'distal', c='hgt', data=self.df)
         plt.xlabel('Close')
         plt.ylabel('Distal')
         save_figure(fig, join(self.output, 'scatter.png'))
+        plt.close()
