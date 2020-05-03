@@ -44,6 +44,7 @@ One may use choice of [DIAMOND](https://github.com/bbuchfink/diamond) or [BLAST]
 conda install -c bioconda diamond blast
 ```
 
+
 ## Database
 
 HGTector has a command `database` for automated database construction. It defaults to the **NCBI** RefSeq microbial genomes and taxonomy. Meanwhile, we also provide instructions for using **GTDB** and custom databases. See [details](database.md).
@@ -53,10 +54,34 @@ A standard database built using the default protocol on 2019-10-21 is available 
 A small, pre-compiled test database is also available for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).
 
 
-## Compatibility
+## Upgrade
 
-If in the future some dependencies have changes that are not compatible with the current release of HGTector, the following "safe" command can be used to install the current versions of dependencies.
+Just add `--upgrade` or `-U` to the pip command:
 
 ```bash
-conda create -n hgtector -c bioconda python=3.7.4 pyyaml=5.1.2 pandas=0.25.1 matplotlib=3.1.1 scikit-learn=0.21.3 diamond=0.9.26 blast=2.9.0
+pip install -U git+https://github.com/DittmarLab/HGTector.git
+```
+
+Note: You can only upgrade from HGTector 2.0b1 or above. You cannot upgrade from older versions, which were written in Perl.
+
+
+## Uninstallation
+
+```bash
+pip uninstall hgtector
+```
+
+If you no longer need the conda environment:
+
+```bash
+conda env remove -n hgtector --all
+```
+
+
+## Compatibility
+
+If in the future some dependencies have changes that are not compatible with the current release of HGTector, the following "safe" command can be used to install the current versions of dependencies (note: DIAMOND version is too tricky to specify).
+
+```bash
+conda create -n hgtector -c bioconda python=3.7.7 pyyaml=5.3.1 pandas=1.0.3 matplotlib=3.1.3 scikit-learn=0.22.1 diamond blast=2.9.0
 ```

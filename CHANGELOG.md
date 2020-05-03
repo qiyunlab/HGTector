@@ -6,12 +6,13 @@ Change Log
 ### Changed
 - Increased Python unit testing coverage.
 - Re-styled Python code to adopt recent features (3.6+).
+- Updated installation tutorial, script and dependency versions.
 
 ### Added
 - Instructions for using the GTDB database.
 
 ### Fixed
-- Removed deprecated parameter "iid" in scikit-learn 0.22+.
+- Removed deprecated parameter "iid" for grid search since scikit-learn 0.22.
 
 
 ## Version 2.0b1 (complete rework) (10/23/2019)
