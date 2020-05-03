@@ -454,21 +454,20 @@ class Search(object):
                 self.diamond = 'diamond'
             if which(self.diamond):
                 try:
-                    db_ = self.db or self.cfg['database']['diamond']
+                    db = self.db or self.cfg['database']['diamond']
                 except KeyError:
                     pass
-                if db_:
-                    if isfile(db_) or isfile(f'{db_}.dmnd'):
-                        return db_
+                if db:
+                    if isfile(db) or isfile(f'{db}.dmnd'):
+                        return db
                     elif self.method == 'diamond':
-                        raise ValueError(f'Invalid DIAMOND database: {db_}.')
+                        raise ValueError(f'Invalid DIAMOND database: {db}.')
                 elif self.method == 'diamond':
                     raise ValueError(
                         'A protein database is required for DIAMOND search.')
             elif self.method == 'diamond':
                 raise ValueError(
                     f'Invalid diamond executable: {self.diamond}.')
-        return None
 
     def check_blast(self):
         """Check if BLAST is available.
@@ -488,24 +487,19 @@ class Search(object):
                 self.blastp = 'blastp'
             if which(self.blastp):
                 try:
-                    db_ = self.db or self.cfg['database']['blast']
+                    db = self.db or self.cfg['database']['blast']
                 except KeyError:
                     pass
-                if db_:
-                    found = True
-                    for ext in ('phr', 'pin', 'psq'):
-                        if not isfile(f'{db_}.{ext}'):
-                            found = False
-                    if found:
-                        return db_
+                if db:
+                    if all(isfile(f'{db}.{x}') for x in ('phr', 'pin', 'psq')):
+                        return db
                     elif self.method == 'blast':
-                        raise ValueError(f'Invalid BLAST database: {db_}.')
-                elif self.method == 'blastp':
+                        raise ValueError(f'Invalid BLAST database: {db}.')
+                elif self.method == 'blast':
                     raise ValueError(
                         'A protein database is required for BLAST search.')
-            elif self.method == 'blastp':
+            elif self.method == 'blast':
                 raise ValueError(f'Invalid blastp executable: {self.blastp}.')
-        return None
 
     def input_wf(self):
         """Master workflow for processing input data.

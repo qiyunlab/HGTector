@@ -1,12 +1,15 @@
 Change Log
 ==========
 
-## Version 2.0b2 (WIP)
+## Version 2.0b2 (5/3/2020)
+
+Note: The command-line interface and the format and content of input, output and database files are identical to last version (2.0b1). You may safely combine analysis results of this and last versions without the need for re-analysis.
 
 ### Changed
 - Increased Python unit testing coverage.
 - Re-styled Python code to adopt recent features (3.6+).
 - Updated installation tutorial, script and dependency versions.
+- Minor tweaks of code.
 
 ### Added
 - Instructions for using the GTDB database.
