@@ -113,7 +113,7 @@ class Analyze(object):
         self.description = description
 
     def __call__(self, args):
-        print('Analysis started at {}.'.format(timestamp()))
+        print(f'Analysis started at {timestamp()}.')
 
         # load configurations
         self.cfg = load_configs()
@@ -159,7 +159,7 @@ class Analyze(object):
         # predict HGTs
         self.predict_hgt()
 
-        print('Analysis finished at {}.'.format(timestamp()))
+        print(f'Analysis finished at {timestamp()}.')
 
     def set_parameters(self, args):
         """Validate and set parameters.
@@ -172,7 +172,7 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            found invalid parameter(s)
+            Found invalid parameter(s).
         """
         # load arguments
         for key, val in vars(args).items():
@@ -186,11 +186,11 @@ class Analyze(object):
                 self.input_map = {k: join(self.input, v) for k, v in
                                   id2file_map(self.input, ext='tsv').items()}
             else:
-                raise ValueError('Invalid input data file or directory: {}.'
-                                 .format(self.input))
+                raise ValueError(
+                    f'Invalid input data file or directory: {self.input}.')
             if len(self.input_map) == 0:
-                raise ValueError('No input data are found under: {}.'
-                                 .format(self.input))
+                raise ValueError(
+                    f'No input data are found under: {self.input}.')
 
         # check / create output directory
         makedirs(self.output, exist_ok=True)
@@ -199,14 +199,12 @@ class Analyze(object):
         # load configurations
         get_config(self, 'evalue', 'analyze.evalue', float)
         for key in ('maxhits', 'identity', 'coverage'):
-            get_config(self, key, 'analyze.{}'.format(key))
+            get_config(self, key, f'analyze.{key}')
         for key in ('input_cov', 'self_rank', 'close_size', 'distal_top'):
-            get_config(self, key, 'grouping.{}'.format(key.replace(
-                '_', '')))
+            get_config(self, key, f'grouping.{key.replace("_", "")}')
         for key in ('weighted', 'outliers', 'orphans', 'bandwidth', 'bw_steps',
                     'low_part', 'noise', 'fixed', 'silhouette', 'self_low'):
-            get_config(self, key, 'predict.{}'.format(key.replace(
-                '_', '')))
+            get_config(self, key, f'predict.{key.replace("_", "")}')
 
         # convert boolean values
         for key in ('weighted', 'orphans', 'self_low'):
@@ -228,6 +226,11 @@ class Analyze(object):
 
     def read_input(self):
         """Workflow for reading input data.
+
+        Notes
+        -----
+        1. Read taxonomy database into `taxdump`.
+        2. Read homology search results into `data`.
         """
         # read taxonomy database
         if self.taxdump is not None:
@@ -243,16 +246,15 @@ class Analyze(object):
             self.taxdump = read_taxdump(dirname(self.input))
         else:
             raise ValueError('Missing taxonomy database.')
-        print('Done. Read {} taxa.'.format(len(self.taxdump)))
+        print(f'Done. Read {len(self.taxdump)} taxa.')
 
         # read search results
         print('Reading homology search results...')
         self.data = {}
         for sid, fname in self.input_map.items():
             self.data[sid] = self.read_search_results(fname)
-            print('  {}: {} proteins.'.format(sid, len(self.data[sid])))
-        print('Done. Read search results of {} samples.'
-              .format(len(self.data)))
+            print(f'  {sid}: {len(self.data[sid])} proteins.')
+        print(f'Done. Read search results of {len(self.data)} samples.')
 
     @staticmethod
     def read_search_results(file, maxhits=None):
@@ -274,7 +276,7 @@ class Analyze(object):
         data = []
         with read_file(file) as f:
             for line in f:
-                line = line.rstrip('\r\n')
+                line = line.rstrip()
                 m = p.match(line)
                 if m:
                     if m.group(1) == 'ID':
@@ -320,10 +322,9 @@ class Analyze(object):
             for sid, tid in sorted(self.input_tax.items()):
                 if tid not in self.taxdump:
                     # TODO: read from both temp and master taxdump
-                    raise ValueError('TaxID {} is not present in taxonomy '
-                                     'database.'.format(tid))
-                print('  {}: {} ({}).'. format(
-                    sid, tid, self.taxdump[tid]['name']))
+                    raise ValueError(
+                        f'TaxID {tid} is not present in taxonomy database.')
+                print(f'  {sid}: {tid} ({self.taxdump[tid]["name"]}).')
         else:
             self.input_tax = {}
 
@@ -338,21 +339,21 @@ class Analyze(object):
                         self.data[sid], self.taxdump, self.input_cov)
                     self.input_tax[sid] = tid
                 except ValueError:
-                    raise ValueError('Cannot auto-infer taxonomy for {}. '
-                                     'Please specify manually.'.format(sid))
-                print('  {}: {} ({}) (covering {:2g}% best hits).'.format(
-                    sid, tid, self.taxdump[tid]['name'], cov))
+                    raise ValueError(f'Cannot auto-infer taxonomy for {sid}.'
+                                     ' Please specify manually.')
+                print(f'  {sid}: {tid} ({self.taxdump[tid]["name"]}) '
+                      f'(covering {cov:2g}% best hits).')
 
         # refine taxonomy database
         print('Refining taxonomy database...')
-        refine_taxdump(self.sum_taxids(), self.taxdump)
+        self.taxdump = refine_taxdump(self.sum_taxids(), self.taxdump)
         add_children(self.taxdump)
-        print('Done. Retained {} taxa.'.format(len(self.taxdump)))
+        print(f'Done. Retained {len(self.taxdump)} taxa.')
 
         # find lowest common ancestor (LCA) of all genomes
         self.lca = find_lca(self.input_tax.values(), self.taxdump)
-        print('All input genomes belong to {} ({}).'.format(
-            self.lca, describe_taxon(self.lca, self.taxdump)))
+        print(f'All input genomes belong to {self.lca} '
+              f'({describe_taxon(self.lca, self.taxdump)}).')
 
     @staticmethod
     def infer_genome_tax(prots, taxdump, coverage):
@@ -375,8 +376,8 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            cannot infer taxon (e.g., none of taxIds cover more best hits than
-            threshold)
+            Cannot infer taxon (e.g., none of taxIds cover more best hits than
+            threshold).
         """
         # collect taxIds of best hits of all proteins
         bestids = []
@@ -393,7 +394,7 @@ class Analyze(object):
             for tid in get_lineage(bestid, taxdump):
                 freqs[tid] = freqs.get(tid, 0) + 1
 
-        # loop frquencies from low to high, and select taxId(s) at the lowest
+        # loop frequencies from low to high, and select taxId(s) at the lowest
         # frequency
         lowfreq = 0
         candidates = []
@@ -419,7 +420,12 @@ class Analyze(object):
             return res, freqs[res] / n * 100
 
     def sum_taxids(self):
-        """Generate a list of taxIds mentioned in all sets and hit tables.
+        """Get all taxIds mentioned in all sets and hit tables.
+
+        Returns
+        -------
+        set of str
+            all taxIds
         """
         res = set(self.input_tax.values())
         for sid, prots in self.data.items():
@@ -429,23 +435,30 @@ class Analyze(object):
 
     def define_groups(self):
         """Define the three (actually two) groups: "self" and "close".
+
+        Notes
+        -----
+        Assign these attributes:
+        1. `self_tax`: top-level taxId(s) of the self group.
+        2. `close_tax`: top-level taxId(s) of the close group.
+        3. `groups` (keys: self, close, distal): all taxIds under each group.
         """
         self.groups = {}
         for key in ('self', 'close'):
-            tids = getattr(self, '{}_tax'.format(key))
+            tids = getattr(self, f'{key}_tax')
 
             # user-defined group
             if tids:
-                setattr(self, '{}_tax'.format(key), list_from_param(tids))
-                print('User-defined {} group:'.format(key))
+                setattr(self, f'{key}_tax', list_from_param(tids))
+                print(f'User-defined {key} group:')
 
             # auto-infer group
             else:
-                getattr(self, 'infer_{}_group'.format(key))()
-                print('Auto-inferred {} group:'.format(key))
+                getattr(self, f'infer_{key}_group')()
+                print(f'Auto-inferred {key} group:')
 
             # collect taxIds that belong to group
-            tids = getattr(self, '{}_tax'.format(key))
+            tids = getattr(self, f'{key}_tax')
             if key not in self.groups:
                 self.groups[key] = set().union(*[[x] + get_descendants(
                     x, self.taxdump) for x in tids])
@@ -457,13 +470,16 @@ class Analyze(object):
 
             # report group content
             for tid in tids:
-                print('  {} ({})'.format(tid, describe_taxon(
-                    tid, self.taxdump)))
-            print('{} group has {} taxa.'.format(
-                key.capitalize(), len(self.groups[key])))
+                print(f'  {tid} ({describe_taxon(tid, self.taxdump)})')
+            print(f'{key.capitalize()} group has {len(self.groups[key])} '
+                  'taxa.')
 
     def infer_self_group(self):
         """Infer self group automatically.
+
+        Notes
+        -----
+        Assign `self_tax` as top-level taxId(s) of the self group.
         """
         # just use LCA
         if not self.self_rank:
@@ -477,6 +493,11 @@ class Analyze(object):
 
     def infer_close_group(self):
         """Infer close group automatically.
+
+        Notes
+        -----
+        1. Assign `close_tax` as top-level taxId(s) of the close group.
+        2. Assign `groups['close']` as all taxIds under the close group.
         """
         mems = []
 
@@ -502,6 +523,13 @@ class Analyze(object):
 
     def calc_scores(self):
         """Summarize search scores for proteins.
+
+        Notes
+        -----
+        1. Append column `group` to the hit table of each protein based on the
+          `taxid` column.
+        2. Calculate scores of `self`, `close` and `distal` for each protein.
+        3. Infer `match` for each protein based on its distal hits.
         """
         print('Calculating protein scores by group...', flush=True)
         for sid, prots in sorted(self.data.items()):
@@ -521,7 +549,7 @@ class Analyze(object):
                 # find best match taxId in distal group
                 prot['match'] = self.find_match(prot['hits'].query(
                     'group == "distal"'))
-            print('  {}'.format(sid))
+            print(f'  {sid}')
         print('Done.')
 
     def find_match(self, df):
@@ -539,7 +567,7 @@ class Analyze(object):
 
         Notes
         -----
-        The best match TaxID is the LCA of top hits. The "top hits" are
+        The best match taxId is the LCA of top hits. The "top hits" are
         defined as those whose bit scores are no less than a certain
         percentage of that of the best hit. This behavior is similar to
         DIAMOND's taxonomic classification function.
@@ -552,6 +580,11 @@ class Analyze(object):
 
     def make_score_table(self):
         """Make a data frame for the entire protein set.
+
+        Notes
+        -----
+        1. Generate score table (pd.DataFrame) and assign to `df`.
+        2. Write score table to file `scores.tsv` (tab-delimited).
         """
         print('Summarizing scores of all proteins...', end='', flush=True)
         self.df = {}
@@ -571,16 +604,21 @@ class Analyze(object):
 
     def remove_orphans(self):
         """Remove ORFans (genes without non-self hits).
+
+        Notes
+        -----
+        Remove ORFan rows from the score table `df` in-place.
         """
         n = self.df.shape[0]
         self.df.query('close + distal > 0', inplace=True)
-        print('Removed {} ORFans.'.format(n - self.df.shape[0]))
+        print(f'Removed {n - self.df.shape[0]} ORFans.')
 
     def remove_outliers(self):
         """Remove outliers from selected groups of scores.
 
         Notes
         -----
+        Remove outlier rows from the score table `df` in-place.
         Only outliers at the right (high) side will be removed.
         """
         # TODO: add other methods
@@ -592,7 +630,7 @@ class Analyze(object):
         elif self.outliers == 'boxplot':
             self.df = self.outliers_boxplot(self.df, groups)
 
-        print('Removed {} outliers.'.format(n - self.df.shape[0]))
+        print(f'Removed {n - self.df.shape[0]} outliers.')
 
     def relevant_groups(self):
         """Get groups that are relevant in HGT prediction.
@@ -600,7 +638,12 @@ class Analyze(object):
         Returns
         -------
         list of str
-            relevant groups
+            relevant groups in order
+
+        Notes
+        -----
+        The `self` group is relevant only when `self_low` is True, otherwise
+        only `close` and `distal` groups are relevant.
         """
         return (['self'] if self.self_low else []) + ['close', 'distal']
 
@@ -619,6 +662,10 @@ class Analyze(object):
         -------
         pd.DataFrame
             output dataframe with outliers removed
+
+        Notes
+        -----
+        Z-score >= 3 is the criterion for outliers.
         """
         return df[(zscore(df[keys]) < 3).all(axis=1)]
 
@@ -637,11 +684,30 @@ class Analyze(object):
         -------
         pd.DataFrame
             output dataframe with outliers removed
+
+        Notes
+        -----
+        Criterion for outliers: < Q1 - 1.5 * IQR or > Q3 + 1.5 * IQR.
         """
         return df[(df[keys] <= df[keys].quantile(0.75) * 2.5 -
                    df[keys].quantile(0.25) * 1.5).all(axis=1)]
 
     def predict_hgt(self):
+        """Predict HGTs.
+
+        Returns
+        -------
+        int
+            number of predicted HGTs
+
+        Notes
+        -----
+        Central pipeline of this script.
+        - Report threshold for each group.
+        - Generate one scatter plot for close vs distal, and one density plot
+          for each group.
+        - Generate one text file for putative HGTs of each sample under `hgt/`.
+        """
         print('Predicting HGTs...')
 
         # perform kernel density estimation (KDE), identify "atypical"
@@ -650,26 +716,26 @@ class Analyze(object):
         groups = self.relevant_groups()
         print('Calculating thresholds for clustering...')
         for group in groups:
-            print('{} group:'.format(group.capitalize()))
+            print(f'{group.capitalize()} group:')
             self.plot_hist(self.df[group].tolist(),
-                           join(self.output, '{}.hist.png'.format(group)))
+                           join(self.output, f'{group}.hist.png'))
 
             # cannot cluster constant data
             if self.df[group].std() == 0.0:
-                print('WARNING: {} group is constant. Cannot predict HGTs.'
-                      .format(group.capitalize()))
-                return
+                print(f'WARNING: {group.capitalize()} group is constant. '
+                      'Cannot predict HGTs.')
+                return 0
 
             # calculate threshold using KDE
             ths[group] = self.cluster_kde(group)
 
             # use a fixed global threshold if KDE fails
             if not ths[group] and self.fixed:
-                print('WARNING: Cannot cluster {} group using KDE. Use fixed '
-                      'threshold {} instead.'.format(group, self.fixed))
+                print(f'WARNING: Cannot cluster {group} group using KDE. '
+                      f'Use fixed threshold {self.fixed} instead.')
                 ths[group] = self.df[group].quantile(self.fixed / 100)
 
-            print('  Threshold: {:g}.'.format(ths[group]))
+            print(f'  Threshold: {ths[group]:g}.')
         print('Done.')
 
         # identify atypical cluster
@@ -679,9 +745,9 @@ class Analyze(object):
                          (not self.self_low or self.df['self'] <= ths['self'])
         print(' done.')
         n = self.df[self.df['hgt']].shape[0]
-        print('  Total predicted HGTs: {:g}.'.format(n))
+        print(f'  Total predicted HGTs: {n:g}.')
         if not n:
-            return
+            return 0
 
         # calculate silhouette scores and centroid
         print('Calculating cluster properties...', end='')
@@ -693,24 +759,25 @@ class Analyze(object):
             print('Refining cluster...', end='')
             self.refine_cluster(cent)
             print(' done.')
-            print('  Total predicted HGTs after refinement: {:g}.'.format(
-                self.df[self.df['hgt']].shape[0]))
+            n = self.df[self.df['hgt']].shape[0]
+            print(f'  Total predicted HGTs after refinement: {n:g}.')
             if not n:
-                return
+                return 0
 
         # summarize prediction results
         print('Predicted HGTs by sample:')
         makedirs(join(self.output, 'hgts'), exist_ok=True)
         for sample in self.df['sample'].unique():
             df_ = self.df[self.df['hgt'] & (self.df['sample'] == sample)]
-            print('  {}: {}.'.format(sample, df_.shape[0]))
+            print(f'  {sample}: {df_.shape[0]}.')
             df_[['protein', 'silh']].to_csv(
-                join(self.output, 'hgts', '{}.txt'.format(sample)),
+                join(self.output, 'hgts', f'{sample}.txt'),
                 sep='\t', index=False, header=False, float_format='%g')
         print('Prediction results saved to hgts/.')
 
         # plot prediction results
         self.plot_hgts()
+        return self.df[self.df['hgt']].shape[0]
 
     def cluster_kde(self, group):
         """Cluster data by KDE.
@@ -723,7 +790,7 @@ class Analyze(object):
         Returns
         -------
         float
-            threshold
+            clustering threshold, or 0 if not determined
         """
         if self.bandwidth != 'auto':
             data = self.df[group].values
@@ -742,14 +809,14 @@ class Analyze(object):
 
             # plot density function and thresholds
             self.plot_density(x, y, peak, valley, th,
-                              join(self.output, '{}.kde.png'.format(group)))
+                              join(self.output, f'{group}.kde.png'))
 
             return th
         else:
             return self.smart_kde(group)
 
     def perform_kde(self, data):
-        """Perform kernel density estimation (KDE)
+        """Perform kernel density estimation (KDE) on data.
 
         Parameters
         ----------
@@ -780,13 +847,12 @@ class Analyze(object):
         if bw == 'grid':
             kde = self.grid_kde(data_, estimator, self.bw_steps)
             bw = kde.bandwidth
-            print('  Grid search-optimized bandwidth: {:g}.'.format(bw))
+            print(f'  Grid search-optimized bandwidth: {bw:g}.')
 
         # Silverman's rule-of-thumb
         elif bw == 'silverman':
             bw = self.silverman_bw(data)
-            print('  Bandwidth by Silverman\'s rule-of-thumb: {:g}.'.format(
-                bw))
+            print(f'  Bandwidth by Silverman\'s rule-of-thumb: {bw:g}.')
             setattr(estimator, 'bandwidth', bw)
             kde = estimator.fit(data_)
 
@@ -795,7 +861,7 @@ class Analyze(object):
             setattr(estimator, 'bandwidth', bw)
             kde = estimator.fit(data_)
         else:
-            raise ValueError('Invalid bandwidth: {}.'.format(bw))
+            raise ValueError(f'Invalid bandwidth: {bw}.')
 
         # get density function
         x, y = self.density_func(data_, kde)
@@ -825,15 +891,19 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            if data size < 5 (number of splits)
+            If data size < 5 (number of splits).
         """
         n = data.size
         if n < 5:
-            raise ValueError('Cannot perform grid search on {} data point(s).'
-                             .format(n))
+            raise ValueError(
+                f'Cannot perform grid search on {n} data point(s).')
         bwspace = np.logspace(-1, 0, steps)
         params = {'bandwidth': bwspace}
-        grid = GridSearchCV(estimator, params, cv=5, iid=False)
+
+        # removed parameter "iid=False" because it is deprecated since scikit-
+        # learn 0.22; however in older versions it was true by default so be
+        # cautious
+        grid = GridSearchCV(estimator, params, cv=5)
         grid.fit(data)
         return grid.best_estimator_
 
@@ -854,7 +924,7 @@ class Analyze(object):
         Raises
         ------
         ValueError
-            if data size < 2
+            If data size < 2.
 
         Notes
         -----
@@ -865,8 +935,7 @@ class Analyze(object):
         """
         n = len(data)
         if n < 2:
-            raise ValueError('Cannot calculate bandwidth on {} data point.'
-                             .format(n))
+            raise ValueError(f'Cannot calculate bandwidth on {n} data point.')
         iqr = np.subtract(*np.percentile(data, [75, 25]))
         std = np.std(data, ddof=1)
         if not std and not iqr:
@@ -921,7 +990,9 @@ class Analyze(object):
         ------
         ValueError
             Cannot identify at least two peaks.
+        ValueError
             Cannot identify at least one valley (unlikely).
+        ValueError
             Peak is larger than valley.
         """
         # find peaks
@@ -958,6 +1029,7 @@ class Analyze(object):
         plt.xlabel('Score')
         plt.ylabel('Frequency')
         save_figure(fig, file)
+        plt.close()
 
     @staticmethod
     def plot_density(x, y, peak, valley, th, file):
@@ -973,6 +1045,12 @@ class Analyze(object):
             x-coordinate of threshold
         file : str
             filename to save plot
+
+        Notes
+        -----
+        1. Generate a density plot, with 1st peak and 1st valley circled, and
+           threshold indicated by a vertical dashed line.
+        2. Export density plot to image file `file`.
         """
         fig = plt.figure(figsize=(5, 5))
         plt.plot(x, y)
@@ -982,6 +1060,7 @@ class Analyze(object):
         plt.xlabel('Score')
         plt.ylabel('Frequency')
         save_figure(fig, file)
+        plt.close()
 
     def smart_kde(self, group):
         """Automatically determine kernel bandwidth for the goal of this
@@ -994,8 +1073,8 @@ class Analyze(object):
 
         Returns
         -------
-        float or None
-            threshold, or None if unable to determine
+        float
+            threshold, or 0 if unable to determine
         """
         data = self.df[group].values
         scaler = StandardScaler()
@@ -1014,16 +1093,15 @@ class Analyze(object):
             try:
                 peak, valley = self.first_hill(x, y)
             except ValueError:
-                print('  {:.3f}: n/a'.format(bw))
+                print(f'  {bw:.3f}: n/a')
                 continue
             th = valley - (valley - peak) * self.noise / 100
             ratio = data[data < th].size / data.size * 100
-            print('  {:.3f}: {:g} - {:.2f}%'.format(bw, th, ratio))
+            print(f'  {bw:.3f}: {th:g} - {ratio:.2f}%')
             if not self.low_part or ratio <= self.low_part:
-                print('  Auto-determined bandwidth: {:g}.'.format(bw))
-                self.plot_density(
-                    x, y, peak, valley, th,
-                    join(self.output, '{}.kde.png'.format(group)))
+                print(f'  Auto-determined bandwidth: {bw:g}.')
+                self.plot_density(x, y, peak, valley, th,
+                                  join(self.output, f'{group}.kde.png'))
                 return th
         return 0.0
 
@@ -1033,11 +1111,11 @@ class Analyze(object):
         Returns
         -------
         tuple of float
-            centroid
+            centroid of prediction results
 
         Notes
         -----
-        Add column `silh` to DataFrame.
+        Add column `silh` to score table as silhouette scores.
         """
         data = self.df[self.relevant_groups()]
         scaler = StandardScaler()
@@ -1060,6 +1138,13 @@ class Analyze(object):
         ----------
         cent : tuple of float
             centroid
+
+        Notes
+        -----
+        1. Append boolean column `far` to score table indicating whether data
+           points fall beyond cluster boundaries.
+        2. Refine predictions based on 1) position relative to centroid and 2)
+           whether beyond cluster boundaries.
         """
         # protect data on far side of centroid in all groups
         if self.self_low:
@@ -1077,9 +1162,15 @@ class Analyze(object):
 
     def plot_hgts(self):
         """Plot HGT prediction results.
+
+        Notes
+        -----
+        1. Generate a scatter plot with putative HGTs colored.
+        2. Export scatter plot to image file `scatter.png`.
         """
         fig = plt.figure(figsize=(5, 5))
         plt.scatter('close', 'distal', c='hgt', data=self.df)
         plt.xlabel('Close')
         plt.ylabel('Distal')
         save_figure(fig, join(self.output, 'scatter.png'))
+        plt.close()

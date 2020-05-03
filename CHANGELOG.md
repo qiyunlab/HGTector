@@ -1,6 +1,24 @@
 Change Log
 ==========
 
+## Version 2.0b2 (5/3/2020)
+
+Note: The command-line interface and the format and content of input, output and database files are identical to last version (2.0b1). You may safely combine analysis results of this and last versions without the need for re-analysis.
+
+### Changed
+- Increased Python unit testing coverage.
+- Re-styled Python code to adopt recent features (3.6+).
+- Updated installation tutorial, script and dependency versions.
+- Minor tweaks of code.
+
+### Added
+- Instructions for using the GTDB database.
+
+### Fixed
+- Removed deprecated parameter "iid" for grid search since scikit-learn 0.22.
+- Fixed a bug in custom genome exclusion during database building.
+
+
 ## Version 2.0b1 (complete rework) (10/23/2019)
 
 ### Changed

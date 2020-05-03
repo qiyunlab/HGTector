@@ -152,7 +152,7 @@ Option | Default | Description
 --- | --- | ---
 `-d`, `--db` | - | Reference protein sequence database.
 `-t`, `--taxdump` | - | Directory of taxonomy database files (`nodes.dmp` and `names.dmp`).
-`--taxmap` | - | Sequence Id to taxId mapping file (not necessary if protein database already contains taxonomy).
+`--taxmap` | - | Sequence ID to taxID mapping file (not necessary if protein database already contains taxonomy).
 
 ### Search behaviors
 
@@ -179,7 +179,7 @@ Option | Default | Description
 --- | --- | ---
 `--tax-include` | - | Include taxa under those TaxIDs (a comma-delimited string, or a file of one TaxID per line).
 `--tax-exclude` | - | Exclude taxa under those TaxIDs (a comma-delimited string, or a file of one TaxID per line).
-`--tax-unique` | yes | Ignore more than one hit with same TaxId.
+`--tax-unique` | yes | Ignore more than one hit with same TaxID.
 `--tax-unirank` | - | Ignore more than one hit under same taxon at this rank (species, genus, family, etc.). Recommended if the database is highly taxonomically imbalanced (e.g., contains thousands of _E. coli_ strains).
 `--tax-capital` | yes | Ignore taxon names that are not capitalized.
 `--tax-latin` | no | Ignore species names that are not Latinate.

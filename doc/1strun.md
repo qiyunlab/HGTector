@@ -11,6 +11,8 @@ A small example is provided in the subdirectory [example](../example). The input
 
 Let's analyze this small example using HGTector.
 
+**Note**: It has been increasingly infeasible as of 2020 to run remote search through the NCBI BLAST server. If you experience an very slow run when going through this tutorial, please skip and move on to [second run](2ndrun.md).
+
 
 ## Search
 
@@ -48,7 +50,7 @@ Let's follow the screen output:
 
 ```
 ...
-Auto-inferring plausible taxIds for input genomes based on taxonomy of search results...
+Auto-inferring plausible TaxIDs for input genomes based on taxonomy of search results...
   gsul: 130081 (Galdieria sulphuraria) (covering 100% best hits).
 ```
 

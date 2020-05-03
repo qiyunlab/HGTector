@@ -130,6 +130,22 @@ done < <(tail -n+2 genomes.tsv)
 
 It is totally okay to use databases from other sources for HGTector analyses. For example, the original [nr](https://ftp.ncbi.nlm.nih.gov/blast/db/), [taxdump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz) and [prot.accession2taxid.gz](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/accession2taxid/prot.accession2taxid.gz) one directly pulls from NCBI already constitute a valid database for HGTector. This combination may not be computationally optimized for the goal of HGT prediction, though, and the unbalanced taxonomic distribution of reference sequences also has potential impact on the analysis. The `search` command has multiple [taxonomic filtering](search.md#Taxonomic-filtering) functions which could help smoothing out this bias, and the program is designed to live with incompatibility between sequence and taxonomy databases by dropping out unidentified hits. Therefore, the conclusion is that it is technically fine to use external databases, but the database design and the research goal need to be carefully considered.
 
+### For GTDB users
+
+[GTDB](https://gtdb.ecogenomic.org/) is an alternative to the NCBI taxonomy. The GTDB taxonomy, which you can found in `taxonomy/gtdb_taxonomy.tsv` of the [GTDB-Tk database](https://data.ace.uq.edu.au/public/gtdb/data/releases/release89/89.0/gtdbtk_r89_data.tar.gz), is provided as lineage strings like:
+
+```
+d__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacterales;f__Enterobacteriaceae;g__Escherichia;s__Escherichia dysenteriae
+```
+
+We provide a Python 3 script: [`gtdb_to_taxdump.py`](https://biocore.github.io/wol/code/scripts/gtdb_to_taxdump.py) to reformat this file into NCBI taxdump style:
+
+```bash
+python gtdb_to_taxdump.py gtdb_taxonomy.tsv
+```
+
+You will get three files: `nodes.dmp`, `names.dmp` and `taxid.map`. And you will know what to do next.
+
 
 ## Command-line reference
 

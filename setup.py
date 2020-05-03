@@ -11,6 +11,8 @@
 from setuptools import setup, find_packages
 from glob import glob
 
+import hgtector.__init__ as init
+
 
 classes = """
     Development Status :: 4 - Beta
@@ -25,39 +27,28 @@ classes = """
     Operating System :: Windows
 """
 
-classifiers = [s.strip() for s in classes.split('\n') if s]
+params = {
+    'name':             init.__name__,
+    'version':          init.__version__,
+    'license':          init.__license__,
+    'description':      init.__description__,
+    'long_description': open('README.md').read(),
+    'long_description_content_type': 'text/markdown',
+    'author':           init.__author__,
+    'author_email':     init.__email__,
+    'url':              init.__url__,
+    'install_requires': ['pyyaml',
+                         'numpy',
+                         'scipy',
+                         'pandas',
+                         'scikit-learn',
+                         'matplotlib'],
+    'classifiers':      classes.strip().split('\n    '),
+    'python_requires':  '>=3.6',
+    'entry_points':     '[console_scripts]',
+    'scripts':          glob(f'scripts/{init.__name__}'),
+    'package_data':     {init.__name__: ['config.yml']},
+    'include_package_data': True
+}
 
-
-description = (
-    'Genome-wide detection of putative horizontal gene transfer (HGT) events '
-    'based on sequence homology search hit distribution statistics')
-
-long_description = open('README.md').read()
-
-
-setup(
-    name='hgtector',
-    version='2.0b1',
-    license='BSD-3-Clause',
-    description=description,
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    author='Qiyun Zhu',
-    author_email='qiyunzhu@gmail.com',
-    url='https://github.com/DittmarLab/HGTector',
-    packages=find_packages(),
-    scripts=glob('scripts/hgtector'),
-    package_data={'hgtector': ['config.yml']},
-    include_package_data=True,
-    install_requires=[
-        'pyyaml',
-        'numpy',
-        'scipy',
-        'pandas',
-        'scikit-learn',
-        'matplotlib'
-    ],
-    classifiers=classifiers,
-    python_requires='>=3.6',
-    entry_points='[console_scripts]'
-)
+setup(**params, packages=find_packages())

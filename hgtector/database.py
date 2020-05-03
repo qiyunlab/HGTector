@@ -101,7 +101,7 @@ class Database(object):
         self.description = description
 
     def __call__(self, args):
-        print('Database building started at {}.'.format(timestamp()))
+        print(f'Database building started at {timestamp()}.')
 
         # load configurations
         self.cfg = load_configs()
@@ -158,7 +158,7 @@ class Database(object):
         if hasattr(self, 'mkdtemp'):
             rmtree(self.tmpdir)
 
-        print('Database building finished at {}.'.format(timestamp()))
+        print(f'Database building finished at {timestamp()}.')
 
     def set_parameters(self, args):
         """Workflow for validating and setting arguments.
@@ -174,13 +174,13 @@ class Database(object):
 
         # load configurations
         for key in ('capital', 'block', 'latin'):
-            get_config(self, key, 'taxonomy.{}'.format(key))
+            get_config(self, key, f'taxonomy.{key}')
         for key in ('retries', 'delay', 'timeout'):
-            get_config(self, key, 'download.{}'.format(key))
+            get_config(self, key, f'download.{key}')
         for key in ('diamond', 'makeblastdb'):
-            get_config(self, key, 'program.{}'.format(key))
+            get_config(self, key, f'program.{key}')
         for key in ('threads', 'tmpdir'):
-            get_config(self, key, 'local.{}'.format(key))
+            get_config(self, key, f'local.{key}')
 
         # convert boolean values
         for key in ('capital', 'latin'):
@@ -191,8 +191,7 @@ class Database(object):
             self.tmpdir = mkdtemp()
             setattr(self, 'mkdtemp', True)  # mark for cleanup
         if not isdir(self.tmpdir):
-            raise ValueError('Invalid temporary directory: {}.'.format(
-                self.tmpdir))
+            raise ValueError(f'Invalid temporary directory: {self.tmpdir}.')
 
         # check local executables
         for key, exe in {'blast': 'makeblastdb', 'diamond': 'diamond'}.items():
@@ -200,8 +199,8 @@ class Database(object):
                 if getattr(self, exe) is None:
                     setattr(self, exe, exe)
                 if which(getattr(self, exe)) is None:
-                    raise ValueError('Invalid {} executable: {}.'.format(
-                        exe, getattr(self, exe)))
+                    raise ValueError(
+                        f'Invalid {exe} executable: {getattr(self, exe)}.')
 
         # determine number of CPUs to use
         if self.compile in ('diamond', 'both') and not self.threads:
@@ -238,7 +237,7 @@ class Database(object):
     def retrieve_taxdump(self):
         """Retrieve NCBI taxdump."""
         fname = 'taxdump.tar.gz'
-        remote_file = '/pub/taxonomy/{}'.format(fname)
+        remote_file = f'/pub/taxonomy/{fname}'
         local_file = join(self.output, 'download', fname)
 
         # download taxdump
@@ -255,7 +254,7 @@ class Database(object):
             f.extract('nodes.dmp', self.tmpdir)
         self.taxdump = read_taxdump(self.tmpdir)
         print(' done.')
-        print('Total number of TaxIDs: {}.'.format(len(self.taxdump)))
+        print(f'Total number of TaxIDs: {len(self.taxdump)}.')
 
     def retrieve_summary(self, genbank=False):
         """Retrieve genome assembly summary.
@@ -263,21 +262,20 @@ class Database(object):
 
         def get_summary(target):
             key = target.lower()
-            fname = 'assembly_summary_{}.txt'.format(key)
-            remote_file = '/genomes/{}/{}'.format(key, fname)
+            fname = f'assembly_summary_{key}.txt'
+            remote_file = f'/genomes/{key}/{fname}'
             local_file = join(self.output, 'download', fname)
 
             # download summary
             if not self.check_local_file(local_file, self.overwrite):
-                print('Downloading {} assembly summary...'.format(target),
-                      end='', flush=True)
+                print(f'Downloading {target} assembly summary...', end='',
+                      flush=True)
                 with open(local_file, 'wb') as f:
                     self.ftp.retrbinary('RETR ' + remote_file, f.write)
                 print(' done.')
 
             # read summary
-            print('Reading {} assembly summary...'.format(target), end='',
-                  flush=True)
+            print(f'Reading {target} assembly summary...', end='', flush=True)
             df = pd.read_csv(local_file, sep='\t', skiprows=1)
             print(' done.')
             return df
@@ -285,7 +283,7 @@ class Database(object):
         self.df = get_summary('RefSeq')
         if self.genbank:
             self.df = pd.concat([self.df, get_summary('GenBank')])
-        print('Total number of genomes: {}.'.format(self.df.shape[0]))
+        print(f'Total number of genomes: {self.df.shape[0]}.')
 
     def retrieve_categories(self):
         """Retrieve genome categories.
@@ -298,22 +296,21 @@ class Database(object):
             self.cats = ['archaea', 'bacteria', 'fungi', 'protozoa']
         else:
             self.cats = cats.split(',')
-        print('Genome categories:')
-        print('  {}'.format(', '.join(self.cats)))
+        print(f'Genome categories:  {", ".join(self.cats)}')
 
         def get_categories(target):
             key = target.lower()
 
             # validate categories
-            self.ftp.cwd('/genomes/{}'.format(key))
+            self.ftp.cwd(f'/genomes/{key}')
             dirs = [x[0] for x in self.ftp.mlsd() if x[1]['type'] == 'dir']
             for cat in self.cats:
                 if cat not in dirs:
-                    raise ValueError('"{}" is not a valid {} genome category.'
-                                     .format(cat, target))
+                    raise ValueError(
+                        f'"{cat}" is not a valid {target} genome category.')
 
             # get genome list per category
-            print('Downloading genome list per {} category...'.format(target))
+            print(f'Downloading genome list per {target} category...')
             dir_ = join(self.output, 'download', 'cats')
             makedirs(dir_, exist_ok=True)
             fname = 'assembly_summary.txt'
@@ -321,7 +318,7 @@ class Database(object):
             file_ = join(self.tmpdir, 'tmp.txt')
 
             for cat in self.cats:
-                file = join(dir_, '{}_{}.txt'.format(key, cat))
+                file = join(dir_, f'{key}_{cat}.txt')
                 islocal = self.check_local_file(file)
 
                 # use local file
@@ -332,15 +329,14 @@ class Database(object):
                 # download remote file
                 else:
                     with open(file_, 'wb') as f:
-                        self.ftp.retrbinary('RETR {}/{}'.format(cat, fname),
-                                            f.write)
+                        self.ftp.retrbinary(f'RETR {cat}/{fname}', f.write)
                     with open(file_, 'r') as f:
                         asms_ = [x.split('\t', 1)[0] for x in f.read().
                                  splitlines() if not x.startswith('#')]
                     with open(file, 'w') as f:
                         f.write(''.join([x + '\n' for x in asms_]))
 
-                print('  {}: {}'.format(cat, len(asms_)))
+                print(f'  {cat}: {len(asms_)}')
                 asms += asms_
 
             if isfile(file_):
@@ -354,8 +350,7 @@ class Database(object):
 
         # filter genomes by category
         self.df = self.df[self.df['# assembly_accession'].isin(asmset)]
-        print('Total number of genomes in categories: {}.'.format(
-            self.df.shape[0]))
+        print(f'Total number of genomes in categories: {self.df.shape[0]}.')
 
         # close and reconnect later to avoid some problems
         self.ftp.close()
@@ -387,14 +382,15 @@ class Database(object):
         self.df['genome'] = 'G' + self.df['accnov'].str.split('_', 1).str[-1]
         self.df.drop_duplicates(subset=['genome'], inplace=True)
 
-        # include/exclude genome IDs
+        # include/exclude genome Ids
         if self.genoids:
             self.genoids = set(list_from_param(self.genoids))
-            print('{}cluding {} custom genome IDs...'.format(
-                'Ex' if self.exclude else 'In', len(self.genoids)))
-            self.df = self.df[(self.df['accession'].isin(self.genoids)) |
-                              (self.df['accnov'].isin(self.genoids)) |
-                              (self.df['genome'].isin(self.genoids))]
+            print(f'{"Ex" if self.exclude else "In"}cluding '
+                  f'{len(self.genoids)} custom genome IDs...')
+            self.df = self.df[(self.df['accession'].isin(self.genoids) |
+                               self.df['accnov'].isin(self.genoids) |
+                               self.df['genome'].isin(self.genoids)) !=
+                              self.exclude]
             report_diff('Dropped {} genomes.')
         print('Done.')
 
@@ -433,7 +429,7 @@ class Database(object):
         self.df = self.df[self.df['taxid'].isin(self.taxdump)]
         report_diff('Dropped {} genomes without valid taxId.')
 
-        # assign genomes to species
+        # assign genomes to species (represented by taxId not name)
         self.df['species'] = self.df['taxid'].apply(
             taxid_at_rank, rank='species', taxdump=self.taxdump)
 
@@ -451,8 +447,8 @@ class Database(object):
         # include/exclude taxIds
         if self.taxids:
             self.taxids = set(list_from_param(self.taxids))
-            print('{}cluding {} custom TaxIDs...'.format(
-                'Ex' if self.exclude else 'In', len(self.taxids)))
+            print(f'{"Ex" if self.exclude else "In"}cluding '
+                  f'{len(self.taxids)} custom TaxIDs...')
 
             self.df = self.df[self.df['taxid'].apply(
                 lambda x: is_ancestral(x, self.taxids, self.taxdump)
@@ -465,8 +461,8 @@ class Database(object):
         if not self.sample:
             return
         print('Sampling genomes based on taxonomy...')
-        print('Up to {} genome(s) will be sampled per {}.'.format(
-            self.sample, self.rank))
+        print(f'Up to {self.sample} genome(s) will be sampled per {self.rank}'
+              '.')
 
         # assign genomes to given rank
         if self.rank not in self.df.columns:
@@ -477,10 +473,8 @@ class Database(object):
         taxa = self.df[self.rank].dropna().unique().tolist()
         n = len(taxa)
         if n == 0:
-            raise ValueError('No genome is classified at rank "{}".'.format(
-                self.rank))
-        print('Total number of taxonomic groups at {}: {}.'.format(
-            self.rank, n))
+            raise ValueError(f'No genome is classified at rank "{self.rank}".')
+        print(f'Total number of taxonomic groups at {self.rank}: {n}.')
 
         # custom sorting orders
         self.df['rc_seq'] = self.df['refseq_category'].map(
@@ -493,7 +487,7 @@ class Database(object):
         selected = []
         for taxon in taxa:
             # select genomes under this taxon
-            df_ = self.df.query('{} == "{}"'.format(self.rank, taxon))
+            df_ = self.df.query(f'{self.rank} == "{taxon}"')
             # sort genomes by three criteria
             df_ = df_.sort_values(by=['rc_seq', 'al_seq', 'genome'])
             # take up to given number of genomes from top
@@ -504,13 +498,12 @@ class Database(object):
         # add reference / representative
         for key in ('reference', 'representative'):
             if getattr(self, key):
-                print('Add {} genomes back to selection.'.format(key))
-                selected.update(self.df.query('refseq_category == "{} genome"'
-                                .format(key))['genome'].tolist())
+                print(f'Add {key} genomes back to selection.')
+                selected.update(self.df.query(
+                    f'refseq_category == "{key} genome"')['genome'].tolist())
 
         self.df = self.df[self.df['genome'].isin(selected)]
-        print('Total number of sampled genomes: {}.'.format(
-            self.df.shape[0]))
+        print(f'Total number of sampled genomes: {self.df.shape[0]}.')
 
         # clean up temporary columns
         self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
@@ -535,7 +528,7 @@ class Database(object):
             remote_dir = row.ftp_path.split('/', 5)[-1]
             stem = remote_dir.rsplit('/', 1)[-1]
             stems[g] = stem
-            fname = '{}_protein.faa.gz'.format(stem)
+            fname = f'{stem}_protein.faa.gz'
             file = join(dir_, fname)
             if self.check_local_file(file):
                 success = True
@@ -544,9 +537,9 @@ class Database(object):
                 for i in range(self.retries):
                     try:
                         with open(file, 'wb') as f:
-                            self.ftp.retrbinary('RETR {}/{}'.format(
-                                remote_dir, fname), f.write)
-                        print('  {}'.format(g), flush=True)
+                            self.ftp.retrbinary(
+                                f'RETR {remote_dir}/{fname}', f.write)
+                        print('  ' + g, flush=True)
                         success = True
                     except ftplib.error_perm as resp:
                         if str(resp).split()[0] == '550':
@@ -557,46 +550,48 @@ class Database(object):
                     else:
                         break
             if not success:
-                print('WARNING: Cannot retrieve {}.'.format(fname))
+                print(f'WARNING: Cannot retrieve {fname}.')
                 failures.append(g)
         print('Done.')
 
         # drop genomes that cannot be retrieved
         if len(failures):
             print('Failed to retrieve the following genomes:')
-            print('  {}'.format(', '.join(failures)))
+            print('  ' + ', '.join(failures))
             failures = set(failures)
             self.df = self.df[~self.df['genome'].isin(failures)]
 
     def extract_genomes(self):
         """Extract proteins from genomes.
+
+        Notes
+        -----
+        Write protein sequences of all genomes into db.faa.
+        Write protein to genomes(s) map to genome.map.gz.
         """
-        print('Extracting downloaded genomic data...', end='',
-              flush=True)
+        print('Extracting downloaded genomic data...', end='', flush=True)
         dir_ = join(self.output, 'download', 'faa')
         prots = {}
         cp = None
         fout = open(join(self.output, 'db.faa'), 'w')
 
         def write_prot():
-            if not cp:
-                return
-            fout.write('>{} {}\n{}\n'.format(
-                cp, prots[cp]['name'], prots[cp]['seq']))
+            if cp:
+                fout.write(f'>{cp} {prots[cp]["name"]}\n{prots[cp]["seq"]}\n')
 
         g2n, g2aa = {}, {}
         for row in self.df.itertuples():
             g, tid = row.genome, row.taxid
             g2n[g], g2aa[g] = 0, 0
-            file = join(dir_, '{}_protein.faa.gz'.format(
-                row.ftp_path.rsplit('/', 1)[-1]))
+            stem = row.ftp_path.rsplit('/', 1)[-1]
+            fp = join(dir_, f'{stem}_protein.faa.gz')
             try:
-                fin = gzip.open(file, 'rt')
+                fin = gzip.open(fp, 'rt')
             except TypeError:
-                fin = gzip.open(file, 'r')
+                fin = gzip.open(fp, 'r')
             cp = None
             for line in fin:
-                line = line.rstrip('\r\n')
+                line = line.rstrip()
                 if line.startswith('>'):
                     write_prot()
                     p, name = line[1:].split(None, 1)
@@ -625,9 +620,8 @@ class Database(object):
         self.p2tids = {k: v['tids'] for k, v in prots.items()}
 
         # report summary
-        print('Total number of genomes extracted: {}.'.format(len(g2n)))
-        print('Total number of unique proteins extracted: {}.'.format(
-            len(prots)))
+        print(f'Total number of genomes extracted: {len(g2n)}.')
+        print(f'Total number of unique proteins extracted: {len(prots)}.')
         print('Number of proteins shared by multiple genomes: {}.'.format(
             sum([1 for k, v in prots.items() if len(v['gs']) > 1])))
         print('Number of proteins shared by multiple TaxIDs: {}.'.format(
@@ -639,10 +633,14 @@ class Database(object):
             for k, v in sorted(prots.items()):
                 f.write('{}\t{}\n'.format(k, ','.join(
                     sorted(v['gs']))).encode())
-        print('Protein-to-genome(s) map written to {}.'.format(fname))
+        print(f'Protein-to-genome(s) map written to {fname}.')
 
     def genome_lineages(self):
         """Generate lineage information for genomes.
+
+        Notes
+        -----
+        Write genome lineages to lineages.txt.
         """
         # identify taxa at standard ranks
         ranks = ['superkingdom', 'kingdom', 'phylum', 'class', 'order',
@@ -653,7 +651,7 @@ class Database(object):
         # report number of taxa represented at each rank
         print('Number of taxonomic groups represented:')
         for rank in ranks:
-            print('  {}: {}.'.format(rank, self.df[rank].nunique()))
+            print(f'  {rank}: {self.df[rank].nunique()}.')
 
         # merge superkingdom and kingdom
         self.df['kingdom'] = self.df[['superkingdom', 'kingdom']].apply(
@@ -669,10 +667,14 @@ class Database(object):
         fname = 'lineages.txt'
         self.df['lineage'].to_csv(
             join(self.output, fname), sep='\t', header=False)
-        print('Genome lineages written to {}.'.format(fname))
+        print(f'Genome lineages written to {fname}.')
 
     def genome_metadata(self):
         """Write and report genome metadata.
+
+        Notes
+        -----
+        Write genome metadata to genomes.tsv.
         """
         self.df.set_index('genome', inplace=True)
         self.df = self.df[[
@@ -682,10 +684,14 @@ class Database(object):
             'ftp_path']]
         fname = 'genomes.tsv'
         self.df.to_csv(join(self.output, fname), sep='\t')
-        print('Genome metadata written to {}.'.format(fname))
+        print(f'Genome metadata written to {fname}.')
 
     def build_taxdump(self):
         """Build taxonomy database.
+
+        Notes
+        -----
+        Write refined taxonomy database to taxdump/nodes.dmp and names.dmp.
         """
         tids = self.df['taxid'].unique().tolist()
 
@@ -703,14 +709,13 @@ class Database(object):
         # shrink taxdump files
         dir_ = join(self.output, 'taxdump')
         makedirs(dir_, exist_ok=True)
-        for key in ('nodes', 'names'):
-            fname = '{}.dmp'.format(key)
+        for fname in ('nodes.dmp', 'names.dmp'):
             fo = open(join(dir_, fname), 'w')
             fi = open(join(self.tmpdir, fname), 'r')
             for line in fi:
-                x = line.rstrip('\r\n').replace('\t|', '').split('\t')
-                if x[0] in ancs:
-                    if key == 'nodes' or 'scientific name' in x:
+                row = line.rstrip().replace('\t|', '').split('\t')
+                if row[0] in ancs:
+                    if fname == 'nodes.dmp' or 'scientific name' in row:
                         fo.write(line)
             fi.close()
             fo.close()
@@ -727,8 +732,8 @@ class Database(object):
         fname = 'taxon.map.gz'
         with gzip.open(join(self.output, fname), 'wb') as f:
             for p, tid in sorted(self.taxonmap.items()):
-                f.write('{}\t{}\n'.format(p, tid).encode())
-        print('Protein-to-taxonomy map written to {}.'.format(fname))
+                f.write(f'{p}\t{tid}\n'.encode())
+        print(f'Protein-to-taxonomy map written to {fname}.')
 
     def compile_database(self):
         """Compile database using external programs.
@@ -744,16 +749,18 @@ class Database(object):
         """Build BLAST database.
         """
         makedirs(join(self.output, 'blast'), exist_ok=True)
-        cmd = ('{} -dbtype prot -in {} -out {} -title db -parse_seqids '
-               '-taxid_map {}'.format(
-                   self.makeblastdb, join(self.output, 'db.faa'),
-                   join(self.output, 'blast', 'db'),
-                   join(self.output, 'taxon.map')))
+        cmd = ' '.join((
+            self.makeblastdb,
+            '-dbtype', 'prot',
+            '-in', join(self.output, 'db.faa'),
+            '-out', join(self.output, 'blast', 'db'),
+            '-title', 'db',
+            '-parse_seqids',
+            '-taxid_map', join(self.output, 'taxon.map')))
         print('Build BLAST database...', flush=True)
-        ec, out = run_command(cmd, capture=False)
+        ec, out = run_command(cmd)
         if ec:
-            raise ValueError('makeblastdb failed with error code {}.'
-                             .format(ec))
+            raise ValueError(f'makeblastdb failed with error code {ec}.')
         print('Done.')
 
     def build_diamond_db(self):
@@ -764,20 +771,23 @@ class Database(object):
         with open(taxonmap, 'w') as f:
             f.write('accession\taccession.version\ttaxid\n')
             for p, tid in sorted(self.taxonmap.items()):
-                f.write('{}\t{}\t{}\n'.format(p.rsplit('.', 1)[0], p, tid))
+                f.write(f'{p.rsplit(".", 1)[0]}\t{p}\t{tid}\n')
 
         # build DIAMOND database
         makedirs(join(self.output, 'diamond'), exist_ok=True)
-        cmd = ('{} makedb --threads {} --in {} --taxonmap {} --taxonnodes {} '
-               '--taxonnames {} --db {} --tmpdir {}'.format(
-                   self.diamond, self.threads, join(self.output, 'db.faa'),
-                   taxonmap, join(self.output, 'taxdump', 'nodes.dmp'),
-                   join(self.output, 'taxdump', 'names.dmp'),
-                   join(self.output, 'diamond', 'db'), self.tmpdir))
+        cmd = ' '.join((
+            self.diamond, 'makedb',
+            '--threads', str(self.threads),
+            '--in', join(self.output, 'db.faa'),
+            '--taxonmap', taxonmap,
+            '--taxonnodes', join(self.output, 'taxdump', 'nodes.dmp'),
+            '--taxonnames', join(self.output, 'taxdump', 'names.dmp'),
+            '--db', join(self.output, 'diamond', 'db'),
+            '--tmpdir', self.tmpdir))
         print('Build DIAMOND database...', flush=True)
-        ec, out = run_command(cmd, capture=False, merge=False)
+        ec, out = run_command(cmd)
         if ec:
-            raise ValueError('diamond failed with error code {}.'.format(ec))
+            raise ValueError(f'diamond failed with error code {ec}.')
 
         # clean up
         remove(taxonmap)
@@ -803,10 +813,10 @@ class Database(object):
             if getsize(file) == 0:
                 remove(file)
             elif overwrite:
-                print('  WARNING: existing local file {} will be overwritten.'
-                      .format(basename(file)))
+                print(f'  WARNING: existing local file {basename(file)} will '
+                      'be overwritten.')
                 remove(file)
             else:
-                print('  Using local file {}.'.format(basename(file)))
+                print(f'  Using local file {basename(file)}.')
                 return True
         return False

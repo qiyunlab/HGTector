@@ -42,7 +42,6 @@ def load_configs():
     if file is not None:
         with open(file, 'r') as f:
             return yaml.load(f, Loader=yaml.SafeLoader)
-    return None
 
 
 def find_config_file():
@@ -62,10 +61,9 @@ def find_config_file():
     # program directory
     if not isfile(fp):
         fp = join(dirname(realpath(__file__)), fname)
-    # not found
-    if not isfile(fp):
-        fp = None
-    return fp
+    # final check
+    if isfile(fp):
+        return fp
 
 
 def get_config(obj, attr, entry, func=None):
@@ -87,16 +85,21 @@ def get_config(obj, attr, entry, func=None):
     if getattr(obj, attr, None) is not None:
         return
     keys = entry.split('.')
+
+    # go down hierarchies till last level
     d_ = obj.cfg
     for key in keys[:-1]:
         try:
             d_ = d_[key]
         except KeyError:
             return
+
+    # get value of last level
     try:
         val = d_[keys[-1]]
     except KeyError:
         return
+
     if val is None:
         return
     if func:
@@ -159,6 +162,7 @@ def list_from_param(param):
     Returns
     -------
     list
+        list of entries
     """
     if not param:
         return []
@@ -184,6 +188,14 @@ def dict_from_param(param):
     Returns
     -------
     dict
+        dictionary of keys to values
+
+    Raises
+    ------
+    ValueError
+        If any section in string is not in "key:value" format.
+    ValueError
+        In any line in file is not in "key<tab>value" format.
     """
     if not param:
         return {}
@@ -192,9 +204,15 @@ def dict_from_param(param):
     elif isinstance(param, str):
         if isfile(param):
             with read_file(param) as f:
-                return dict(x.split('\t') for x in f.read().splitlines())
+                try:
+                    return dict(x.split('\t') for x in f.read().splitlines())
+                except ValueError:
+                    raise ValueError(f'Invalid dictionary file: "{param}".')
         else:
-            return dict(x.split(':') for x in param.split(','))
+            try:
+                return dict(x.split(':') for x in param.split(','))
+            except ValueError:
+                raise ValueError(f'Invalid dictionary string: "{param}".')
 
 
 def run_command(cmd, capture=True, merge=True):
@@ -211,13 +229,10 @@ def run_command(cmd, capture=True, merge=True):
 
     Returns
     -------
-    int, list or None
+    int
         exit code
+    list or None
         screen output split by line, or None if not capture
-
-    Raises
-    ------
-    - non-zero exit code
     """
     res = subprocess.run(
         cmd, shell=True,
@@ -282,7 +297,7 @@ def id2file_map(dir_, ext=None, ids=None):
         if ids is not None and id_ not in ids:
             continue
         if id_ in res:
-            raise ValueError('Ambiguous files for Id: {}.'.format(id_))
+            raise ValueError(f'Ambiguous files for Id: {id_}.')
         res[id_] = fname
     return res
 
@@ -311,7 +326,7 @@ def read_input_prots(fp):
     lines = []
     with read_file(fp) as f:
         for line in f:
-            line = line.rstrip('\r\n')
+            line = line.rstrip()
             if not line or line.startswith('#'):
                 continue
 
@@ -360,7 +375,7 @@ def read_fasta(lines):
     """
     seqs = []
     for line in lines:
-        line = line.rstrip('\r\n')
+        line = line.rstrip()
         if line.startswith('>'):
             x = line[1:].split(None, 1)
             seqs.append([x[0], get_product(x[1]) if len(x) > 1 else '', ''])
@@ -379,8 +394,8 @@ def write_fasta(seqs, f):
     f : file handle
         file to write
     """
-    for id, seq in seqs:
-        f.write('>{}\n{}\n'.format(id, seq))
+    for id_, seq in seqs:
+        f.write(f'>{id_}\n{seq}\n')
 
 
 def _get_taxon(tid, taxdump):
@@ -401,13 +416,12 @@ def _get_taxon(tid, taxdump):
     Raises
     ------
     ValueError
-        if taxId is not found in taxonomy database
+        If taxId is not found in taxonomy database.
     """
     try:
         return taxdump[tid]
     except KeyError:
-        raise ValueError(
-            'TaxID {} is not found in taxonomy database.'.format(tid))
+        raise ValueError(f'TaxID {tid} is not found in taxonomy database.')
 
 
 def describe_taxon(tid, taxdump):
@@ -427,12 +441,13 @@ def describe_taxon(tid, taxdump):
 
     Raises
     ------
-    if taxId is not found in taxonomy database
+    ValueError
+        If taxId is not found in taxonomy database.
     """
     taxon = _get_taxon(tid, taxdump)
     name, rank = taxon['name'], taxon['rank']
-    return ('{} (no rank)'.format(name) if not rank or rank == 'no rank'
-            else '{} {}'.format(rank, name))
+    return (f'{name} (no rank)' if not rank or rank == 'no rank'
+            else f'{rank} {name}')
 
 
 def is_capital(name):
@@ -564,11 +579,11 @@ def read_taxdump(dir_):
     taxdump = {}
     with open(join(dir_, 'nodes.dmp'), 'r') as f:
         for line in f:
-            x = line.rstrip('\r\n').replace('\t|', '').split('\t')
+            x = line.rstrip().replace('\t|', '').split('\t')
             taxdump[x[0]] = {'parent': x[1], 'rank': x[2]}
     with open(join(dir_, 'names.dmp'), 'r') as f:
         for line in f:
-            x = line.rstrip('\r\n').replace('\t|', '').split('\t')
+            x = line.rstrip().replace('\t|', '').split('\t')
             if len(x) < 4 or x[3] == 'scientific name':
                 try:
                     taxdump[x[0]]['name'] = x[1]
@@ -593,19 +608,19 @@ def read_prot2taxid(file):
     Notes
     -----
     Two formats are supported:
-    . "plain": name <tab> taxId
-    . "ncbi": accn <tab> accn.ver <tab> taxId ...
+    - "plain": name <tab> taxId
+    - "ncbi": accn <tab> accn.ver <tab> taxId ...
     """
     isncbi = None
+    header = ['accession', 'accession.version', 'taxid']
     res = {}
     with read_file(file) as f:
         for line in f:
-            x = line.rstrip('\r\n').split()
+            x = line.rstrip().split('\t')
             if len(x) == 1:
                 continue
             if isncbi is None:
-                if len(x) >= 3 and x[:3] == ['accession', 'accession.version',
-                                             'taxid']:
+                if len(x) >= 3 and x[:3] == header:
                     isncbi = True
                     continue
                 else:
@@ -837,12 +852,17 @@ def refine_taxdump(tids, taxdump):
     taxdump : dict
         taxonomy database
 
+    Returns
+    -------
+    dict
+        refined taxonomy database
+
     Notes
     -----
     `children` is a list of immediate child taxIds of current taxId.
     """
     ancs = set().union(*[get_lineage(x, taxdump) for x in tids])
-    taxdump = {k: v for k, v in taxdump.items() if k in ancs}
+    return {k: v for k, v in taxdump.items() if k in ancs}
 
 
 def add_children(taxdump):
@@ -860,14 +880,10 @@ def add_children(taxdump):
     children = {}
     for tid, taxon in taxdump.items():
         pid = taxon['parent']
-        if pid == tid or pid == '0':
-            continue
-        children.setdefault(pid, []).append(tid)
+        if pid != tid and pid != '0':
+            children.setdefault(pid, []).append(tid)
     for tid, taxon in taxdump.items():
-        try:
-            taxon['children'] = children[tid]
-        except KeyError:
-            taxon['children'] = []
+        taxon['children'] = children.get(tid, [])
 
 
 def get_descendants(tid, taxdump):
@@ -903,3 +919,24 @@ def save_figure(fig, file):
     """
     fig.tight_layout()
     fig.savefig(file, bbox_inches='tight')
+
+
+def taxdump_from_text(text):
+    """Read taxdump from comma-delimited text.
+
+    Parameters
+    ----------
+    text : list of str
+        multi-line, comma-delimited text
+        columns: taxId, name, parent taxId, rank
+
+    Returns
+    -------
+    dict of dict
+        taxonomy database
+    """
+    res = {}
+    for line in text:
+        x = line.split(',')
+        res[x[0]] = {'name': x[1], 'parent': x[2], 'rank': x[3]}
+    return res

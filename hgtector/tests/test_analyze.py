@@ -9,9 +9,9 @@
 # ----------------------------------------------------------------------------
 
 from unittest import TestCase, main
-from os import remove
-from os.path import join, isfile, dirname, realpath
-from shutil import rmtree
+from os import remove, makedirs
+from os.path import join, isdir, isfile, dirname, realpath
+from shutil import rmtree, copy, move
 from tempfile import mkdtemp
 
 import numpy as np
@@ -20,7 +20,8 @@ import pandas as pd
 from sklearn.neighbors import KernelDensity
 
 from hgtector.analyze import Analyze
-from hgtector.util import add_children, get_descendants
+from hgtector.util import (
+    load_configs, add_children, get_descendants, taxdump_from_text)
 
 
 class AnalyzeTests(TestCase):
@@ -38,16 +39,132 @@ class AnalyzeTests(TestCase):
         rmtree(self.tmpdir)
 
     def test___call__(self):
-        # TODO
-        pass
+        # run Ecoli sample using the Silverman method
+        me = Analyze()
+        def args(): return None
+        args.input = join(self.datadir, 'Ecoli', 'search')
+        args.output = join(self.tmpdir, 'output')
+        args.taxdump = join(self.datadir, 'Ecoli', 'taxdump')
+        args.input_tax = None
+        args.self_tax = None
+        args.close_tax = None
+        args.self_rank = None
+        args.close_size = None
+        args.distal_top = None
+        args.bandwidth = 'silverman'
+        args.from_scores = False
+        me(args)
+        self.assertEqual(me.df[me.df['hgt']].shape[0], 16)
+
+        # use existing score table, run grid search
+        args.input = None
+        args.from_scores = True
+        args.bandwidth = 'grid'
+        me(args)
+        self.assertEqual(me.df[me.df['hgt']].shape[0], 18)
+        rmtree(args.output)
 
     def test_set_parameters(self):
-        # TODO
-        pass
+        me = Analyze()
+        me.cfg = load_configs()
+        def args(): return None
+
+        # input is file
+        infile = join(self.datadir, 'DnaK', 'search', 'sample.tsv')
+        outdir = join(self.tmpdir, 'output')
+        args.input = infile
+        args.output = outdir
+        args.noise = 0.75
+        me.set_parameters(args)
+        self.assertEqual(me.input, infile)
+        self.assertEqual(me.output, outdir)
+        self.assertTrue(isdir(outdir))
+        self.assertDictEqual(me.input_map, {'sample': infile})
+        self.assertEqual(me.noise, 75)
+
+        # coverage threshold too small
+        args.input_cov = 25
+        with self.assertRaises(ValueError) as ctx:
+            me.set_parameters(args)
+        msg = 'Taxonomy coverage for auto-interence must be at least 50%.'
+        self.assertEqual(str(ctx.exception), msg)
+        args.input_cov = 75
+
+        # input is directory
+        indir = join(self.datadir, 'DnaK', 'search')
+        args.input = indir
+        me.set_parameters(args)
+        self.assertEqual(me.input, indir)
+        self.assertDictEqual(me.input_map, {'sample': infile})
+        rmtree(outdir)
+
+        # input is invalid
+        not_path = 'I am not a path'
+        args.input = not_path
+        with self.assertRaises(ValueError) as ctx:
+            me.set_parameters(args)
+        msg = f'Invalid input data file or directory: {not_path}.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # input has no search result
+        args.input = self.tmpdir
+        with self.assertRaises(ValueError) as ctx:
+            me.set_parameters(args)
+        msg = f'No input data are found under: {self.tmpdir}.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # no input (which is okay)
+        delattr(me, 'input_map')
+        args.input = None
+        me.set_parameters(args)
+        self.assertFalse(hasattr(me, 'input_map'))
 
     def test_read_input(self):
-        # TODO
-        pass
+        me = Analyze()
+
+        def batch_assert():
+            self.assertEqual(len(me.taxdump), 76)
+            self.assertEqual(me.data['sample'][0]['id'], 'WP_000516135.1')
+            self.assertEqual(me.data['sample'][0]['hits'].shape, (12, 5))
+
+        # DnaK - default mode
+        me.taxdump = join(self.datadir, 'DnaK', 'taxdump')
+        me.input_map = {'sample': join(
+            self.datadir, 'DnaK', 'search', 'sample.tsv')}
+        me.read_input()
+        batch_assert()
+
+        # missing taxonomy
+        copy(join(self.datadir, 'DnaK', 'search', 'sample.tsv'),
+             join(self.tmpdir, 'sample.tsv'))
+        me.input = self.tmpdir
+        me.taxdump = None
+        with self.assertRaises(ValueError) as ctx:
+            me.read_input()
+        msg = 'Missing taxonomy database.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # taxonomy in same directory as search result
+        copy(join(self.datadir, 'DnaK', 'taxdump', 'nodes.dmp'),
+             join(self.tmpdir, 'nodes.dmp'))
+        copy(join(self.datadir, 'DnaK', 'taxdump', 'names.dmp'),
+             join(self.tmpdir, 'names.dmp'))
+        me.input_map = {'sample': join(self.tmpdir, 'sample.tsv')}
+        me.read_input()
+        batch_assert()
+
+        # taxonomy in parent directory as search result
+        indir = join(self.tmpdir, 'search')
+        makedirs(indir)
+        move(join(self.tmpdir, 'sample.tsv'), join(indir, 'sample.tsv'))
+        me.input = indir
+        me.input_map = {'sample': join(indir, 'sample.tsv')}
+        me.taxdump = None
+        me.read_input()
+        batch_assert()
+        rmtree(indir)
+        remove(join(self.tmpdir, 'nodes.dmp'))
+        remove(join(self.tmpdir, 'names.dmp'))
 
     def test_read_search_results(self):
         file = join(self.datadir, 'DnaK', 'search', 'sample.tsv')
@@ -66,11 +183,73 @@ class AnalyzeTests(TestCase):
         self.assertEqual(len(obs[0]['hits']), 5)
 
     def test_assign_taxonomy(self):
-        # TODO
-        pass
+        # input are two genomes with defined taxonomy
+        me = Analyze()
+        me.input_tax = 'S1:561,S2:620'  # Escherichia and Shigella
+        me.data = {}
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        me.assign_taxonomy()
+        # test input taxonomy extraction
+        self.assertDictEqual(me.input_tax, {'S1': '561', 'S2': '620'})
+        # test taxonomy refinement
+        exp = {'1', '131567', '2', '1224', '1236', '91347', '543', '561',
+               '620'}
+        self.assertSetEqual(set(me.taxdump.keys()), exp)
+        # test LCA discovery
+        self.assertEqual(me.lca, '543')
+
+        # helper for making hit table
+        def _hits_df(d):
+            return pd.Series(d, name='taxid', dtype=object).to_frame()
+
+        # input is one genome with defined taxonomy
+        me = Analyze()
+        me.data = {'S1': [{'hits': pd.DataFrame(columns=['taxid'])}]}
+        me.input_tax = '561'  # Escherichia
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        me.assign_taxonomy()
+        self.assertDictEqual(me.input_tax, {'S1': '561'})
+
+        # input taxonomy not found in database
+        me.input_tax = '1234'
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        with self.assertRaises(ValueError) as ctx:
+            me.assign_taxonomy()
+        msg = 'TaxID 1234 is not present in taxonomy database.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # input are two genome whose taxonomies are to be inferred based on
+        # search results
+        me = Analyze()
+        me.input_tax = None
+        me.data = {'S1': [{'hits': _hits_df({'P1': '561', 'P2': '562'})},
+                          {'hits': _hits_df({'P3': '543', 'P4': '561'})}],
+                   'S2': [{'hits': _hits_df({'P5': '562', 'P6': '585056'})},
+                          {'hits': _hits_df({'P7': '561', 'P8': '1038927'})},
+                          {'hits': _hits_df({'P9': '2580236'})}]}
+        me.input_cov = 75
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        me.assign_taxonomy()
+        self.assertDictEqual(me.input_tax, {'S1': '543', 'S2': '561'})
+        self.assertEqual(me.lca, '543')
+
+        # cannot auto-infer taxonomy
+        me.data['S3'] = [{'hits': _hits_df({})}]
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        with self.assertRaises(ValueError) as ctx:
+            me.assign_taxonomy()
+        msg = 'Cannot auto-infer taxonomy for S3. Please specify manually.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # invalid input taxonomy string
+        me.input_tax = '561'
+        with self.assertRaises(ValueError) as ctx:
+            me.assign_taxonomy()
+        msg = 'Invalid input taxonomy format.'
+        self.assertEqual(str(ctx.exception), msg)
 
     def test_infer_genome_tax(self):
-        taxdump = _taxdump_from_text(taxdump_proteo)
+        taxdump = taxdump_from_text(taxdump_proteo)
 
         # five proteins, in which four have hits
         taxids = [['562', '620', '570'],  # E. coli
@@ -94,19 +273,36 @@ class AnalyzeTests(TestCase):
         exp = ('543', 100.0)  # 3 / 3 best hits assigned to Enterobacteriaceae
         self.assertTupleEqual(obs, exp)
 
+        # no input protein
+        with self.assertRaises(ValueError) as ctx:
+            Analyze.infer_genome_tax({}, taxdump, 75)
+        msg = 'Cannot auto-infer taxonomy.'
+        self.assertEqual(str(ctx.exception), msg)
+
     def test_sum_taxids(self):
-        # TODO
-        pass
+        me = Analyze()
+        me.input_tax = {'S1': '1', 'S2': '3'}
+
+        def _hits_df(d):
+            return pd.Series(d, name='taxid').to_frame()
+
+        me.data = {'S1': [{'hits': _hits_df({'a': '4', 'b': '6'})},
+                          {'hits': _hits_df({'a': '4', 'c': '8'})}],
+                   'S2': [{'hits': _hits_df({'b': '6', 'd': '1'})}]}
+        obs = me.sum_taxids()
+        exp = {'1', '3', '4', '6', '8'}
+        self.assertSetEqual(obs, exp)
 
     def test_define_groups(self):
         me = Analyze()
-        me.taxdump = _taxdump_from_text(taxdump_proteo)
+        me.taxdump = taxdump_from_text(taxdump_proteo)
         add_children(me.taxdump)
         me.groups = {}
 
         # user defined groups:
         # self: genera Escherichia and Shigella
         # close: family Enterobacteriaceae
+        me.groups = {}
         me.self_tax = '561,620'
         me.close_tax = '543'
         me.define_groups()
@@ -117,9 +313,23 @@ class AnalyzeTests(TestCase):
         exp = {'543', '548', '570'}
         self.assertSetEqual(me.groups['close'], exp)
 
+        # auto-infer groups
+        me.self_tax = {}
+        me.close_tax = {}
+        me.lca = '562'          # all inputs are E. coli
+        me.self_rank = 'genus'  # but we want to raise self to genus
+        me.close_size = 2       # close group must be this big or bigger
+        me.define_groups()
+        self.assertListEqual(me.self_tax, ['561'])
+        exp = {'561', '562', '585056', '1038927', '2580236'}
+        self.assertSetEqual(me.groups['self'], exp)
+        self.assertListEqual(me.close_tax, ['543'])
+        exp = {'543', '548', '570', '620', '622'}
+        self.assertSetEqual(me.groups['close'], exp)
+
     def test_infer_self_group(self):
         me = Analyze()
-        me.taxdump = _taxdump_from_text(taxdump_proteo)
+        me.taxdump = taxdump_from_text(taxdump_proteo)
         add_children(me.taxdump)
 
         # assign to LCA of all genomes (E. coli)
@@ -145,7 +355,7 @@ class AnalyzeTests(TestCase):
 
     def test_infer_close_group(self):
         me = Analyze()
-        me.taxdump = _taxdump_from_text(taxdump_proteo)
+        me.taxdump = taxdump_from_text(taxdump_proteo)
         add_children(me.taxdump)
         me.groups = {}
 
@@ -180,12 +390,51 @@ class AnalyzeTests(TestCase):
         self.assertSetEqual(me.groups['close'], exp)
 
     def test_calc_scores(self):
-        # TODO
-        pass
+        columns = ('id', 'taxid', 'score')
+
+        # helper for making hit table
+        def _hits_df(data):
+            return pd.DataFrame(data, columns=columns).set_index('id')
+
+        me = Analyze()
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        add_children(me.taxdump)
+        me.groups = {'self':  {'561', '562', '585056'},
+                     'close': {'543', '91347', '1236'}}
+        me.data = {'S1': [
+            {'score': 100, 'hits': _hits_df((('P1', '561', 100),
+                                             ('P2', '562', 95)))},
+            {'score': 90,  'hits': _hits_df((('P3', '561', 81),
+                                             ('P4', '543', 72)))}],
+                   'S2': [
+            {'score': 96,  'hits': _hits_df((('P5', '561', 90),
+                                             ('P6', '543', 84),
+                                             ('P7', '620', 66)))}]}
+        me.weighted = True
+        me.match_th = 0.9
+        me.calc_scores()
+
+        # helper for get scores
+        def _prot_scores(prot):
+            return [prot[x] for x in ('self', 'close', 'distal')]
+
+        s1_1 = me.data['S1'][0]
+        self.assertListEqual(s1_1['hits']['group'].tolist(), ['self', 'self'])
+        self.assertListEqual(_prot_scores(s1_1), [1.95, 0.0, 0.0])
+        self.assertEqual(s1_1['match'], '0')
+        s1_2 = me.data['S1'][1]
+        self.assertListEqual(s1_2['hits']['group'].tolist(), ['self', 'close'])
+        self.assertListEqual(_prot_scores(s1_2), [0.9, 0.8, 0.0])
+        self.assertEqual(s1_2['match'], '0')
+        s2_1 = me.data['S2'][0]
+        self.assertListEqual(s2_1['hits']['group'].tolist(),
+                             ['self', 'close', 'distal'])
+        self.assertListEqual(_prot_scores(s2_1), [0.9375, 0.875, 0.6875])
+        self.assertEqual(s2_1['match'], '620')
 
     def test_find_match(self):
         me = Analyze()
-        me.taxdump = _taxdump_from_text(taxdump_proteo)
+        me.taxdump = taxdump_from_text(taxdump_proteo)
         add_children(me.taxdump)
         df = pd.DataFrame(
             [[100, '585056'],  # E. coli UMN026
@@ -213,8 +462,29 @@ class AnalyzeTests(TestCase):
         self.assertEqual(me.find_match(pd.DataFrame()), '0')
 
     def test_make_score_table(self):
-        # TODO
-        pass
+        me = Analyze()
+        me.output = self.tmpdir
+        me.data = {'S1': [{'id': 'P1', 'length': 100, 'match': '0',
+                           'self': 1.5, 'close': 0.75, 'distal': 0.0,
+                           'hits': pd.DataFrame([0] * 3)},
+                          {'id': 'P2', 'length': 120, 'match': '1224',
+                           'self': 1.625, 'close': 0.225, 'distal': 0.375,
+                           'hits': pd.DataFrame([0] * 5)}],
+                   'S2': [{'id': 'P1', 'length': 225, 'match': '620',
+                           'self': 2.35, 'close': 1.05, 'distal': 0.75,
+                           'hits': pd.DataFrame([0] * 6)}]}
+        me.make_score_table()
+        obs = me.df.values.tolist()
+        exp = [['S1', 'P1', 100, 3, 1.5,   0.75,  0,        '0'],
+               ['S1', 'P2', 120, 5, 1.625, 0.225, 0.375, '1224'],
+               ['S2', 'P1', 225, 6, 2.35,  1.05,  0.75,   '620']]
+        self.assertListEqual(obs, exp)
+        fp = join(self.tmpdir, 'scores.tsv')
+        with open(fp, 'r') as f:
+            obs = [x.split('\t') for x in f.read().splitlines()[1:]]
+        exp = [[str(y) for y in x] for x in exp]
+        self.assertListEqual(obs, exp)
+        remove(fp)
 
     def test_remove_orphans(self):
         me = Analyze()
@@ -266,8 +536,51 @@ class AnalyzeTests(TestCase):
         self.assertEqual(obs.shape[0], 710)
 
     def test_predict_hgt(self):
-        # TODO
-        pass
+        me = Analyze()
+
+        # populate score table
+        n = 1000
+        data = {'sample': ['S1'] * n,
+                'protein': [f'P{x}' for x in range(n)],
+                'self': np.random.choice(self.dist_gamma, n),
+                'close': np.concatenate((
+                    np.random.choice(self.dist_norm1, int(n / 2)) / 3,
+                    np.random.choice(self.dist_norm2, int(n / 2)))),
+                'distal': np.concatenate((
+                    np.random.choice(self.dist_lognorm, int(n * 3 / 4)),
+                    np.random.choice(self.dist_gamma, int(n / 4)) / 2))}
+        me.df = pd.DataFrame(data)
+
+        # default setting
+        me.output = self.tmpdir
+        me.self_low = False
+        me.bandwidth = 'auto'
+        me.bw_steps = 20
+        me.low_part = 75
+        me.fixed = 25
+        me.noise = 50
+        me.silhouette = 0.5
+
+        # run prediction
+        self.assertEqual(me.predict_hgt(), 96)
+        groups = ['self', 'close', 'distal']
+        for group in groups[1:]:
+            fp = join(self.tmpdir, f'{group}.hist.png')
+            self.assertTrue(isfile(fp))
+            remove(fp)
+        fp = join(self.tmpdir, 'scatter.png')
+        self.assertTrue(isfile(fp))
+        remove(fp)
+        fp = join(self.tmpdir, 'hgts')
+        self.assertTrue(isfile(join(fp, 'S1.txt')))
+        rmtree(fp)
+
+        # constant values
+        me.df['close'] = 1
+        me.df.drop('hgt', axis=1, inplace=True)
+        self.assertEqual(me.predict_hgt(), 0)
+        self.assertNotIn('hgt', me.df.columns)
+        remove(join(self.tmpdir, 'close.hist.png'))
 
     def test_cluster_kde(self):
         me = Analyze()
@@ -301,6 +614,12 @@ class AnalyzeTests(TestCase):
         # clean up
         remove(join(self.tmpdir, 'group.kde.png'))
 
+        # cannot find threshold (unimodal distribution)
+        me.df = pd.Series(self.dist_norm1, name='group').to_frame()
+        me.bandwidth = 'silverman'
+        obs = me.cluster_kde('group')
+        self.assertEqual(obs, 0)
+
     def test_perform_kde(self):
         me = Analyze()
         me.bw_steps = 10
@@ -320,6 +639,13 @@ class AnalyzeTests(TestCase):
         me.bandwidth = 0.5
         obs = me.perform_kde(data)[2]
         self.assertAlmostEqual(obs, 0.5)
+
+        # invalid bandwidth
+        me.bandwidth = 100
+        with self.assertRaises(ValueError) as ctx:
+            me.perform_kde(data)
+        msg = 'Invalid bandwidth: 100.'
+        self.assertEqual(str(ctx.exception), msg)
 
     def test_grid_kde(self):
         estimator = KernelDensity(kernel='gaussian')
@@ -371,6 +697,10 @@ class AnalyzeTests(TestCase):
         # constant values
         obs = Analyze.silverman_bw([1, 1, 1, 1, 1])
         self.assertAlmostEqual(obs, 0.652301697309926)
+
+        # IQR = 0
+        obs = Analyze.silverman_bw([1, 3, 3, 3, 5])
+        self.assertAlmostEqual(obs, 0.9224939070946869)
 
         # one element
         with self.assertRaises(ValueError) as ctx:
@@ -442,8 +772,10 @@ class AnalyzeTests(TestCase):
 
     def test_smart_kde(self):
         me = Analyze()
-        data = np.concatenate([self.dist_norm1, self.dist_norm2])
-        me.df = pd.Series(data, name='group').to_frame()
+
+        # typical case (bimodal distribution)
+        me.df = pd.Series(np.concatenate([
+            self.dist_norm1, self.dist_norm2]), name='group').to_frame()
         me.bw_steps = 10
         me.noise = 50
         me.low_part = 75
@@ -453,6 +785,11 @@ class AnalyzeTests(TestCase):
         file = join(self.tmpdir, 'group.kde.png')
         self.assertTrue(isfile(file))
         remove(file)
+
+        # unable to determine threshold
+        me.low_part = 0.001
+        me.df = pd.Series(self.dist_norm1, name='group').to_frame()
+        self.assertEqual(me.smart_kde('group'), 0)
 
     def test_calc_cluster_props(self):
         me = Analyze()
@@ -471,6 +808,8 @@ class AnalyzeTests(TestCase):
 
     def test_refine_cluster(self):
         me = Analyze()
+
+        # only close and distal
         me.self_low = False
         me.silhouette = 0.5
         me.df = pd.DataFrame(np.array(
@@ -479,6 +818,16 @@ class AnalyzeTests(TestCase):
         me.df['hgt'] = (me.df['close'] < 2) & (me.df['distal'] > 2)
         me.refine_cluster(me.calc_cluster_props())
         self.assertEqual(me.df[me.df['hgt']].shape[0], 11)
+
+        # all three groups
+        me.self_low = True
+        me.df = pd.DataFrame(np.array([
+            self.dist_norm1[:800], self.dist_gamma,
+            self.dist_lognorm[:800]]).T,
+            columns=['self', 'close', 'distal'])
+        me.df['hgt'] = (me.df['close'] < 2) & (me.df['distal'] > 2)
+        me.refine_cluster(me.calc_cluster_props())
+        self.assertEqual(me.df[me.df['hgt']].shape[0], 4)
 
     def test_plot_hgts(self):
         me = Analyze()
@@ -516,29 +865,6 @@ taxdump_proteo = (
     '548,Klebsiella aerogenes,570,species',
     '118884,unclassified Gammaproteobacteria,1236,no rank',
     '126792,Plasmid pPY113,1,species')
-
-
-"""Helpers"""
-
-
-def _taxdump_from_text(text):
-    """Read taxdump from text.
-
-    Parameters
-    ----------
-    text : list of str
-        multi-line, tab-delimited text
-
-    Returns
-    -------
-    dict of dict
-        taxonomy database
-    """
-    res = {}
-    for line in text:
-        x = line.split(',')
-        res[x[0]] = {'name': x[1], 'parent': x[2], 'rank': x[3]}
-    return res
 
 
 if __name__ == '__main__':

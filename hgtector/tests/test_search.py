@@ -15,6 +15,7 @@ from shutil import rmtree
 from tempfile import mkstemp, mkdtemp
 
 from hgtector.search import Search
+from hgtector.util import load_configs
 
 
 class SearchTests(TestCase):
@@ -38,6 +39,96 @@ class SearchTests(TestCase):
     def test_args_wf(self):
         # TODO
         pass
+
+    def test_check_diamond(self):
+        me = Search()
+        me.cfg = load_configs()
+        me.diamond = None
+        me.db = None
+
+        # don't check
+        me.method = None
+        self.assertIsNone(me.check_diamond())
+        self.assertIsNone(me.diamond)
+
+        # method is auto
+        me.method = 'auto'
+        self.assertIsNone(me.check_diamond())
+        self.assertEqual(me.diamond, 'diamond')
+
+        # method is diamond and a mock database is present
+        me.method = 'diamond'
+        open(join(self.tmpdir, 'db.dmnd'), 'w').close()
+        me.db = join(self.tmpdir, 'db')
+        self.assertEqual(me.check_diamond(), me.db)
+        remove(join(self.tmpdir, 'db.dmnd'))
+
+        # no database
+        me.db = None
+        with self.assertRaises(ValueError) as ctx:
+            me.check_diamond()
+        msg = 'A protein database is required for DIAMOND search.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # invalid database
+        me.db = 'not_a_db'
+        with self.assertRaises(ValueError) as ctx:
+            me.check_diamond()
+        msg = 'Invalid DIAMOND database: not_a_db.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # invalid program
+        me.diamond = 'not_an_exe'
+        with self.assertRaises(ValueError) as ctx:
+            me.check_diamond()
+        msg = 'Invalid diamond executable: not_an_exe.'
+        self.assertEqual(str(ctx.exception), msg)
+
+    def test_check_blast(self):
+        me = Search()
+        me.cfg = load_configs()
+        me.blastp = None
+        me.db = None
+
+        # don't check
+        me.method = None
+        self.assertIsNone(me.check_blast())
+        self.assertIsNone(me.blastp)
+
+        # method is auto
+        me.method = 'auto'
+        self.assertIsNone(me.check_blast())
+        self.assertEqual(me.blastp, 'blastp')
+
+        # method is blast and a mock database is present
+        me.method = 'blast'
+        for ext in ('phr', 'pin', 'psq'):
+            open(join(self.tmpdir, f'db.{ext}'), 'w').close()
+        me.db = join(self.tmpdir, 'db')
+        self.assertEqual(me.check_blast(), join(self.tmpdir, 'db'))
+        for ext in ('phr', 'pin', 'psq'):
+            remove(join(self.tmpdir, f'db.{ext}'))
+
+        # no database
+        me.db = None
+        with self.assertRaises(ValueError) as ctx:
+            me.check_blast()
+        msg = 'A protein database is required for BLAST search.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # invalid database
+        me.db = 'not_a_db'
+        with self.assertRaises(ValueError) as ctx:
+            me.check_blast()
+        msg = 'Invalid BLAST database: not_a_db.'
+        self.assertEqual(str(ctx.exception), msg)
+
+        # invalid program
+        me.blastp = 'not_an_exe'
+        with self.assertRaises(ValueError) as ctx:
+            me.check_blast()
+        msg = 'Invalid blastp executable: not_an_exe.'
+        self.assertEqual(str(ctx.exception), msg)
 
     def test_input_wf(self):
         # TODO
@@ -138,7 +229,7 @@ class SearchTests(TestCase):
         me.method = 'precomp'
         me.taxmap = None
 
-        # this case has two hits that miss taxIds: one is available from taxom
+        # this case has two hits that miss taxIds: one is available from taxon
         # map and one needs to be looked-up from database; and another hit with
         # invalid sequence Id
         prots = {'WP_000516135.1': [
@@ -1088,8 +1179,7 @@ class SearchTests(TestCase):
         me.parse_taxonomy_xml(xml)
         obs = []
         for tid, d in sorted(me.taxdump.items(), key=lambda x: int(x[0])):
-            obs.append('{}:{},{},{}'.format(
-                tid, d['name'], d['parent'], d['rank']))
+            obs.append(f'{tid}:{d["name"]},{d["parent"]},{d["rank"]}')
         exp = ['2:Bacteria,131567,superkingdom',
                '543:Enterobacteriaceae,91347,family',
                '561:Escherichia,543,genus',
@@ -1123,8 +1213,7 @@ class SearchTests(TestCase):
         self.assertListEqual(obs, exp)
         obs = []
         for tid, d in sorted(me.taxdump.items(), key=lambda x: int(x[0])):
-            obs.append('{}:{},{},{}'.format(
-                tid, d['name'], d['parent'], d['rank']))
+            obs.append(f'{tid}:{d["name"]},{d["parent"]},{d["rank"]}')
         exp = ['2:Bacteria,131567,superkingdom',
                '543:Enterobacteriaceae,91347,family',
                '561:Escherichia,543,genus',
