@@ -327,7 +327,7 @@ class Search(object):
             if not dir_:
                 self.tmpdir = mkdtemp()
                 setattr(self, 'mkdtemp', True)  # mark for cleanup
-            if not isdir(dir_):
+            elif not isdir(dir_):
                 raise ValueError(f'Invalid temporary directory: {dir_}.')
 
         """determine taxonomy database and filters"""
