@@ -24,6 +24,8 @@ from sklearn.neighbors import KernelDensity, NearestCentroid
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import silhouette_samples
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from hgtector.util import (
