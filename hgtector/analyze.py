@@ -276,7 +276,7 @@ class Analyze(object):
         data = []
         with read_file(file) as f:
             for line in f:
-                line = line.rstrip("\n")
+                line = line.rstrip('\r\n')
                 m = p.match(line)
                 if m:
                     if m.group(1) == 'ID':
