@@ -562,7 +562,7 @@ class Search(object):
                 scores = {}
                 with open(file, 'r') as f:
                     for line in f:
-                        line = line.rstrip()
+                        line = line.rstrip('\r\n')
                         if not line or line.startswith('#'):
                             continue
                         id_, score = line.split('\t')
@@ -1110,7 +1110,7 @@ class Search(object):
         with open(fp, 'r') as f:
             for line in f:
                 if line.startswith('# ID: '):
-                    done.append(line[6:].rstrip())
+                    done.append(line[6:].rstrip('\r\n'))
         doneset = set(done)
         for prot in prots:
             if prot['id'] in doneset:
@@ -1675,7 +1675,7 @@ class Search(object):
         lines = []
         with open(file, 'r') as f:
             for line in f:
-                line = line.rstrip()
+                line = line.rstrip('\r\n')
                 if line and not line.startswith('#'):
                     lines.append(line)
                     if ism8 is None:
@@ -1702,7 +1702,7 @@ class Search(object):
         ths = {x: getattr(self, x, 0) for x in (
             'evalue', 'identity', 'coverage', 'maxhits')}
         for line in lines:
-            line = line.rstrip()
+            line = line.rstrip('\r\n')
             if not line or line.startswith('#'):
                 continue
             x = line.split('\t')
@@ -1756,7 +1756,7 @@ class Search(object):
         ths = {x: getattr(self, x, 0) for x in (
             'evalue', 'identity', 'coverage', 'maxhits')}
         for line in lines:
-            line = line.rstrip()
+            line = line.rstrip('\r\n')
             if not line or line.startswith('#'):
                 continue
             x = line.split('\t')
@@ -2238,7 +2238,7 @@ class Search(object):
         res = []
         used = set()
         for line in lines:
-            x = line.rstrip().split('\t')
+            x = line.rstrip('\r\n').split('\t')
             if x[0].startswith('#'):
                 continue
             if len(x) < 12:

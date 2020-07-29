@@ -326,7 +326,7 @@ def read_input_prots(fp):
     lines = []
     with read_file(fp) as f:
         for line in f:
-            line = line.rstrip()
+            line = line.rstrip('\r\n')
             if not line or line.startswith('#'):
                 continue
 
@@ -375,7 +375,7 @@ def read_fasta(lines):
     """
     seqs = []
     for line in lines:
-        line = line.rstrip()
+        line = line.rstrip('\r\n')
         if line.startswith('>'):
             x = line[1:].split(None, 1)
             seqs.append([x[0], get_product(x[1]) if len(x) > 1 else '', ''])
@@ -579,11 +579,11 @@ def read_taxdump(dir_):
     taxdump = {}
     with open(join(dir_, 'nodes.dmp'), 'r') as f:
         for line in f:
-            x = line.rstrip().replace('\t|', '').split('\t')
+            x = line.rstrip('\r\n').replace('\t|', '').split('\t')
             taxdump[x[0]] = {'parent': x[1], 'rank': x[2]}
     with open(join(dir_, 'names.dmp'), 'r') as f:
         for line in f:
-            x = line.rstrip().replace('\t|', '').split('\t')
+            x = line.rstrip('\r\n').replace('\t|', '').split('\t')
             if len(x) < 4 or x[3] == 'scientific name':
                 try:
                     taxdump[x[0]]['name'] = x[1]
@@ -616,7 +616,7 @@ def read_prot2taxid(file):
     res = {}
     with read_file(file) as f:
         for line in f:
-            x = line.rstrip().split('\t')
+            x = line.rstrip('\r\n').split('\t')
             if len(x) == 1:
                 continue
             if isncbi is None:

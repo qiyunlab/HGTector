@@ -300,14 +300,12 @@ class DatabaseTests(TestCase):
         # get database files
         copy(join(self.datadir, 'DnaK', 'linear.faa'),
              join(self.tmpdir, 'db.faa'))
-        copy(join(self.datadir, 'DnaK', 'prot2tid.txt'),
-             join(self.tmpdir, 'taxon.map'))
         makedirs(join(self.tmpdir, 'taxdump'))
         copy(join(self.datadir, 'DnaK', 'taxdump', 'nodes.dmp'),
              join(self.tmpdir, 'taxdump', 'nodes.dmp'))
         copy(join(self.datadir, 'DnaK', 'taxdump', 'names.dmp'),
              join(self.tmpdir, 'taxdump', 'names.dmp'))
-        with open(join(self.tmpdir, 'taxon.map'), 'r') as f:
+        with open(join(self.datadir, 'DnaK', 'prot2tid.txt'), 'r') as f:
             me.taxonmap = dict(x.split('\t') for x in f.read().splitlines())
 
         # set parameters
@@ -344,24 +342,23 @@ class DatabaseTests(TestCase):
 
         # clean up
         remove(join(self.tmpdir, 'db.faa'))
-        remove(join(self.tmpdir, 'taxon.map'))
         rmtree(join(self.tmpdir, 'taxdump'))
 
     def test_build_blast_db(self):
         me = Database()
         me.output = self.tmpdir
         me.makeblastdb = 'makeblastdb'
+        me.tmpdir = self.tmpdir
         copy(join(self.datadir, 'DnaK', 'linear.faa'),
              join(self.tmpdir, 'db.faa'))
-        copy(join(self.datadir, 'DnaK', 'prot2tid.txt'),
-             join(self.tmpdir, 'taxon.map'))
+        with open(join(self.datadir, 'DnaK', 'prot2tid.txt'), 'r') as f:
+            me.taxonmap = dict(x.split('\t') for x in f.read().splitlines())
         me.build_blast_db()
         self.assertTrue(isdir(join(self.tmpdir, 'blast')))
         for ext in ('phr', 'pin', 'pog', 'psd', 'psi', 'psq'):
             self.assertTrue(isfile(join(self.tmpdir, 'blast', f'db.{ext}')))
         rmtree(join(self.tmpdir, 'blast'))
         remove(join(self.tmpdir, 'db.faa'))
-        remove(join(self.tmpdir, 'taxon.map'))
 
     def test_build_diamond_db(self):
         me = Database()

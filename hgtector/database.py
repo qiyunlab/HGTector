@@ -591,7 +591,7 @@ class Database(object):
                 fin = gzip.open(fp, 'r')
             cp = None
             for line in fin:
-                line = line.rstrip()
+                line = line.rstrip('\r\n')
                 if line.startswith('>'):
                     write_prot()
                     p, name = line[1:].split(None, 1)
@@ -713,7 +713,7 @@ class Database(object):
             fo = open(join(dir_, fname), 'w')
             fi = open(join(self.tmpdir, fname), 'r')
             for line in fi:
-                row = line.rstrip().replace('\t|', '').split('\t')
+                row = line.rstrip('\r\n').replace('\t|', '').split('\t')
                 if row[0] in ancs:
                     if fname == 'nodes.dmp' or 'scientific name' in row:
                         fo.write(line)
@@ -748,6 +748,13 @@ class Database(object):
     def build_blast_db(self):
         """Build BLAST database.
         """
+        # create temporary taxon map
+        taxonmap = join(self.tmpdir, 'taxon.map')
+        with open(taxonmap, 'w') as f:
+            for p, tid in sorted(self.taxonmap.items()):
+                f.write(f'{p}\t{tid}\n')
+
+        # build BLAST database
         makedirs(join(self.output, 'blast'), exist_ok=True)
         cmd = ' '.join((
             self.makeblastdb,
@@ -756,11 +763,14 @@ class Database(object):
             '-out', join(self.output, 'blast', 'db'),
             '-title', 'db',
             '-parse_seqids',
-            '-taxid_map', join(self.output, 'taxon.map')))
+            '-taxid_map', taxonmap))
         print('Build BLAST database...', flush=True)
         ec, out = run_command(cmd)
         if ec:
             raise ValueError(f'makeblastdb failed with error code {ec}.')
+
+        # clean up
+        remove(taxonmap)
         print('Done.')
 
     def build_diamond_db(self):
