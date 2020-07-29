@@ -748,6 +748,13 @@ class Database(object):
     def build_blast_db(self):
         """Build BLAST database.
         """
+        # create temporary taxon map
+        taxonmap = join(self.tmpdir, 'taxon.map')
+        with open(taxonmap, 'w') as f:
+            for p, tid in sorted(self.taxonmap.items()):
+                f.write(f'{p}\t{tid}\n')
+
+        # build BLAST database
         makedirs(join(self.output, 'blast'), exist_ok=True)
         cmd = ' '.join((
             self.makeblastdb,
@@ -756,11 +763,14 @@ class Database(object):
             '-out', join(self.output, 'blast', 'db'),
             '-title', 'db',
             '-parse_seqids',
-            '-taxid_map', join(self.output, 'taxon.map')))
+            '-taxid_map', taxonmap))
         print('Build BLAST database...', flush=True)
         ec, out = run_command(cmd)
         if ec:
             raise ValueError(f'makeblastdb failed with error code {ec}.')
+
+        # clean up
+        remove(taxonmap)
         print('Done.')
 
     def build_diamond_db(self):
