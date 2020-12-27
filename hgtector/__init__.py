@@ -16,4 +16,4 @@ __description__ = (
 __license__ = 'BSD-3-Clause'
 __author__ = 'Qiyun Zhu',
 __email__ = 'qiyunzhu@gmail.com',
-__url__ = 'https://github.com/DittmarLab/HGTector'
+__url__ = 'https://github.com/qiyunlab/HGTector'
