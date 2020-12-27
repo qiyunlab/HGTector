@@ -7,6 +7,7 @@ Change Log
 - Predicted HGT list now includes potential donors. Users can optionally specify a taxonomic rank at which they will be reported.
 
 ### Changed
+- Repository transferred from [DittmarLab](https://github.com/DittmarLab) to [qiyunlab](https://github.com/qiyunlab).
 - Minor tweaks with no visible impact on program behavior.
 
 
