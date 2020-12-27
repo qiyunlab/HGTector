@@ -41,6 +41,7 @@ class AnalyzeTests(TestCase):
     def test___call__(self):
         # run Ecoli sample using the Silverman method
         me = Analyze()
+
         def args(): return None
         args.input = join(self.datadir, 'Ecoli', 'search')
         args.output = join(self.tmpdir, 'output')
@@ -67,6 +68,7 @@ class AnalyzeTests(TestCase):
     def test_set_parameters(self):
         me = Analyze()
         me.cfg = load_configs()
+
         def args(): return None
 
         # input is file
@@ -179,7 +181,12 @@ class AnalyzeTests(TestCase):
         self.assertEqual(obs[0]['hits']['taxid']['NP_384288.1'], '266834')
 
         # maximum number of hits
-        obs = Analyze.read_search_results(file, 5)
+        obs = Analyze.read_search_results(file, maxhits=8)
+        self.assertEqual(len(obs[0]['hits']), 8)
+
+        # alignment thresholds
+        obs = Analyze.read_search_results(
+            file, evalue=1e-50, identity=95, coverage=95)
         self.assertEqual(len(obs[0]['hits']), 5)
 
     def test_assign_taxonomy(self):

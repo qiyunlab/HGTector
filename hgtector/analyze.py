@@ -254,12 +254,14 @@ class Analyze(object):
         print('Reading homology search results...')
         self.data = {}
         for sid, fname in self.input_map.items():
-            self.data[sid] = self.read_search_results(fname)
+            self.data[sid] = self.read_search_results(
+                fname, self.maxhits, self.evalue, self.identity, self.coverage)
             print(f'  {sid}: {len(self.data[sid])} proteins.')
         print(f'Done. Read search results of {len(self.data)} samples.')
 
     @staticmethod
-    def read_search_results(file, maxhits=None):
+    def read_search_results(file, maxhits=None, evalue=None, identity=None,
+                            coverage=None):
         """Read homology search results of one sample.
 
         Parameters
@@ -268,12 +270,19 @@ class Analyze(object):
             input filepath
         maxhits : int
             maximum number of hits per protein to preserve
+        evalue : float
+            maximum E-value cutoff
+        identity : int
+            minimum percent identity cutoff
+        coverage : int
+            minimum percent query coverage cutoff
 
         Returns
         -------
         list of dict
             search results
         """
+        # read research result file
         p = re.compile(r'# (\S+): (.*)')
         data = []
         with read_file(file) as f:
@@ -281,22 +290,21 @@ class Analyze(object):
                 line = line.rstrip('\r\n')
                 m = p.match(line)
                 if m:
-                    if m.group(1) == 'ID':
+                    key = m.group(1)
+                    if key == 'ID':
                         data.append({'id': m.group(2), 'hits': []})
-                    elif m.group(1) == 'Length':
+                    elif key == 'Length':
                         data[-1]['length'] = int(m.group(2))
-                    elif m.group(1) == 'Product':
+                    elif key == 'Product':
                         data[-1]['product'] = m.group(2)
-                    elif m.group(1) == 'Score':
+                    elif key == 'Score':
                         data[-1]['score'] = float(m.group(2))
                 else:
                     data[-1]['hits'].append(line)
-                    if len(data[-1]['hits']) == (maxhits or 0):
-                        break
 
-        # convert hit table to DataFrame
         for i in range(len(data)):
-            data[i]['hits'] = pd.read_csv(
+            # convert hit table to DataFrame
+            hits = pd.read_csv(
                 StringIO('\n'.join(data[i]['hits'])), sep='\t', na_values='*',
                 names=['id', 'identity', 'evalue', 'score', 'coverage',
                        'taxid'],
@@ -306,6 +314,14 @@ class Analyze(object):
                        'score': np.float32,
                        'coverage': np.float32,
                        'taxid': str}).set_index('id')
+
+            # filter hits by thresholds
+            hits = hits.query(
+                'evalue <= {} & identity >= {} & coverage >= {}'.format(
+                    (evalue or 100), (identity or 0), (coverage or 0)))
+
+            # limit number of hits
+            data[i]['hits'] = hits.head(maxhits) if maxhits else hits
         return data
 
     def assign_taxonomy(self):
