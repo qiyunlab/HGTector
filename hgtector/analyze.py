@@ -24,8 +24,6 @@ from sklearn.neighbors import KernelDensity, NearestCentroid
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import silhouette_samples
 
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from hgtector.util import (
@@ -34,6 +32,8 @@ from hgtector.util import (
     sort_by_hierarchy, refine_taxdump, add_children, describe_taxon, find_lca,
     taxid_at_rank, get_descendants, save_figure)
 
+
+plt.switch_backend('agg')
 
 description = """predict HGT events based on search results"""
 
