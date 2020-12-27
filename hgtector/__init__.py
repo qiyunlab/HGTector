@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 
 __name__ = 'hgtector'
-__version__ = '2.0b2'
+__version__ = '2.0b3'
 __description__ = (
     'Genome-wide detection of putative horizontal gene transfer (HGT) events '
     'based on sequence homology search hit distribution statistics')

@@ -125,13 +125,13 @@ Refining cluster... done.
 
 Starting from this candidate list, the program performs a refinement in the 2D space. This process involves calculating the "**silhouette scores**", a metric which measures how confident a data point is assigned to the current cluster in the whole dataset. The higher the better. The program drops low-score genes from the candidate list, and the refined list will be the final result.
 
-The 13 predicted HGT-derived genes, together with their silhouette scores, are listed in [hgts/gsul.txt](../example/output/hgts/gsul.txt). Meanwhile, a scatter plot showing "distal" score vs. "close" score is generated. The yellow dots represent the predicted genes. As you can see, they are all located at the right boundary of the plot, meaning they have no to few "close" hits, but a decent amount of "distal" hits.
+The 13 predicted HGT-derived genes, together with their silhouette scores and potential donors (a rough range), are listed in [hgts/gsul.txt](../example/output/hgts/gsul.txt). Meanwhile, a scatter plot showing "distal" score vs. "close" score is generated. The yellow dots represent the predicted genes. As you can see, they are all located at the right boundary of the plot, meaning they have no to few "close" hits, but a decent amount of "distal" hits.
 
 ![gsul.scatter](../example/output/scatter.png "Distal vs. close scatter plot")
 
 ## Aftermath
 
-Let's do a sanity check on the result. The original paper, [Schönknecht _et al_. (2013)](https://science.sciencemag.org/content/339/6124/1207.long) reported that two genes encoding for ArsB (arsenite efflux protein) (`EME29520` and `EME26816`) were horizontally acquired (see Figure 3 of the paper). You should find that the two genes are among the 13 predicted genes in this small and quick analysis.
+Let's do a sanity check on the result. The original paper, [Schönknecht _et al_. (2013)](https://science.sciencemag.org/content/339/6124/1207.long) reported that two genes encoding for ArsB (arsenite efflux protein) (`EME29520` and `EME26816`) were horizontally acquired from Bacteria (see Figure 3 of the paper). You should find that the two genes are among the 13 predicted genes in this small and quick analysis.
 
 Next, one may examine these predicted genes and their hit tables. This will provide clues for further inferring the putative donors of the genes. For example, in the hit table of `EME29520`, there are multiple hits from beta- and gammaproteobacteria...
 

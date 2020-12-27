@@ -70,9 +70,6 @@ arguments = [
                      'this rank'],
     ['--close-size', 'for auto-inference: "close" group must have at least '
                      'this number of taxa', {'type': int}],
-    ['--distal-top', 'find match in "distal" group which is LCA of hits with '
-                     'bit score at most this percentage lower than best hit',
-                     {'type': int}],
 
     'scoring',
     ['--weighted',   'score is sum of weighted bit scores; otherwise simple '
@@ -100,6 +97,14 @@ arguments = [
                      {'type': float}],
     ['--self-low',   'HGT has low "self" score (an optional criterion)',
                      {'choices': ['yes', 'no']}],
+
+    'donor reporting',
+    ['--distal-top', 'find match in "distal" group which is LCA of hits with '
+                     'bit score at most this percentage lower than best hit',
+                     {'type': int}],
+    ['--donor-name', 'report taxon name instead of taxId of donor.',
+                     {'action': 'store_true'}],
+    ['--donor-rank', 'report donor at this rank (genus, phylum, etc.).'],
 
     'program behavior',
     ['--from-scores', 'if score table already exists, use it and skip search '
@@ -202,14 +207,17 @@ class Analyze(object):
         get_config(self, 'evalue', 'analyze.evalue', float)
         for key in ('maxhits', 'identity', 'coverage'):
             get_config(self, key, f'analyze.{key}')
-        for key in ('input_cov', 'self_rank', 'close_size', 'distal_top'):
+        for key in ('input_cov', 'self_rank', 'close_size'):
             get_config(self, key, f'grouping.{key.replace("_", "")}')
         for key in ('weighted', 'outliers', 'orphans', 'bandwidth', 'bw_steps',
                     'low_part', 'noise', 'fixed', 'silhouette', 'self_low'):
             get_config(self, key, f'predict.{key.replace("_", "")}')
+        get_config(self, 'distal_top', 'donor.distaltop')
+        for key in ('name', 'rank'):
+            get_config(self, f'donor_{key}', f'donor.{key}')
 
         # convert boolean values
-        for key in ('weighted', 'orphans', 'self_low'):
+        for key in ('weighted', 'orphans', 'self_low', 'donor_name'):
             setattr(self, key, arg2bool(getattr(self, key, None)))
 
         # convert fractions to percentages
@@ -572,17 +580,14 @@ class Analyze(object):
 
     def find_match(self, df):
         """Find a taxId that best describes top hits.
-
         Parameters
         ----------
         df : pd.DataFrame
             hit table
-
         Returns
         -------
         str
             taxId of match, or '0' if not found
-
         Notes
         -----
         The best match taxId is the LCA of top hits. The "top hits" are
@@ -786,16 +791,42 @@ class Analyze(object):
         print('Predicted HGTs by sample:')
         makedirs(join(self.output, 'hgts'), exist_ok=True)
         for sample in self.df['sample'].unique():
-            df_ = self.df[self.df['hgt'] & (self.df['sample'] == sample)]
-            print(f'  {sample}: {df_.shape[0]}.')
-            df_[['protein', 'silh']].to_csv(
-                join(self.output, 'hgts', f'{sample}.txt'),
-                sep='\t', index=False, header=False, float_format='%g')
+            self.write_hgt_list(sample)
         print('Prediction results saved to hgts/.')
 
         # plot prediction results
         self.plot_hgts()
         return self.df[self.df['hgt']].shape[0]
+
+    def write_hgt_list(self, sample):
+        """Write a list of predicted HGTs to an output file.
+
+        Parameters
+        ----------
+        sample : str
+            sample Id
+
+        Notes
+        -----
+        The output file has three columns: protein Id, silhouette score,
+        potential donor.
+
+        The donor will be the LCA of top hits as determined by `find_match`.
+        However, if `donor_rank` is specified, a donor below this rank will be
+        raise to this rank; a donor above this rank will be discarded.
+        """
+        taxdump, name, rank = self.taxdump, self.donor_name, self.donor_rank
+        df_ = self.df[self.df['hgt'] & (self.df['sample'] == sample)]
+        print(f'  {sample}: {df_.shape[0]}.')
+        with open(join(self.output, 'hgts', f'{sample}.txt'), 'w') as f:
+            for row in df_[['protein', 'silh', 'match']].itertuples():
+                # format donor taxon
+                match = row.match
+                if rank and match != '0':
+                    match = taxid_at_rank(match, rank, self.taxdump) or '0'
+                if name:
+                    match = taxdump[match]['name'] if match != '0' else 'N/A'
+                f.write(f'{row.protein}\t{row.silh:g}\t{match}\n')
 
     def cluster_kde(self, group):
         """Cluster data by KDE.

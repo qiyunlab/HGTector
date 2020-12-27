@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+## Version 2.0b3 (12/27/2020)
+
+### Added
+- Predicted HGT list now includes potential donors. Users can optionally specify a taxonomic rank at which they will be reported.
+
+### Changed
+- Minor tweaks with no visible impact on program behavior.
+
+
 ## Version 2.0b2 (5/3/2020)
 
 Note: The command-line interface and the format and content of input, output and database files are identical to last version (2.0b1). You may safely combine analysis results of this and last versions without the need for re-analysis.

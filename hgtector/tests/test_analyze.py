@@ -46,6 +46,10 @@ class AnalyzeTests(TestCase):
         args.input = join(self.datadir, 'Ecoli', 'search')
         args.output = join(self.tmpdir, 'output')
         args.taxdump = join(self.datadir, 'Ecoli', 'taxdump')
+        args.maxhits = None
+        args.evalue = None
+        args.identity = None
+        args.coverage = None
         args.input_tax = None
         args.self_tax = None
         args.close_tax = None
@@ -54,6 +58,9 @@ class AnalyzeTests(TestCase):
         args.distal_top = None
         args.bandwidth = 'silverman'
         args.from_scores = False
+        args.donor_name = False
+        args.donor_rank = None
+
         me(args)
         self.assertEqual(me.df[me.df['hgt']].shape[0], 16)
 
@@ -133,6 +140,9 @@ class AnalyzeTests(TestCase):
         me.taxdump = join(self.datadir, 'DnaK', 'taxdump')
         me.input_map = {'sample': join(
             self.datadir, 'DnaK', 'search', 'sample.tsv')}
+        for key in ('maxhits', 'evalue', 'identity', 'coverage'):
+            setattr(me, key, None)
+
         me.read_input()
         batch_assert()
 
@@ -457,6 +467,12 @@ class AnalyzeTests(TestCase):
         me.match_th = 0.99
         self.assertEqual(me.find_match(df), '562')
 
+        # raise to family
+        # self.assertEqual(me.find_match(df, rank='family'), '543')
+
+        # report taxon name
+        # self.assertEqual(me.find_match(df, name=True), 'Escherichia coli')
+
         # keep top 10% hits
         me.match_th = 0.9
         self.assertEqual(me.find_match(df), '543')
@@ -467,6 +483,8 @@ class AnalyzeTests(TestCase):
 
         # input DataFrame is empty
         self.assertEqual(me.find_match(pd.DataFrame()), '0')
+        # self.assertEqual(me.find_match(
+        #     pd.DataFrame(), rank='phylum', name=True), 'N/A')
 
     def test_make_score_table(self):
         me = Analyze()
@@ -555,7 +573,8 @@ class AnalyzeTests(TestCase):
                     np.random.choice(self.dist_norm2, int(n / 2)))),
                 'distal': np.concatenate((
                     np.random.choice(self.dist_lognorm, int(n * 3 / 4)),
-                    np.random.choice(self.dist_gamma, int(n / 4)) / 2))}
+                    np.random.choice(self.dist_gamma, int(n / 4)) / 2)),
+                'match': ['0'] * n}
         me.df = pd.DataFrame(data)
 
         # default setting
@@ -567,6 +586,9 @@ class AnalyzeTests(TestCase):
         me.fixed = 25
         me.noise = 50
         me.silhouette = 0.5
+        me.taxdump = {}
+        me.donor_name = False
+        me.donor_rank = None
 
         # run prediction
         self.assertEqual(me.predict_hgt(), 96)
@@ -588,6 +610,58 @@ class AnalyzeTests(TestCase):
         self.assertEqual(me.predict_hgt(), 0)
         self.assertNotIn('hgt', me.df.columns)
         remove(join(self.tmpdir, 'close.hist.png'))
+
+    def test_write_hgt_list(self):
+        me = Analyze()
+        me.output = self.tmpdir
+        makedirs(join(me.output, 'hgts'), exist_ok=True)
+        me.donor_name = False
+        me.donor_rank = None
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        add_children(me.taxdump)
+        me.df = pd.DataFrame(
+            [['S1', 'P1', 0.85, '562', True],
+             ['S1', 'P2', 0.95, '622', True],
+             ['S1', 'P3', 1.05,   '0', True],
+             ['S2', 'P4', 0.80, '766', True],
+             ['S2', 'P5', 0.20,   '0', False]],
+            columns=['sample', 'protein', 'silh', 'match', 'hgt'])
+
+        # default
+        me.write_hgt_list('S1')
+        with open(join(me.output, 'hgts', 'S1.txt'), 'r') as f:
+            obs = f.read()
+        exp = ('P1\t0.85\t562\n'
+               'P2\t0.95\t622\n'
+               'P3\t1.05\t0\n')
+        self.assertEqual(obs, exp)
+
+        # number format and negative result
+        me.write_hgt_list('S2')
+        with open(join(me.output, 'hgts', 'S2.txt'), 'r') as f:
+            self.assertEqual(f.read(), 'P4\t0.8\t766\n')
+
+        # raise to family
+        me.donor_rank = 'family'
+        me.write_hgt_list('S1')
+        with open(join(me.output, 'hgts', 'S1.txt'), 'r') as f:
+            obs = f.read()
+        exp = ('P1\t0.85\t543\n'
+               'P2\t0.95\t543\n'
+               'P3\t1.05\t0\n')
+        self.assertEqual(obs, exp)
+
+        # report taxon name
+        me.donor_rank = None
+        me.donor_name = True
+        me.write_hgt_list('S1')
+        with open(join(me.output, 'hgts', 'S1.txt'), 'r') as f:
+            obs = f.read()
+        exp = ('P1\t0.85\tEscherichia coli\n'
+               'P2\t0.95\tShigella dysenteriae\n'
+               'P3\t1.05\tN/A\n')
+        self.assertEqual(obs, exp)
+        rmtree(join(me.output, 'hgts'))
 
     def test_cluster_kde(self):
         me = Analyze()
