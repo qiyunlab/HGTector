@@ -202,12 +202,6 @@ class Database(object):
                     raise ValueError(
                         f'Invalid {exe} executable: {getattr(self, exe)}.')
 
-        # determine number of CPUs to use
-        if self.compile in ('diamond', 'both') and not self.threads:
-            self.threads = cpu_count()
-            if self.threads is None:
-                self.threads = 1
-
         # default protocol
         if self.default:
             print('The default protocol is selected for database building.')
@@ -220,7 +214,22 @@ class Database(object):
             self.rank = 'species'
             self.reference = True
             self.representative = True
-            self.compile = 'diamond'
+
+            if self.diamond is None:
+                self.diamond = 'diamond'
+            if which(self.diamond) is None:
+                print('WARNING: Cannot find DIAMOND in this computer. '
+                      'You will need to manually compile the database '
+                      'after download is complete.')
+                self.compile = 'none'
+            else:
+                self.compile = 'diamond'
+
+        # determine number of CPUs to use
+        if self.compile in ('diamond', 'both') and not self.threads:
+            self.threads = cpu_count()
+            if self.threads is None:
+                self.threads = 1
 
         makedirs(self.output, exist_ok=True)
 
