@@ -11,6 +11,6 @@ hgtector search -i gsul.txt -o .
 hgtector analyze -i gsul.tsv -o .
 ```
 
-The sample output files are provided in `output`. They were generated on 2019-10-16, based on the NCBI nr database by time.
+The sample output files are provided in `output`. They were generated on 2019-10-16, based on the NCBI nr database by time. The file `hgts/gsul.txt` was manually modified to include potential donors (a feature of more recent versions of HGTector).
 
 Detailed instruction for running this example and interpreting outputs is provided in [first run](../doc/1strun.md).

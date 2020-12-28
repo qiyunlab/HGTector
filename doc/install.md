@@ -20,12 +20,12 @@ HGTector is written in Python 3. One needs at least Python 3.6 to run the progra
 ```bash
 conda create -n hgtector python=3 pyyaml pandas matplotlib scikit-learn
 conda activate hgtector
-pip install git+https://github.com/DittmarLab/HGTector.git
+pip install git+https://github.com/qiyunlab/HGTector.git
 ```
 
 ### Option 2: Native installation
 
-Download this [repository](https://github.com/DittmarLab/HGTector/archive/master.zip). Unzip. Then execute:
+Download this [repository](https://github.com/qiyunlab/HGTector/archive/master.zip). Unzip. Then execute:
 
 ```bash
 python setup.py install
@@ -59,7 +59,7 @@ A small, pre-compiled test database is also available for [download](https://www
 Just add `--upgrade` or `-U` to the pip command:
 
 ```bash
-pip install -U git+https://github.com/DittmarLab/HGTector.git
+pip install -U git+https://github.com/qiyunlab/HGTector.git
 ```
 
 Note: You can only upgrade from HGTector 2.0b1 or above. You cannot upgrade from older versions, which were written in Perl.

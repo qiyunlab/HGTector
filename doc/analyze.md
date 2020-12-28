@@ -36,6 +36,14 @@ Field | Description
 `self`, `close`, `distal` | Score (sum of normalized bit scores) of each group
 `match` | Best match in "distal" group which implicates potential donor for predicted HGTs
 
+Format of `hgts/<sample>.txt`:
+
+Field | Description
+--- | ---
+1 | Protein ID
+2 | Silhouette score
+3 | Potential donor
+
 
 ## Command-line reference
 
@@ -71,8 +79,6 @@ Option | Default | Description
 `--close-tax` | - | TaxIDs of "close" group (a comma-delimited string, or a file of one TaxID per line). Will auto-infer if omitted.
 `--self-rank` | - | For auto-inference: "self" group must be at or above this rank (e.g., species, genus, family...).
 `--close-size` | 10 | For auto-inference: "close" group must have at least this number of taxa.
-`--distal-top` | 10 | Find a match in "distal" group which is LCA of hits with bit score at most this percentage lower than the best hit. The behavior is consistent with DIAMOND's `--top` parameter. This match implicates the potential donor of an HGT-derived gene.
-
 
 ### Scoring
 
@@ -98,6 +104,14 @@ Option | Default | Description
 `--fixed` | 25 | Use this percentage as threshold if KDE clustering fails.
 `--silhouette` | 0.5 | Silhouette score threshold for cluster refinement.
 `--self-low` | no | HGT has low "self" score (an optional criterion).
+
+### Donor reporting
+
+Option | Default | Description
+--- | --- | ---
+`--distal-top` | 10 | Find a match in "distal" group which is LCA of hits with bit score at most this percentage lower than the best hit. The behavior is consistent with DIAMOND's `--top` parameter. This match implicates the potential donor of an HGT-derived gene.
+`--donor-name` | - | Report taxon name instead of TaxID of donor.
+`--donor-rank` | - | Report donor at this rank (e.g., genus, family...). A donor below this rank will be raise to this rank; a donor above this rank will be discarded. If unspecified, the donor will be the LCA of top hits from the distal group.
 
 ### Program behavior
 
