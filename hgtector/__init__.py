@@ -14,6 +14,6 @@ __description__ = (
     'Genome-wide detection of putative horizontal gene transfer (HGT) events '
     'based on sequence homology search hit distribution statistics')
 __license__ = 'BSD-3-Clause'
-__author__ = 'Qiyun Zhu',
-__email__ = 'qiyunzhu@gmail.com',
+__author__ = 'Qiyun Zhu'
+__email__ = 'qiyunzhu@gmail.com'
 __url__ = 'https://github.com/qiyunlab/HGTector'
