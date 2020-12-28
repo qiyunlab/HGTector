@@ -24,7 +24,7 @@ classes = """
     Operating System :: Unix
     Operating System :: POSIX
     Operating System :: MacOS
-    Operating System :: Windows
+    Operating System :: Microsoft :: Windows
 """
 
 params = {
