@@ -374,11 +374,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # read prediction result
-hgts = pd.read_csv('hgts/o55h7.txt', sep='\t', names=['silh'], squeeze=True)
+hgts = pd.read_csv('hgts/o55h7.txt', sep='\t', names=['silh', 'donor'])
 
 # bar plot
 fig = plt.figure(figsize=(5, 5))
-plt.barh(range(len(hgts)), hgts.sort_values())
+silhs = hgts['silh'].sort_values()
+plt.barh(range(len(silhs)), silhs)
 plt.xlim(left=0.5)
 plt.xlabel('Silhouette score')
 plt.ylabel('Gene')
@@ -402,7 +403,7 @@ df = df.query('close + distal > 0')
 df = df[(zscore(df[['close', 'distal']]) < 3).all(axis=1)]
 
 # append silhouette scores
-df['silh'] = df['protein'].map(hgts)
+df['silh'] = df['protein'].map(silhs)
 
 # scatter plot
 fig = plt.figure(figsize=(5, 5))
