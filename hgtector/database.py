@@ -594,12 +594,15 @@ class Database(object):
             g2n[g], g2aa[g] = 0, 0
             stem = row.ftp_path.rsplit('/', 1)[-1]
             fp = join(dir_, f'{stem}_protein.faa.gz')
-            try:
-                fin = gzip.open(fp, 'rt')
-            except TypeError:
-                fin = gzip.open(fp, 'r')
+            with gzip.open(fp, 'rb') as f:
+                try:
+                    content = f.read().decode().splitlines()
+                except (OSError, EOFError, TypeError):
+                    print(f' skipping corrupted file {stem}.', end='',
+                          flush=True)
+                    continue
             cp = None
-            for line in fin:
+            for line in content:
                 line = line.rstrip('\r\n')
                 if line.startswith('>'):
                     write_prot()
@@ -618,7 +621,6 @@ class Database(object):
                     line = line.rstrip('*')
                     prots[cp]['seq'] += line
                     g2aa[g] += len(line)
-            fin.close()
             write_prot()
         fout.close()
         print(' done.')
