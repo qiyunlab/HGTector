@@ -546,8 +546,12 @@ class Database(object):
                 for i in range(self.retries):
                     try:
                         with open(file, 'wb') as f:
-                            self.ftp.retrbinary(
-                                f'RETR {remote_dir}/{fname}', f.write)
+                            cmd = f'RETR {remote_dir}/{fname}'
+                            try:
+                                self.ftp.retrbinary(cmd, f.write)
+                            except EOFError:
+                                sleep(self.delay)
+                                continue
                         print('  ' + g, flush=True)
                         success = True
                     except ftplib.error_perm as resp:
