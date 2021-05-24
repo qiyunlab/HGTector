@@ -8,7 +8,7 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
-from os import remove, makedirs, cpu_count
+from os import remove, makedirs, cpu_count, system
 from os.path import join, isfile, isdir, getsize, basename
 from shutil import which, rmtree
 from time import sleep
@@ -75,6 +75,8 @@ arguments = [
                      {'choices': ['yes', 'no']}],
 
     'download',
+    ['--skipdownload',  'Skip downloading process.'
+                     'Use already downloaded database', {'action': 'store_true'}],
     ['--overwrite',  'overwrite existing files with newly downloaded ones; '
                      'othewise use existing files whenever available, i.e., '
                      'resume an interrupted run', {'action': 'store_true'}],
@@ -109,8 +111,9 @@ class Database(object):
         # read and validate arguments
         self.set_parameters(args)
 
-        # connect to NCBI FTP server
-        self.connect_server()
+        if not self.skipdownload:
+            # connect to NCBI FTP server
+            self.connect_server()
 
         # create target directory
         makedirs(self.output, exist_ok=True)
@@ -249,12 +252,13 @@ class Database(object):
         remote_file = f'/pub/taxonomy/{fname}'
         local_file = join(self.output, 'download', fname)
 
-        # download taxdump
-        if not self.check_local_file(local_file, self.overwrite):
-            print('Downloading NCBI taxonomy database...', end='', flush=True)
-            with open(local_file, 'wb') as f:
-                self.ftp.retrbinary('RETR ' + remote_file, f.write)
-            print(' done.')
+        if not self.skipdownload:
+            # download taxdump
+            if not self.check_local_file(local_file, self.overwrite):
+                print('Downloading NCBI taxonomy database...', end='', flush=True)
+                with open(local_file, 'wb') as f:
+                    self.ftp.retrbinary('RETR ' + remote_file, f.write)
+                print(' done.')
 
         # read taxdump
         print('Reading NCBI taxonomy database...', end='', flush=True)
@@ -279,8 +283,9 @@ class Database(object):
             if not self.check_local_file(local_file, self.overwrite):
                 print(f'Downloading {target} assembly summary...', end='',
                       flush=True)
-                with open(local_file, 'wb') as f:
-                    self.ftp.retrbinary('RETR ' + remote_file, f.write)
+                if not self.skipdownload:
+                    with open(local_file, 'wb') as f:
+                        self.ftp.retrbinary('RETR ' + remote_file, f.write)
                 print(' done.')
 
             # read summary
@@ -337,13 +342,14 @@ class Database(object):
 
                 # download remote file
                 else:
-                    with open(file_, 'wb') as f:
-                        self.ftp.retrbinary(f'RETR {cat}/{fname}', f.write)
-                    with open(file_, 'r') as f:
-                        asms_ = [x.split('\t', 1)[0] for x in f.read().
-                                 splitlines() if not x.startswith('#')]
-                    with open(file, 'w') as f:
-                        f.write(''.join([x + '\n' for x in asms_]))
+                    if not self.skipdownload:
+                        with open(file_, 'wb') as f:
+                            self.ftp.retrbinary(f'RETR {cat}/{fname}', f.write)
+                        with open(file_, 'r') as f:
+                            asms_ = [x.split('\t', 1)[0] for x in f.read().
+                                     splitlines() if not x.startswith('#')]
+                        with open(file, 'w') as f:
+                            f.write(''.join([x + '\n' for x in asms_]))
 
                 print(f'  {cat}: {len(asms_)}')
                 asms += asms_
@@ -516,18 +522,20 @@ class Database(object):
 
         # clean up temporary columns
         self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
+        self.df.to_csv('/tmp/table_path.csv', index=False)
 
     def download_genomes(self):
         """Download genomes from NCBI.
         """
         # reconnect to avoid server timeout problem
         # TODO: replace this ugly hack with a more stable solution
-        self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
-        self.ftp.login()
-        self.ftp.cwd('/genomes/all')
+        if not self.skipdownload:
+            self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
+            self.ftp.login()
+            self.ftp.cwd('/genomes/all')
 
-        print('Downloading non-redundant genomic data from NCBI...',
-              flush=True)
+            print('Downloading non-redundant genomic data from NCBI...',
+                  flush=True)
         dir_ = join(self.output, 'download', 'faa')
         makedirs(dir_, exist_ok=True)
         stems = {}
@@ -543,6 +551,10 @@ class Database(object):
                 success = True
             else:
                 success = False
+                if self.skipdownload:
+                    print(f'WARNING: Cannot retrieve {fname}.')
+                    failures.append(g)
+                    continue
                 for i in range(self.retries):
                     try:
                         with open(file, 'wb') as f:
@@ -594,32 +606,40 @@ class Database(object):
             g2n[g], g2aa[g] = 0, 0
             stem = row.ftp_path.rsplit('/', 1)[-1]
             fp = join(dir_, f'{stem}_protein.faa.gz')
+            print(fp,  flush=True)
             try:
                 fin = gzip.open(fp, 'rt')
             except TypeError:
                 fin = gzip.open(fp, 'r')
             cp = None
-            for line in fin:
-                line = line.rstrip('\r\n')
-                if line.startswith('>'):
-                    write_prot()
-                    p, name = line[1:].split(None, 1)
-                    g2n[g] += 1
-                    if p in prots:
-                        cp = None
-                        prots[p]['gs'].add(g)
-                        prots[p]['tids'].add(tid)
-                        g2aa[g] += len(prots[p]['seq'])
-                    else:
-                        cp = p
-                        prots[p] = {
-                            'name': name, 'gs': {g}, 'tids': {tid}, 'seq': ''}
-                elif cp:
-                    line = line.rstrip('*')
-                    prots[cp]['seq'] += line
-                    g2aa[g] += len(line)
-            fin.close()
-            write_prot()
+            try:
+                for line in fin:
+                    line = line.rstrip('\r\n')
+                    if line.startswith('>'):
+                        write_prot()
+                        tmp617 = line[1:].split(None,  1)
+                        if len(tmp617) < 2:
+                            print(fp, "wrong",  flush=True)
+                            break
+                        p, name = line[1:].split(None, 1)
+                        g2n[g] += 1
+                        if p in prots:
+                            cp = None
+                            prots[p]['gs'].add(g)
+                            prots[p]['tids'].add(tid)
+                            g2aa[g] += len(prots[p]['seq'])
+                        else:
+                            cp = p
+                            prots[p] = {
+                                'name': name, 'gs': {g}, 'tids': {tid}, 'seq': ''}
+                    elif cp:
+                        line = line.rstrip('*')
+                        prots[cp]['seq'] += line
+                        g2aa[g] += len(line)
+                fin.close()
+                write_prot()
+            except:
+                print(fp, "wrong",  flush=True)
         fout.close()
         print(' done.')
         print('Combined protein sequences written to db.faa.')
@@ -836,6 +856,12 @@ class Database(object):
                       'be overwritten.')
                 remove(file)
             else:
+                if file.endswith('.gz'):
+                    gzip_invalid = system('gzip -t '+file)
+                    if gzip_invalid:
+                        print(f'  {basename(file)} is not in valid gzip format.')
+                        remove(file)
+                        return False
                 print(f'  Using local file {basename(file)}.')
                 return True
         return False
