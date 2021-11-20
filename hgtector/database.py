@@ -175,17 +175,17 @@ class Database(object):
             setattr(self, key, val)
 
         # load configurations
-        for key in ('capital', 'block', 'latin'):
+        for key in 'capital', 'block', 'latin':
             get_config(self, key, f'taxonomy.{key}')
-        for key in ('retries', 'delay', 'timeout'):
+        for key in 'retries', 'delay', 'timeout':
             get_config(self, key, f'download.{key}')
-        for key in ('diamond', 'makeblastdb'):
+        for key in 'diamond', 'makeblastdb':
             get_config(self, key, f'program.{key}')
-        for key in ('threads', 'tmpdir'):
+        for key in 'threads', 'tmpdir':
             get_config(self, key, f'local.{key}')
 
         # convert boolean values
-        for key in ('capital', 'latin'):
+        for key in 'capital', 'latin':
             setattr(self, key, arg2bool(getattr(self, key, None)))
 
         # make temporary directory

@@ -205,23 +205,23 @@ class Analyze(object):
 
         # load configurations
         get_config(self, 'evalue', 'analyze.evalue', float)
-        for key in ('maxhits', 'identity', 'coverage'):
+        for key in 'maxhits', 'identity', 'coverage':
             get_config(self, key, f'analyze.{key}')
-        for key in ('input_cov', 'self_rank', 'close_size'):
+        for key in 'input_cov', 'self_rank', 'close_size':
             get_config(self, key, f'grouping.{key.replace("_", "")}')
         for key in ('weighted', 'outliers', 'orphans', 'bandwidth', 'bw_steps',
                     'low_part', 'noise', 'fixed', 'silhouette', 'self_low'):
             get_config(self, key, f'predict.{key.replace("_", "")}')
         get_config(self, 'distal_top', 'donor.distaltop')
-        for key in ('name', 'rank'):
+        for key in 'name', 'rank':
             get_config(self, f'donor_{key}', f'donor.{key}')
 
         # convert boolean values
-        for key in ('weighted', 'orphans', 'self_low', 'donor_name'):
+        for key in 'weighted', 'orphans', 'self_low', 'donor_name':
             setattr(self, key, arg2bool(getattr(self, key, None)))
 
         # convert fractions to percentages
-        for metric in ('input_cov', 'noise', 'fixed', 'distal_top'):
+        for metric in 'input_cov', 'noise', 'fixed', 'distal_top':
             val = getattr(self, metric)
             if val and val < 1:
                 setattr(self, metric, val * 100)
@@ -470,7 +470,7 @@ class Analyze(object):
         3. `groups` (keys: self, close, distal): all taxIds under each group.
         """
         self.groups = {}
-        for key in ('self', 'close'):
+        for key in 'self', 'close':
             tids = getattr(self, f'{key}_tax')
 
             # user-defined group

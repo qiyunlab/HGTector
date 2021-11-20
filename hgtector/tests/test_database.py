@@ -112,7 +112,7 @@ class DatabaseTests(TestCase):
                 ('Plasmid pPY113', '126792', '', ''))
         df = pd.DataFrame(data, columns=header)
 
-        # organism names must be capital and latinate
+        # organism names must be capital and Latinate
         me.capital = True
         me.block = None
         me.latin = True
