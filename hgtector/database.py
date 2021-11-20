@@ -477,13 +477,6 @@ class Database(object):
             self.df[self.rank] = self.df['taxid'].apply(
                 taxid_at_rank, rank=self.rank, taxdump=self.taxdump)
 
-        # list taxonomic groups at rank
-        taxa = self.df[self.rank].dropna().unique().tolist()
-        n = len(taxa)
-        if n == 0:
-            raise ValueError(f'No genome is classified at rank "{self.rank}".')
-        print(f'Total number of taxonomic groups at {self.rank}: {n}.')
-
         # custom sorting orders
         self.df['rc_seq'] = self.df['refseq_category'].map(
             {'reference genome': 0, 'representative genome': 1})
@@ -491,18 +484,13 @@ class Database(object):
             {'Chromosome': 0, 'Complete Genome': 0, 'Scaffold': 1,
              'Contig': 2})
 
-        # sample genomes per taxonomic group
-        # TODO: make this code faster
-        selected = []
         # sort genomes by three criteria
         self.df.sort_values(by=['rc_seq', 'al_seq', 'genome'], inplace=True)
-        for taxon in taxa:
-            # select genomes under this taxon
-            df_ = self.df.query(f'{self.rank} == "{taxon}"')
-            # take up to given number of genomes from top
-            gs = df_.head(min(self.sample, df_.shape[0]))['genome'].tolist()
-            selected.extend(gs)
-        selected = set(selected)
+
+        # select up to given number of genomes of each taxonomic group
+        selected = set(self.df.groupby(self.rank).head(self.sample)['genome'])
+        if not selected:
+            raise ValueError(f'No genome is classified at rank "{self.rank}".')
 
         # add reference / representative
         for key in ('reference', 'representative'):
@@ -511,11 +499,15 @@ class Database(object):
                 selected.update(self.df.query(
                     f'refseq_category == "{key} genome"')['genome'].tolist())
 
+        # filter genomes to selected
         self.df.query('genome in @selected', inplace=True)
         n = self.df.shape[0]
         if n == 0:
             raise ValueError('No genome is retained after sampling.')
         print(f'Total number of sampled genomes: {n}.')
+
+        # sort by genome ID
+        self.df.sort_values('genome', inplace=True)
 
         # clean up temporary columns
         self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)

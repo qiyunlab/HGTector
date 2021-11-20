@@ -144,6 +144,7 @@ download:
   delay: 10         # seconds between retries
   timeout: 60       # seconds before program gives up waiting
 
+
 ## Taxonomic filtering
 taxonomy:
 
