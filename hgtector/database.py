@@ -479,9 +479,14 @@ class Database(object):
             self.df[self.rank] = self.df['taxid'].apply(
                 taxid_at_rank, rank=self.rank, taxdump=self.taxdump)
 
-        # custom sorting orders
-        self.df['rc_seq'] = self.df['refseq_category'].map(
-            {'reference genome': 0, 'representative genome': 1})
+        # sort by reference > representative > type material > other
+        self.df['rc_seq'] = self.df.apply(
+            lambda x: 0 if x['refseq_category'] == 'reference genome'
+            else (1 if x['refseq_category'] == 'representative genome'
+                  else (2 if pd.notnull(x['relation_to_type_material'])
+                  else 3)), axis=1)
+
+        # sort by complete > scaffold > contig
         self.df['al_seq'] = self.df['assembly_level'].map(
             {'Chromosome': 0, 'Complete Genome': 0, 'Scaffold': 1,
              'Contig': 2})
@@ -494,14 +499,14 @@ class Database(object):
         if not selected:
             raise ValueError(f'No genome is classified at rank "{self.rank}".')
 
-        # add reference / representative
+        # add reference / representative genomes
         for key in 'reference', 'representative':
             if getattr(self, key):
                 print(f'Add {key} genomes to selection.')
                 selected.update(self.df.query(
                     f'refseq_category == "{key} genome"')['genome'].tolist())
 
-        # add type material
+        # add type material genomes
         if self.typematerial:
             print('Add type material genomes to selection.')
             selected.update(self.df[self.df[
