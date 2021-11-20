@@ -367,6 +367,7 @@ class UtilTests(TestCase):
     def test_is_latin(self):
         self.assertTrue(is_latin('Escherichia coli'))
         self.assertTrue(is_latin('Rickettsia felis'))
+        self.assertTrue(is_latin('[Clostridium] difficile'))
         self.assertFalse(is_latin('Enterobacteriaceae'))
         self.assertFalse(is_latin('Escherichia coli O157:H7'))
         self.assertFalse(is_latin('Citrobacter sp. A293'))

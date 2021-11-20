@@ -65,6 +65,8 @@ arguments = [
                      {'action': 'store_true'}],
     ['--representative', 'include NCBI-defined representative genomes',
                          {'action': 'store_true'}],
+    ['--typematerial', 'include NCBI-defined type material genomes',
+                       {'action': 'store_true'}],
 
     'taxonomic filter',
     ['--capital',    'organism name must be capitalized',
@@ -173,17 +175,17 @@ class Database(object):
             setattr(self, key, val)
 
         # load configurations
-        for key in ('capital', 'block', 'latin'):
+        for key in 'capital', 'block', 'latin':
             get_config(self, key, f'taxonomy.{key}')
-        for key in ('retries', 'delay', 'timeout'):
+        for key in 'retries', 'delay', 'timeout':
             get_config(self, key, f'download.{key}')
-        for key in ('diamond', 'makeblastdb'):
+        for key in 'diamond', 'makeblastdb':
             get_config(self, key, f'program.{key}')
-        for key in ('threads', 'tmpdir'):
+        for key in 'threads', 'tmpdir':
             get_config(self, key, f'local.{key}')
 
         # convert boolean values
-        for key in ('capital', 'latin'):
+        for key in 'capital', 'latin':
             setattr(self, key, arg2bool(getattr(self, key, None)))
 
         # make temporary directory
@@ -240,7 +242,6 @@ class Database(object):
         makedirs(join(self.output, 'download'), exist_ok=True)
         self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
         self.ftp.login()
-        # self.ftp.set_pasv(False)
         print(' done.')
 
     def retrieve_taxdump(self):
@@ -285,7 +286,7 @@ class Database(object):
 
             # read summary
             print(f'Reading {target} assembly summary...', end='', flush=True)
-            df = pd.read_csv(local_file, sep='\t', skiprows=1)
+            df = pd.read_table(local_file, skiprows=1, low_memory=False)
             print(' done.')
             return df
 
@@ -478,41 +479,48 @@ class Database(object):
             self.df[self.rank] = self.df['taxid'].apply(
                 taxid_at_rank, rank=self.rank, taxdump=self.taxdump)
 
-        # list taxonomic groups at rank
-        taxa = self.df[self.rank].dropna().unique().tolist()
-        n = len(taxa)
-        if n == 0:
-            raise ValueError(f'No genome is classified at rank "{self.rank}".')
-        print(f'Total number of taxonomic groups at {self.rank}: {n}.')
+        # sort by reference > representative > type material > other
+        self.df['rc_seq'] = self.df.apply(
+            lambda x: 0 if x['refseq_category'] == 'reference genome'
+            else (1 if x['refseq_category'] == 'representative genome'
+                  else (2 if pd.notnull(x['relation_to_type_material'])
+                  else 3)), axis=1)
 
-        # custom sorting orders
-        self.df['rc_seq'] = self.df['refseq_category'].map(
-            {'reference genome': 0, 'representative genome': 1})
+        # sort by complete > scaffold > contig
         self.df['al_seq'] = self.df['assembly_level'].map(
             {'Chromosome': 0, 'Complete Genome': 0, 'Scaffold': 1,
              'Contig': 2})
 
-        # sample genomes per taxonomic group
-        selected = []
-        for taxon in taxa:
-            # select genomes under this taxon
-            df_ = self.df.query(f'{self.rank} == "{taxon}"')
-            # sort genomes by three criteria
-            df_ = df_.sort_values(by=['rc_seq', 'al_seq', 'genome'])
-            # take up to given number of genomes from top
-            df_ = df_.head(min(self.sample, df_.shape[0]))
-            selected.extend(df_['genome'].tolist())
-        selected = set(selected)
+        # sort genomes by three criteria
+        self.df.sort_values(by=['rc_seq', 'al_seq', 'genome'], inplace=True)
 
-        # add reference / representative
-        for key in ('reference', 'representative'):
+        # select up to given number of genomes of each taxonomic group
+        selected = set(self.df.groupby(self.rank).head(self.sample)['genome'])
+        if not selected:
+            raise ValueError(f'No genome is classified at rank "{self.rank}".')
+
+        # add reference / representative genomes
+        for key in 'reference', 'representative':
             if getattr(self, key):
-                print(f'Add {key} genomes back to selection.')
+                print(f'Add {key} genomes to selection.')
                 selected.update(self.df.query(
                     f'refseq_category == "{key} genome"')['genome'].tolist())
 
-        self.df = self.df[self.df['genome'].isin(selected)]
-        print(f'Total number of sampled genomes: {self.df.shape[0]}.')
+        # add type material genomes
+        if self.typematerial:
+            print('Add type material genomes to selection.')
+            selected.update(self.df[self.df[
+                'relation_to_type_material'].notna()]['genome'].tolist())
+
+        # filter genomes to selected
+        self.df.query('genome in @selected', inplace=True)
+        n = self.df.shape[0]
+        if n == 0:
+            raise ValueError('No genome is retained after sampling.')
+        print(f'Total number of sampled genomes: {n}.')
+
+        # sort by genome ID
+        self.df.sort_values('genome', inplace=True)
 
         # clean up temporary columns
         self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
@@ -521,7 +529,6 @@ class Database(object):
         """Download genomes from NCBI.
         """
         # reconnect to avoid server timeout problem
-        # TODO: replace this ugly hack with a more stable solution
         self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
         self.ftp.login()
         self.ftp.cwd('/genomes/all')
@@ -555,6 +562,13 @@ class Database(object):
                             break
                     except ftplib.error_temp:
                         sleep(self.delay)
+                        continue
+                    except EOFError:
+                        sleep(self.delay)
+                        self.ftp = ftplib.FTP(
+                            'ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
+                        self.ftp.login()
+                        self.ftp.cwd('/genomes/all')
                         continue
                     else:
                         break
@@ -594,12 +608,15 @@ class Database(object):
             g2n[g], g2aa[g] = 0, 0
             stem = row.ftp_path.rsplit('/', 1)[-1]
             fp = join(dir_, f'{stem}_protein.faa.gz')
-            try:
-                fin = gzip.open(fp, 'rt')
-            except TypeError:
-                fin = gzip.open(fp, 'r')
+            with gzip.open(fp, 'rb') as f:
+                try:
+                    content = f.read().decode().splitlines()
+                except (OSError, EOFError, TypeError):
+                    print(f' skipping corrupted file {stem}.', end='',
+                          flush=True)
+                    continue
             cp = None
-            for line in fin:
+            for line in content:
                 line = line.rstrip('\r\n')
                 if line.startswith('>'):
                     write_prot()
@@ -618,7 +635,6 @@ class Database(object):
                     line = line.rstrip('*')
                     prots[cp]['seq'] += line
                     g2aa[g] += len(line)
-            fin.close()
             write_prot()
         fout.close()
         print(' done.')
