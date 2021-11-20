@@ -1,15 +1,21 @@
 Change Log
 ==========
 
-## Version 2.0b3 (12/27/2020)
+## Version 2.0b3 (ongoing)
 
 ### Added
 - Predicted HGT list now includes potential donors. Users can optionally specify a taxonomic rank at which they will be reported.
 - A quick-start guide added to the homepage.
+- Let the database construction task resume from an interrupted task and use already downloaded files, while detecting and skipping corrupt files.
+- Added NCBI-defined type materials as a new optional criterion for genome sampling during database construction.
 
 ### Changed
 - Repository transferred from [DittmarLab](https://github.com/DittmarLab) to [qiyunlab](https://github.com/qiyunlab).
+- Updated recommended dependency versions, however the program should continue to be compatible with previous versions.
 - Minor tweaks with no visible impact on program behavior.
+
+### Fixed
+- Fixed an issue with the NCBI FTP server connection during database construction.
 
 
 ## Version 2.0b2 (5/3/2020)

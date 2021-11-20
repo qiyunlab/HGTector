@@ -30,7 +30,7 @@ References
 Set up a Conda environment and install dependencies:
 
 ```bash
-conda create -n hgtector python=3 pyyaml pandas matplotlib scikit-learn bioconda::diamond
+conda create -n hgtector -c conda-forge python=3 pyyaml pandas matplotlib scikit-learn bioconda::diamond
 conda activate hgtector
 ```
 
@@ -39,6 +39,8 @@ Install HGTector2:
 ```bash
 pip install git+https://github.com/qiyunlab/HGTector.git
 ```
+
+Then you will be able to type `hgtector` to run the program. Here are more details of [installation](doc/install.md).
 
 Build a reference database using the default protocol:
 
@@ -69,7 +71,7 @@ It is recommended that you read the [first run](doc/1strun.md), [second run](doc
 
 ## License
 
-Copyright (c) 2013-2020, [Qiyun Zhu](mailto:qiyunzhu@gmail.com) and [Katharina Dittmar](mailto:katharinad@gmail.com). Licensed under [BSD 3-clause](http://opensource.org/licenses/BSD-3-Clause). See full license [statement](LICENSE).
+Copyright (c) 2013-2021, [Qiyun Zhu](mailto:qiyunzhu@gmail.com) and [Katharina Dittmar](mailto:katharinad@gmail.com). Licensed under [BSD 3-clause](http://opensource.org/licenses/BSD-3-Clause). See full license [statement](LICENSE).
 
 
 ## Citation

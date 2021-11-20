@@ -18,7 +18,7 @@ HGTector is written in Python 3. One needs at least Python 3.6 to run the progra
 ### Option 1: Through Conda (recommended)
 
 ```bash
-conda create -n hgtector python=3 pyyaml pandas matplotlib scikit-learn
+conda create -n hgtector -c conda-forge python=3 pyyaml pandas matplotlib scikit-learn
 conda activate hgtector
 pip install git+https://github.com/qiyunlab/HGTector.git
 ```
@@ -80,8 +80,8 @@ conda env remove -n hgtector --all
 
 ## Compatibility
 
-If in the future some dependencies have changes that are not compatible with the current release of HGTector, the following "safe" command can be used to install the current versions of dependencies (note: DIAMOND version is too tricky to specify).
+If in the future some dependencies have changes that are not compatible with the current release of HGTector, the following "safe" command can be used to install the current versions of dependencies.
 
 ```bash
-conda create -n hgtector -c bioconda python=3.7.7 pyyaml=5.3.1 pandas=1.0.3 matplotlib=3.1.3 scikit-learn=0.22.1 diamond blast=2.9.0
+conda create -n hgtector-dev -c conda-forge python=3.10.0 pyyaml=6.0 pandas=1.3.4 matplotlib=3.5.0 scikit-learn=1.0.1 bioconda::diamond=2.0.13 bioconda::blast=2.12.0
 ```

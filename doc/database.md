@@ -185,6 +185,7 @@ Option | Default | Description
 `--complete` | - | Only include complete genomes, i.e., `assembly_level` is `Complete Genome` or `Chromosome`.
 `--reference` | - | Add NCBI-defined reference genomes to selection (after taxon sampling).
 `--representative` | - | Add NCBI-defined representative genomes to selection (after taxon sampling).
+`--typematerial` | - | Add NCBI-defined type material genomes to selection (after taxon sampling).
 
 ### Taxonomic filter
 
