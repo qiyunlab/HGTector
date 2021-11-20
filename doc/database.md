@@ -20,7 +20,7 @@ hgtector database -o <output_dir> --default
 This will download all protein sequences of NCBI RefSeq genomes of bacteria, archaea, fungi and protozoa, keep one genome per species, plus all NCBI-defined reference and representative genomes. Finally it will attempt to compile the database using DIAMOND, if available. The command is equivalent to:
 
 ```bash
-hgtector database --output <output_dir> --cats microbe --sample 1 --rank species --reference --representative --compile diamond
+hgtector database --output <output_dir> --cats microbe --sample 1 --rank species --reference --represent --compile diamond
 ```
 
 A pre-built default database as of 2019-10-21 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0). It needs to be [compiled](#Manual-compiling) using choice of aligner.
@@ -183,9 +183,9 @@ Option | Default | Description
 --- | --- | ---
 `--genbank` | - | By default the program only downloads RefSeq genomes (`GCF`). This flag will let the program also download GenBank genomes (`GCA`). But RefSeq has higher priority than GenBank if the same genome is hosted by both catalogs.
 `--complete` | - | Only include complete genomes, i.e., `assembly_level` is `Complete Genome` or `Chromosome`.
-`--reference` | - | Add NCBI-defined reference genomes to selection (after taxon sampling).
-`--representative` | - | Add NCBI-defined representative genomes to selection (after taxon sampling).
-`--typematerial` | - | Add NCBI-defined type material genomes to selection (after taxon sampling).
+`--reference` | - | Include NCBI-defined reference genomes.
+`--represent` | - | Include NCBI-defined representative genomes.
+`--typemater` | - | Include NCBI-defined type material genomes.
 
 ### Taxonomic filter
 

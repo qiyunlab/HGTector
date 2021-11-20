@@ -63,10 +63,10 @@ arguments = [
                      {'action': 'store_true'}],
     ['--reference',  'include NCBI-defined reference genomes',
                      {'action': 'store_true'}],
-    ['--representative', 'include NCBI-defined representative genomes',
-                         {'action': 'store_true'}],
-    ['--typematerial', 'include NCBI-defined type material genomes',
-                       {'action': 'store_true'}],
+    ['--represent',  'include NCBI-defined representative genomes',
+                     {'action': 'store_true'}],
+    ['--typemater',  'include NCBI-defined type material genomes',
+                     {'action': 'store_true'}],
 
     'taxonomic filter',
     ['--capital',    'organism name must be capitalized',
@@ -215,7 +215,7 @@ class Database(object):
             self.sample = 1
             self.rank = 'species'
             self.reference = True
-            self.representative = True
+            self.represent = True
 
             if self.diamond is None:
                 self.diamond = 'diamond'
@@ -499,15 +499,21 @@ class Database(object):
         if not selected:
             raise ValueError(f'No genome is classified at rank "{self.rank}".')
 
-        # add reference / representative genomes
-        for key in 'reference', 'representative':
-            if getattr(self, key):
-                print(f'Add {key} genomes to selection.')
-                selected.update(self.df.query(
-                    f'refseq_category == "{key} genome"')['genome'].tolist())
+        # add reference genomes
+        if self.reference:
+            print('Add reference genomes to selection.')
+            selected.update(self.df.query(
+                'refseq_category == "reference genome"')['genome'].tolist())
+
+        # add representative genomes
+        if self.represent:
+            print('Add representative genomes to selection.')
+            selected.update(self.df.query(
+                'refseq_category == "representative genome"')[
+                    'genome'].tolist())
 
         # add type material genomes
-        if self.typematerial:
+        if self.typemater:
             print('Add type material genomes to selection.')
             selected.update(self.df[self.df[
                 'relation_to_type_material'].notna()]['genome'].tolist())
