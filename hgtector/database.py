@@ -65,6 +65,8 @@ arguments = [
                      {'action': 'store_true'}],
     ['--representative', 'include NCBI-defined representative genomes',
                          {'action': 'store_true'}],
+    ['--typematerial', 'include NCBI-defined type material genomes',
+                       {'action': 'store_true'}],
 
     'taxonomic filter',
     ['--capital',    'organism name must be capitalized',
@@ -493,11 +495,17 @@ class Database(object):
             raise ValueError(f'No genome is classified at rank "{self.rank}".')
 
         # add reference / representative
-        for key in ('reference', 'representative'):
+        for key in 'reference', 'representative':
             if getattr(self, key):
-                print(f'Add {key} genomes back to selection.')
+                print(f'Add {key} genomes to selection.')
                 selected.update(self.df.query(
                     f'refseq_category == "{key} genome"')['genome'].tolist())
+
+        # add type material
+        if self.typematerial:
+            print('Add type material genomes to selection.')
+            selected.update(self.df[self.df[
+                'relation_to_type_material'].notna()]['genome'].tolist())
 
         # filter genomes to selected
         self.df.query('genome in @selected', inplace=True)
