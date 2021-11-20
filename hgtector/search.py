@@ -248,9 +248,9 @@ class Search(object):
 
         # load search parameters
         get_config(self, 'evalue', 'search.evalue', float)
-        for key in ('method', 'minsize', 'maxseqs', 'identity', 'coverage'):
+        for key in 'method', 'minsize', 'maxseqs', 'identity', 'coverage':
             get_config(self, key, f'search.{key}')
-        for key in ('diamond', 'blastp', 'blastdbcmd'):
+        for key in 'diamond', 'blastp', 'blastdbcmd':
             get_config(self, key, f'program.{key}')
 
         if self.method not in {'auto', 'diamond', 'blast', 'remote',
@@ -295,12 +295,12 @@ class Search(object):
                 self.method = 'remote'
 
         # load method-specific arguments
-        for key in ('queries', 'maxchars', 'extrargs'):
+        for key in 'queries', 'maxchars', 'extrargs':
             get_config(self, key, f'{self.method}.{key}')
 
         # load remote search settings
         if self.method == 'remote':
-            for key in ('db', 'algorithm', 'delay', 'timeout', 'entrez'):
+            for key in 'db', 'algorithm', 'delay', 'timeout', 'entrez':
                 get_config(self, key, f'remote.{key}')
             get_config(self, 'server', 'server.search')
 
@@ -336,7 +336,7 @@ class Search(object):
         self.prot2tid = {}
 
         # assign taxonomy database
-        for key in ('taxdump', 'taxmap'):
+        for key in 'taxdump', 'taxmap':
             get_config(self, key, f'database.{key}')
 
         if self.method != 'remote':
@@ -350,7 +350,7 @@ class Search(object):
                 raise ValueError(
                     f'Invalid taxonomy database directory: {self.taxdump}.')
             else:
-                for fname in ('names.dmp', 'nodes.dmp'):
+                for fname in 'names.dmp', 'nodes.dmp':
                     if not isfile(join(self.taxdump, fname)):
                         raise ValueError(
                             f'Taxonomy database file {fname} is not found.')
@@ -361,13 +361,13 @@ class Search(object):
                     f'Invalid protein-to-taxId map: {self.taxmap}.')
 
         # load taxonomic filters and convert to lists
-        for key in ('include', 'exclude', 'block'):
+        for key in 'include', 'exclude', 'block':
             attr = f'tax_{key}'
             get_config(self, attr, f'taxonomy.{key}')
             setattr(self, attr, list_from_param(getattr(self, attr)))
 
         # load taxonomy switches
-        for key in ('unique', 'unirank', 'capital', 'latin'):
+        for key in 'unique', 'unirank', 'capital', 'latin':
             get_config(self, f'tax_{key}', f'taxonomy.{key}')
 
         """determine self-alignment strategy"""
@@ -410,7 +410,7 @@ class Search(object):
 
         # load configurations
         get_config(self, 'fetch_server', 'server.fetch')
-        for key in ('enable', 'queries', 'retries', 'delay', 'timeout'):
+        for key in 'enable', 'queries', 'retries', 'delay', 'timeout':
             get_config(self, f'fetch_{key}', f'fetch.{key}')
 
         # determine remote or local fetching
@@ -421,11 +421,11 @@ class Search(object):
         """final steps"""
 
         # convert boolean values
-        for key in ('tax_unique', 'tax_capital', 'tax_latin'):
+        for key in 'tax_unique', 'tax_capital', 'tax_latin':
             setattr(self, key, arg2bool(getattr(self, key, None)))
 
         # convert fractions to percentages
-        for metric in ('identity', 'coverage'):
+        for metric in 'identity', 'coverage':
             val = getattr(self, metric)
             if val and val < 1:
                 setattr(self, metric, val * 100)
@@ -1417,7 +1417,7 @@ class Search(object):
         for m in re.finditer(r'<TSeq>(.+?)<\/TSeq>', xml, re.DOTALL):
             s_ = m.group(1)
             seq = []
-            for key in (('accver', 'taxid', 'defline', 'sequence')):
+            for key in 'accver', 'taxid', 'defline', 'sequence':
                 m_ = re.search(r'<TSeq_%s>(.+)<\/TSeq_%s>' % (key, key), s_)
                 seq.append(m_.group(1) if m_ else '')
             seq[2] = get_product(seq[2])

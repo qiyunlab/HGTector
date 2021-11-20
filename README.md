@@ -25,9 +25,52 @@ References
 - [Configure](doc/config.md)
 
 
+## Quick start
+
+Set up a Conda environment and install dependencies:
+
+```bash
+conda create -n hgtector python=3 pyyaml pandas matplotlib scikit-learn bioconda::diamond
+conda activate hgtector
+```
+
+Install HGTector2:
+
+```bash
+pip install git+https://github.com/qiyunlab/HGTector.git
+```
+
+Build a reference database using the default protocol:
+
+```bash
+hgtector database -o db_dir --default
+```
+
+This will retrieve the latest genomic data from NCBI. If this does not work (e.g., due to network issues), or you need some customization, please read the [database](doc/database.md) page.
+
+Prepare input file(s). They should be multi-Fasta files of amino acid sequences (faa). Each file represents the whole protein set of a complete or partial genome.
+
+Perform homology [search](doc/search.md):
+
+```bash
+hgtector search -i input.faa -o search_dir -m diamond -p 16 -d db_dir/diamond/db -t db_dir/taxdump
+```
+
+Perform HGT [prediction](doc/analyze.md):
+
+```bash
+hgtector analyze -i search_dir -o analyze_dir -t hgtdb/taxdump
+```
+
+Examine the prediction results under the `analyze_dir` directory.
+
+It is recommended that you read the [first run](doc/1strun.md), [second run](doc/2ndrun.md) and [real runs](doc/realrun.md) pages to get familiar with the pipeline, the underlying methodology, and the customization options.
+
+
 ## License
 
 Copyright (c) 2013-2020, [Qiyun Zhu](mailto:qiyunzhu@gmail.com) and [Katharina Dittmar](mailto:katharinad@gmail.com). Licensed under [BSD 3-clause](http://opensource.org/licenses/BSD-3-Clause). See full license [statement](LICENSE).
+
 
 ## Citation
 
