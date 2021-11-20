@@ -240,7 +240,6 @@ class Database(object):
         makedirs(join(self.output, 'download'), exist_ok=True)
         self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
         self.ftp.login()
-        # self.ftp.set_pasv(False)
         print(' done.')
 
     def retrieve_taxdump(self):
@@ -285,7 +284,7 @@ class Database(object):
 
             # read summary
             print(f'Reading {target} assembly summary...', end='', flush=True)
-            df = pd.read_csv(local_file, sep='\t', skiprows=1)
+            df = pd.read_table(local_file, skiprows=1, low_memory=False)
             print(' done.')
             return df
 
@@ -493,15 +492,16 @@ class Database(object):
              'Contig': 2})
 
         # sample genomes per taxonomic group
+        # TODO: make this code faster
         selected = []
+        # sort genomes by three criteria
+        self.df.sort_values(by=['rc_seq', 'al_seq', 'genome'], inplace=True)
         for taxon in taxa:
             # select genomes under this taxon
             df_ = self.df.query(f'{self.rank} == "{taxon}"')
-            # sort genomes by three criteria
-            df_ = df_.sort_values(by=['rc_seq', 'al_seq', 'genome'])
             # take up to given number of genomes from top
-            df_ = df_.head(min(self.sample, df_.shape[0]))
-            selected.extend(df_['genome'].tolist())
+            gs = df_.head(min(self.sample, df_.shape[0]))['genome'].tolist()
+            selected.extend(gs)
         selected = set(selected)
 
         # add reference / representative
@@ -511,8 +511,11 @@ class Database(object):
                 selected.update(self.df.query(
                     f'refseq_category == "{key} genome"')['genome'].tolist())
 
-        self.df = self.df[self.df['genome'].isin(selected)]
-        print(f'Total number of sampled genomes: {self.df.shape[0]}.')
+        self.df.query('genome in @selected', inplace=True)
+        n = self.df.shape[0]
+        if n == 0:
+            raise ValueError('No genome is retained after sampling.')
+        print(f'Total number of sampled genomes: {n}.')
 
         # clean up temporary columns
         self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
@@ -521,7 +524,6 @@ class Database(object):
         """Download genomes from NCBI.
         """
         # reconnect to avoid server timeout problem
-        # TODO: replace this ugly hack with a more stable solution
         self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
         self.ftp.login()
         self.ftp.cwd('/genomes/all')
@@ -546,12 +548,8 @@ class Database(object):
                 for i in range(self.retries):
                     try:
                         with open(file, 'wb') as f:
-                            cmd = f'RETR {remote_dir}/{fname}'
-                            try:
-                                self.ftp.retrbinary(cmd, f.write)
-                            except EOFError:
-                                sleep(self.delay)
-                                continue
+                            self.ftp.retrbinary(
+                                f'RETR {remote_dir}/{fname}', f.write)
                         print('  ' + g, flush=True)
                         success = True
                     except ftplib.error_perm as resp:
@@ -559,6 +557,13 @@ class Database(object):
                             break
                     except ftplib.error_temp:
                         sleep(self.delay)
+                        continue
+                    except EOFError:
+                        sleep(self.delay)
+                        self.ftp = ftplib.FTP(
+                            'ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
+                        self.ftp.login()
+                        self.ftp.cwd('/genomes/all')
                         continue
                     else:
                         break
