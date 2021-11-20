@@ -474,7 +474,7 @@ def is_capital(name):
 
 
 def is_latin(name):
-    """Check if a species name is Latin.
+    """Check if a species name is Latinate.
 
     Parameters
     ----------
@@ -484,16 +484,21 @@ def is_latin(name):
     Returns
     -------
     bool
-        whether species name is Latin
+        whether species name is Latinate
     """
     if name == '':
         return False
     elif name.count(' ') != 1:
         return False
-    str_ = name.replace(' ', '')
-    if not str_.istitle():
+    if name[0] == '[':
+        i = name.find(']')
+        if i == -1:
+            return False
+        name = name[1:i] + name[i + 1:]
+    name = name.replace(' ', '')
+    if not name.istitle():
         return False
-    elif not str_.isalpha():
+    elif not name.isalpha():
         return False
     return True
 
