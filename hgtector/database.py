@@ -260,7 +260,8 @@ class Database(object):
         if not self.check_local_file(local_file, self.overwrite):
             print('Downloading NCBI taxonomy database...', end='', flush=True)
             with open(local_file, 'wb') as f:
-                self.ftp.retrbinary('RETR ' + remote_file, f.write)
+                self.ftp.retrbinary(
+                    'RETR ' + remote_file, f.write, blocksize=65536)
             print(' done.')
 
         # read taxdump
