@@ -52,8 +52,11 @@ arguments = [
     'taxon sampling',
     ['-s|--sample',  'sample up to this number of genomes per taxonomic '
                      'group at given rank (0 for all)', {'type': int}],
-    ['-r|--rank',    'taxonomic rank at which subsampling will be performed',
+    ['-r|--rank',    'taxonomic rank at which sampling will be performed',
                      {'default': 'species'}],
+    ['--above',      'sampling will also be performed on ranks from the '
+                     'designated one to phylum',
+                     {'action': 'store_true'}],
 
     'genome sampling',
     ['--genbank',    'also search GenBank if a genome is not found in RefSeq; '
@@ -128,6 +131,9 @@ class Database(object):
 
         # filter genomes
         self.filter_genomes()
+
+        # sort genomes by quality
+        self.sort_genomes()
 
         # identify taxonomy of genomes
         self.identify_taxonomy()
@@ -404,6 +410,27 @@ class Database(object):
             report_diff('Dropped {} genomes.')
         print('Done.')
 
+    def sort_genomes(self):
+        """Sort genomes by quality as informed by metadata.
+        """
+        # sort by reference > representative > type material > other
+        self.df['rc_seq'] = self.df.apply(
+            lambda x: 0 if x['refseq_category'] == 'reference genome'
+            else (1 if x['refseq_category'] == 'representative genome'
+                  else (2 if pd.notnull(x['relation_to_type_material'])
+                  else 3)), axis=1)
+
+        # sort by complete > scaffold > contig
+        self.df['al_seq'] = self.df['assembly_level'].map(
+            {'Chromosome': 0, 'Complete Genome': 0, 'Scaffold': 1,
+             'Contig': 2})
+
+        # sort genomes by three criteria
+        self.df.sort_values(by=['rc_seq', 'al_seq', 'genome'], inplace=True)
+
+        # clean up temporary columns
+        self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
+
     def identify_taxonomy(self):
         """Identify taxonomy of genomes.
         """
@@ -468,7 +495,7 @@ class Database(object):
     def sample_by_taxonomy(self):
         """Taxonomy-based sampling.
         """
-        if not self.sample:
+        if self.sample is None:
             return
         print('Sampling genomes based on taxonomy...')
         print(f'Up to {self.sample} genome(s) will be sampled per {self.rank}'
@@ -479,44 +506,48 @@ class Database(object):
             self.df[self.rank] = self.df['taxid'].apply(
                 taxid_at_rank, rank=self.rank, taxdump=self.taxdump)
 
-        # sort by reference > representative > type material > other
-        self.df['rc_seq'] = self.df.apply(
-            lambda x: 0 if x['refseq_category'] == 'reference genome'
-            else (1 if x['refseq_category'] == 'representative genome'
-                  else (2 if pd.notnull(x['relation_to_type_material'])
-                  else 3)), axis=1)
-
-        # sort by complete > scaffold > contig
-        self.df['al_seq'] = self.df['assembly_level'].map(
-            {'Chromosome': 0, 'Complete Genome': 0, 'Scaffold': 1,
-             'Contig': 2})
-
-        # sort genomes by three criteria
-        self.df.sort_values(by=['rc_seq', 'al_seq', 'genome'], inplace=True)
-
         # select up to given number of genomes of each taxonomic group
-        selected = set(self.df.groupby(self.rank).head(self.sample)['genome'])
-        if not selected:
-            raise ValueError(f'No genome is classified at rank "{self.rank}".')
+        selected = set(self.df.dropna(subset=[self.rank]).groupby(
+            self.rank).head(self.sample)['genome'])
+        print(f'Sampled {len(selected)} genomes at the {self.rank} rank.')
+
+        # sample at ranks above the current one
+        ranks = ['phylum', 'class', 'order', 'family', 'genus', 'species']
+        if self.above:
+            if self.rank not in ranks:
+                raise ValueError(
+                    f'Cannot determine taxonomic ranks above "{self.rank}", '
+                    'because it is not among the six standard ranks: '
+                    f'{", ".join(ranks)}.')
+            ranks = ranks[:ranks.index(self.rank)][::-1]
+            print(f'Sampling will also be performed on: {", ".join(ranks)}.')
+            for rank in ranks:
+                self.df['temp_rank_'] = self.df['taxid'].apply(
+                    taxid_at_rank, rank=rank, taxdump=self.taxdump)
+                df_ = self.df.dropna(subset=['temp_rank_']).groupby(
+                    'temp_rank_').head(self.sample)
+                selected.update(df_['genome'])
+            print(f'Sampled a total of {len(selected)} genomes at {self.rank} '
+                  'and above.')
+            self.df.drop(columns=['temp_rank_'], inplace=True)
 
         # add reference genomes
         if self.reference:
-            print('Add reference genomes to selection.')
-            selected.update(self.df.query(
-                'refseq_category == "reference genome"')['genome'].tolist())
+            df_ = self.df.query('refseq_category == "reference genome"')
+            print(f'Include {df_.shape[0]} reference genomes.')
+            selected.update(df_['genome'])
 
         # add representative genomes
         if self.represent:
-            print('Add representative genomes to selection.')
-            selected.update(self.df.query(
-                'refseq_category == "representative genome"')[
-                    'genome'].tolist())
+            df_ = self.df.query('refseq_category == "representative genome"')
+            print(f'Include {df_.shape[0]} representative genomes.')
+            selected.update(df_['genome'])
 
         # add type material genomes
         if self.typemater:
-            print('Add type material genomes to selection.')
-            selected.update(self.df[self.df[
-                'relation_to_type_material'].notna()]['genome'].tolist())
+            df_ = self.df[self.df['relation_to_type_material'].notna()]
+            print(f'Include {df_.shape[0]} type material genomes.')
+            selected.update(df_['genome'])
 
         # filter genomes to selected
         self.df.query('genome in @selected', inplace=True)
@@ -525,15 +556,12 @@ class Database(object):
             raise ValueError('No genome is retained after sampling.')
         print(f'Total number of sampled genomes: {n}.')
 
-        # sort by genome ID
-        self.df.sort_values('genome', inplace=True)
-
-        # clean up temporary columns
-        self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
-
     def download_genomes(self):
         """Download genomes from NCBI.
         """
+        # sort by genome ID
+        self.df.sort_values('genome', inplace=True)
+
         # reconnect to avoid server timeout problem
         self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
         self.ftp.login()
