@@ -37,7 +37,7 @@ Here we will analyze a single genome of [_Escherichia coli_ O55:H7](https://www.
 Download the whole protein set of _E. coli_ O55:H7 (5,278 protein sequences in total) from the NCBI server:
 
 ```bash
-wget -O o55h7.faa.gz ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/025/165/GCF_000025165.1_ASM2516v1/GCF_000025165.1_ASM2516v1_protein.faa.gz
+wget -O o55h7.faa.gz https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/025/165/GCF_000025165.1_ASM2516v1/GCF_000025165.1_ASM2516v1_protein.faa.gz
 ```
 
 You don't need to unzip the file, as HGTector can automatically parse compressed files in the format of gzip, bzip2 and lzma.

@@ -42,13 +42,13 @@ pip install git+https://github.com/qiyunlab/HGTector.git
 
 Then you will be able to type `hgtector` to run the program. Here are more details of [installation](doc/install.md).
 
-Build a reference database using the default protocol:
+Build a reference [database](doc/database.md) using the default protocol:
 
 ```bash
 hgtector database -o db_dir --default
 ```
 
-This will retrieve the latest genomic data from NCBI. If this does not work (e.g., due to network issues), or you need some customization, please read the [database](doc/database.md) page.
+Or [download](https://www.dropbox.com/s/tszxy9etp52id3u/hgtdb_20211121.tar.xz?dl=0) a pre-built database as of 2021-11-21, and [compile](doc/database.md#Manual-compiling) it.
 
 Prepare input file(s). They should be multi-Fasta files of amino acid sequences (faa). Each file represents the whole protein set of a complete or partial genome.
 

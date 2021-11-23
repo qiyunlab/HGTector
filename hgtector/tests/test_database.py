@@ -232,8 +232,8 @@ class DatabaseTests(TestCase):
             'infraspecific_name': '',
             'isolate': '',
             'taxid': '12345',
-            'ftp_path': ('ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/123/'
-                         '456/GCF_000123456.1_ASM123v1'),
+            'ftp_path': ('https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/'
+                         '123/456/GCF_000123456.1_ASM123v1'),
             'proteins': 100,
             'residues': 12500,
             'whatever': 'nonsense'}).to_frame().T
@@ -247,7 +247,7 @@ class DatabaseTests(TestCase):
         exp = ('G1', '100', '12500', 'Chromosome', 'GCF_000123456.1',
                'PRJNA123456', 'SAMN00123456', 'ASM123v1',
                'hypothetical organism', '', '', '12345',
-               ('ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/123/456/'
+               ('https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/123/456/'
                 'GCF_000123456.1_ASM123v1'))
         self.assertEqual(obs[1], '\t'.join(exp))
         remove(join(self.tmpdir, 'genomes.tsv'))

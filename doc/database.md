@@ -9,7 +9,8 @@ The `database` command is an automated workflow for sampling reference genomes, 
 hgtector database -o <output_dir> <parameters...>
 ```
 
-### Default protocol
+
+## Default protocol
 
 HGTector provides a default protocol for database building.
 
@@ -17,25 +18,25 @@ HGTector provides a default protocol for database building.
 hgtector database -o <output_dir> --default
 ```
 
-This will download all protein sequences of NCBI RefSeq genomes of bacteria, archaea, fungi and protozoa, keep one genome per species, plus all NCBI-defined reference and representative genomes. Finally it will attempt to compile the database using DIAMOND, if available. The command is equivalent to:
+This will download all protein sequences of NCBI RefSeq genomes of **bacteria**, **archaea**, **fungi** and **protozoa**, keep _one genome per species_ that has a Latinate name, plus one genome per taxonomic group at higher ranks, regardless whether that genome has a Latinate species name, plus all NCBI-defined **reference**, **representative** and **type material** genomes (prioritized during taxonomy-based sampling, and added afterwards if not sampled). Finally it will attempt to compile the database using DIAMOND, if available. The command is equivalent to:
 
 ```bash
-hgtector database --output <output_dir> --cats microbe --sample 1 --rank species --reference --represent --compile diamond
+hgtector database --output <output_dir> --cats microbe --sample 1 --rank species_latin --above --reference --represent --typemater --compile diamond
 ```
 
-A pre-built default database as of 2019-10-21 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0). It needs to be [compiled](#Manual-compiling) using choice of aligner.
 
-### Procedures
+## Pre-built database
 
-The workflow consists of the following steps:
+A database built using the default protocol on 2021-11-21 is available for [download](https://www.dropbox.com/s/tszxy9etp52id3u/hgtdb_20211121.tar.xz?dl=0) \([MD5](https://www.dropbox.com/s/kdopz946pk088wr/hgtdb_20211121.tar.xz.md5?dl=0)\). It needs to be [compiled](#Manual-compiling) using choice of aligner.
 
-1. Download NCBI taxonomy database (taxdump).
-2. Download NCBI RefSeq assembly summary.
-3. Sample genomes based on various properties and taxonomic information.
-4. Download protein sequences associated with sampled genomes.
-5. Compile local databases using DIAMOND and/or BLAST.
+This database, sampled from NCBI RefSeq after release, 209 contains 68,977,351 unique protein sequences from 21,754 microbial genomes, representing 3 domains, 74 phyla, 145 classes, 337 orders, 783 families, 3,753 genera and 15,932 species.
 
-### Database files
+Building this database used a maximum of 63 GB memory. Searching this database using DIAMOND v2.0.13 requires ~7 GB memory.
+
+A previous version of the database built on 2019-10-21 is available [here](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0).
+
+
+## Database files
 
 File or directory | Description
 --- | ---
@@ -60,6 +61,20 @@ The protein-to-TaxID map is already integrated into the compiled databases, so o
 
 Feel free to delete (e.g., `download/`) or compress the intermediate files (e.g., `db.faa`) to save disk space.
 
+
+## Procedures
+
+The workflow consists of the following steps:
+
+1. Download NCBI taxonomy database (taxdump).
+2. Download NCBI RefSeq assembly summary.
+3. Sample genomes based on various properties and taxonomic information.
+4. Download protein sequences associated with sampled genomes.
+5. Compile local databases using DIAMOND and/or BLAST.
+
+
+## Considerations
+
 ### More examples
 
 ```bash
@@ -80,11 +95,30 @@ hgtector database -g gids.txt -o .
 
 This will only download genomes specified in the file `gids.txt`. Useful for controlled tests.
 
+### Clean up
+
+After the database is successfully built, you may consider compressing `db.faa` and deleting `download/` (or just `download/faa/`) to save disk space. HGTector won't do this automatically.
+
 ### Break and resume
 
 Should any of the download steps be interrupted by e.g., a network failure, one can resume the downloading process by re-executing the same command. The program will skip the already downloaded files in this new run. In some instances, one may need to manually remove the last file from the failed run (because that file may be corrupt), before re-running the program.
 
 If one wants to overwrite downloaded files (e.g., upgrading), add `--overwrite` to the command.
+
+### Manual downloading
+
+One may want to download genomes manually in a more controled manner, instead of letting HGTector running for hours to days to retrieve them one after another before moving to the next step. In this case, add `--manual` to the command, and the program will generate `urls.txt`, a list of URLs of the sampled genomes, and quit.
+
+Then one can choose the most appropriate method to download them. For example, one may use the [rsync protocol](https://www.ncbi.nlm.nih.gov/genome/doc/ftpfaq/#protocols), as recommended by NCBI:
+
+```bash
+while read url
+do
+    rsync -Ltq rsync${url#https}/${url##*/}_protein.faa.gz download/faa/
+done < urls.txt
+```
+
+After all genomes (protein sequences) are downloaded to `download/faa/`, one may restart the program without `--manual`, and the program will take the downloaded files and move to the next step.
 
 ### Manual compiling
 
@@ -95,12 +129,11 @@ Therefore, it is a reasonable plan to only download database files without compi
 For DIAMOND:
 
 ```bash
-echo $'accession\taccession.version\ttaxid' > prot.accession2taxid
-zcat taxon.map.gz | awk -v OFS='\t' '{split($1, a, "."); print a[1], $1, $2}' >> prot.accession2taxid
+echo $'accession.version\ttaxid' | cat - <(zcat taxon.map.gz) > prot.accession2taxid.FULL
 
-diamond makedb --threads 16 --in db.faa --taxonmap prot.accession2taxid --taxonnodes taxdump/nodes.dmp --taxonnames taxdump/names.dmp --db diamond/db
+diamond makedb --threads 16 --in db.faa --taxonmap prot.accession2taxid.FULL --taxonnodes taxdump/nodes.dmp --taxonnames taxdump/names.dmp --db diamond/db
 
-rm prot.accession2taxid
+rm prot.accession2taxid.FULL
 ```
 
 For BLAST:
