@@ -19,6 +19,7 @@ Change Log
 
 ### Fixed
 - Fixed an issue with the NCBI FTP server connection during database construction. NCBI now recommends rsync over ftp. Therefore the protocol has been updated accordingly.
+- Fixed compatibility with latest scikit-learn (1.0.1).
 - Fixed compatibility with latest DIAMOND (2.0.13).
 
 

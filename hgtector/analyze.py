@@ -887,9 +887,8 @@ class Analyze(object):
             https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
         """
         bw = self.bandwidth
-        data_ = data[:, np.newaxis]
         scaler = StandardScaler()
-        data_ = scaler.fit_transform(data[:, np.newaxis])
+        data_ = scaler.fit_transform(data.reshape(-1, 1))
         estimator = KernelDensity(kernel='gaussian')
 
         # grid search optimization
@@ -914,8 +913,8 @@ class Analyze(object):
 
         # get density function
         x, y = self.density_func(data_, kde)
-        x = scaler.inverse_transform(x)
-        y = scaler.inverse_transform(y)
+        x = scaler.inverse_transform(x.reshape(-1, 1)).reshape(-1)
+        y = scaler.inverse_transform(y.reshape(-1, 1)).reshape(-1)
         return x, y, bw
 
     @staticmethod
@@ -1127,7 +1126,7 @@ class Analyze(object):
         """
         data = self.df[group].values
         scaler = StandardScaler()
-        data_ = scaler.fit_transform(data[:, np.newaxis])
+        data_ = scaler.fit_transform(data.reshape(-1, 1))
         estimator = KernelDensity(kernel='gaussian')
         bwspace = np.logspace(0, -1, self.bw_steps)
 
@@ -1137,8 +1136,8 @@ class Analyze(object):
             setattr(estimator, 'bandwidth', bw)
             kde = estimator.fit(data_)
             x, y = self.density_func(data_, kde)
-            x = scaler.inverse_transform(x)
-            y = scaler.inverse_transform(y)
+            x = scaler.inverse_transform(x.reshape(-1, 1)).reshape(-1)
+            y = scaler.inverse_transform(y.reshape(-1, 1)).reshape(-1)
             try:
                 peak, valley = self.first_hill(x, y)
             except ValueError:
@@ -1177,7 +1176,8 @@ class Analyze(object):
         # calculate centroid
         clf = NearestCentroid()
         clf.fit(data_, self.df['hgt'])
-        cent = scaler.inverse_transform(clf.centroids_[1])
+        cent = scaler.inverse_transform(clf.centroids_[1].reshape(
+            -1, data_.shape[1])).reshape(-1)
         return cent
 
     def refine_cluster(self, cent):
