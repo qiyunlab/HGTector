@@ -18,7 +18,7 @@ HGTector is written in Python 3. One needs at least Python 3.6 to run the progra
 ### Option 1: Through Conda (recommended)
 
 ```bash
-conda create -n hgtector python=3 pyyaml pandas matplotlib scikit-learn
+conda create -n hgtector -c conda-forge python=3 pyyaml pandas matplotlib scikit-learn
 conda activate hgtector
 pip install git+https://github.com/qiyunlab/HGTector.git
 ```
@@ -49,7 +49,7 @@ conda install -c bioconda diamond blast
 
 HGTector has a command `database` for automated database construction. It defaults to the **NCBI** RefSeq microbial genomes and taxonomy. Meanwhile, we also provide instructions for using **GTDB** and custom databases. See [details](database.md).
 
-A standard database built using the default protocol on 2019-10-21 is available for [download](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0), together with [instruction](database.md#Manual-compiling) for compiling.
+A standard database built using the default protocol on 2021-11-21 is available for [download](https://www.dropbox.com/s/tszxy9etp52id3u/hgtdb_20211121.tar.xz?dl=0) \([MD5](https://www.dropbox.com/s/kdopz946pk088wr/hgtdb_20211121.tar.xz.md5?dl=0)\), together with [instruction](database.md#Manual-compiling) for compiling.
 
 A small, pre-compiled test database is also available for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).
 
@@ -80,8 +80,8 @@ conda env remove -n hgtector --all
 
 ## Compatibility
 
-If in the future some dependencies have changes that are not compatible with the current release of HGTector, the following "safe" command can be used to install the current versions of dependencies (note: DIAMOND version is too tricky to specify).
+If in the future some dependencies have changes that are not compatible with the current release of HGTector, the following "safe" command can be used to install the current versions of dependencies.
 
 ```bash
-conda create -n hgtector -c bioconda python=3.7.7 pyyaml=5.3.1 pandas=1.0.3 matplotlib=3.1.3 scikit-learn=0.22.1 diamond blast=2.9.0
+conda create -n hgtector-dev -c conda-forge python=3.10.0 pyyaml=6.0 pandas=1.3.4 matplotlib=3.5.0 scikit-learn=1.0.1 bioconda::diamond=2.0.13 bioconda::blast=2.12.0
 ```

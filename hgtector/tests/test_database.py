@@ -59,12 +59,12 @@ class DatabaseTests(TestCase):
 
     def test_filter_genomes(self):
         me = Database()
-        header = ('# assembly_accession', 'assembly_level')
-        data = (('GCF_000000001.1', 'Chromosome'),
-                ('GCF_000000002.1', 'Complete Genome'),
-                ('GCF_000000003.2', 'Scaffold'),
-                ('GCF_000000004.1', 'Contig'),
-                ('GCA_000000004.1', 'Contig'))
+        header = ('# assembly_accession', 'assembly_level', 'ftp_path')
+        data = (('GCF_000000001.1', 'Chromosome', ''),
+                ('GCF_000000002.1', 'Complete Genome', ''),
+                ('GCF_000000003.2', 'Scaffold', ''),
+                ('GCF_000000004.1', 'Contig', ''),
+                ('GCA_000000004.1', 'Contig', ''))
         df = pd.DataFrame(data, columns=header)
         me.complete = False
         me.genoids = None
@@ -102,7 +102,27 @@ class DatabaseTests(TestCase):
         self.assertListEqual(me.df['accession'].tolist(), [
             'GCF_000000001.1', 'GCF_000000003.2'])
 
-    def test_identify_taxonomy(self):
+    def test_sort_genomes(self):
+        me = Database()
+        header = (
+            'genome', 'taxid', 'refseq_category', 'assembly_level',
+            'relation_to_type_material')
+        data = (
+            ('G1', '585056', '', 'Chromosome', None),  # E. coli UMN026
+            ('G2', '1038927', 'representative genome', 'Chromosome', None),
+            # E. coli O104:H4
+            ('G3', '2580236', '', 'Contig', None),  # sync E. coli
+            ('G4', '622', '', 'Scaffold', 'yes'),  # Shigella
+            ('G5', '548', '', 'Scaffold', None),  # Klebsiella
+            ('G6', '126792', 'reference genome', 'Contig', None))  # plasmid
+        df = pd.DataFrame(data, columns=header)
+        me.taxdump = taxdump_from_text(taxdump_proteo)
+        me.df = df.copy()
+        me.sort_genomes()
+        self.assertListEqual(me.df['genome'].tolist(), [
+            'G6', 'G2', 'G4', 'G1', 'G5', 'G3'])
+
+    def test_filter_by_taxonomy(self):
         me = Database()
         header = ('organism_name', 'taxid', 'species', 'species_taxid')
         data = (('Escherichia coli UMN026', '585056', 'E. coli', '562'),
@@ -120,7 +140,7 @@ class DatabaseTests(TestCase):
         me.exclude = False
         me.taxdump = taxdump_from_text(taxdump_proteo)
         me.df = df.copy()
-        me.identify_taxonomy()
+        me.filter_by_taxonomy()
         self.assertNotIn('species_taxid', me.df.columns)
         self.assertListEqual(me.df.index.tolist(), [0, 1, 2])
         self.assertListEqual(me.df['species'].tolist(), ['562', '562', '548'])
@@ -129,35 +149,34 @@ class DatabaseTests(TestCase):
         me.block = 'plasmid'
         me.latin = False
         me.df = df.copy()
-        me.identify_taxonomy()
+        me.filter_by_taxonomy()
         self.assertListEqual(me.df.index.tolist(), [0, 1, 2])
 
         # no Escherichia
         me.taxids = '561'
         me.exclude = True
         me.df = df.copy()
-        me.identify_taxonomy()
+        me.filter_by_taxonomy()
         self.assertListEqual(me.df.index.tolist(), [2])
 
     def test_sample_by_taxonomy(self):
         me = Database()
 
         # do nothing
+        me.rank = None
         me.sample = None
+        me.above = None
         self.assertIsNone(me.sample_by_taxonomy())
 
-        # xxx
-        header = ('genome', 'taxid', 'refseq_category', 'assembly_level')
-        data = (('G1', '585056', '', 'Chromosome'),  # E. coli UMN026
-                ('G2', '1038927', 'representative genome', 'Chromosome'),
-                # E. coli O104:H4 (rep. genome to be prioritized over G1)
-                ('G3', '2580236', '', 'Contig'),  # sync E. coli
-                ('G4', '622', '', 'Scaffold'),  # Shigella
-                ('G5', '548', '', 'Scaffold'),  # Klebsiella
-                ('G6', '126792', 'reference genome', 'Contig'))  # plasmid
+        # regular
+        header = ('genome', 'taxid')
+        data = (('G1',  '585056'),  # E. coli UMN026
+                ('G2', '1038927'),  # E. coli O104:H4
+                ('G3', '2580236'),  # sync E. coli
+                ('G4',     '622'),  # Shigella
+                ('G5',     '548'),  # Klebsiella
+                ('G6',  '126792'))  # plasmid
         df = pd.DataFrame(data, columns=header)
-        me.reference = False
-        me.representative = False
         me.taxdump = taxdump_from_text(taxdump_proteo)
 
         # up to one genome per genus
@@ -166,21 +185,36 @@ class DatabaseTests(TestCase):
         me.df = df.copy()
         me.sample_by_taxonomy()
         self.assertListEqual(me.df.columns.tolist(), list(header) + ['genus'])
-        self.assertListEqual(me.df['genome'].tolist(), ['G2', 'G4', 'G5'])
-
-        # include reference genome (plasmid)
-        me.reference = True
-        me.df = df.copy()
-        me.sample_by_taxonomy()
-        self.assertEqual(me.df['genome'].tolist()[-1], 'G6')
+        self.assertListEqual(sorted(me.selected), ['G1', 'G4', 'G5'])
 
         # up to two genomes for entire cellular life
         me.rank = 'superkingdom'
         me.sample = 2
-        me.reference = False
-        me.df = df.copy()
         me.sample_by_taxonomy()
-        self.assertListEqual(me.df['genome'].tolist(), ['G1', 'G2'])
+        self.assertListEqual(sorted(me.selected), ['G1', 'G2'])
+
+        # up to one genome per species
+        me.rank = 'species'
+        me.sample = 1
+        me.sample_by_taxonomy()
+        self.assertListEqual(sorted(me.selected), [
+            'G1', 'G3', 'G4', 'G5', 'G6'])
+
+        # up to one genome per species, Latinate only
+        me.rank = 'species_latin'
+        me.sample = 1
+        me.df['latin'] = [True, True, True, True, True, False]
+        me.sample_by_taxonomy()
+        self.assertListEqual(sorted(me.selected), [
+            'G1', 'G3', 'G4', 'G5'])
+
+        # species and above (no difference)
+        me.rank = 'species_latin'
+        me.above = True
+        me.sample = 10
+        me.sample_by_taxonomy()
+        self.assertListEqual(sorted(me.selected), [
+            'G1', 'G2', 'G3', 'G4', 'G5'])
 
     def test_download_genomes(self):
         # TODO
@@ -232,8 +266,8 @@ class DatabaseTests(TestCase):
             'infraspecific_name': '',
             'isolate': '',
             'taxid': '12345',
-            'ftp_path': ('ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/123/'
-                         '456/GCF_000123456.1_ASM123v1'),
+            'ftp_path': ('https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/'
+                         '123/456/GCF_000123456.1_ASM123v1'),
             'proteins': 100,
             'residues': 12500,
             'whatever': 'nonsense'}).to_frame().T
@@ -247,7 +281,7 @@ class DatabaseTests(TestCase):
         exp = ('G1', '100', '12500', 'Chromosome', 'GCF_000123456.1',
                'PRJNA123456', 'SAMN00123456', 'ASM123v1',
                'hypothetical organism', '', '', '12345',
-               ('ftp://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/123/456/'
+               ('https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/123/456/'
                 'GCF_000123456.1_ASM123v1'))
         self.assertEqual(obs[1], '\t'.join(exp))
         remove(join(self.tmpdir, 'genomes.tsv'))

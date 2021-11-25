@@ -22,7 +22,7 @@ from hgtector.util import (
     read_fasta, read_input_prots, contain_words, get_product, seqid2accver,
     taxids_at_ranks, find_lca, get_lineage, sort_by_hierarchy, refine_taxdump,
     _get_taxon, add_children, get_descendants, is_latin, is_capital,
-    taxdump_from_text)
+    taxdump_from_text, rank_plural)
 
 
 class UtilTests(TestCase):
@@ -571,6 +571,14 @@ class UtilTests(TestCase):
         self.assertDictEqual(
             obs['2157'], {'name': 'Archaea', 'parent': '131567',
                           'rank': 'superkingdom'})
+
+    def test_rank_plural(self):
+        self.assertEqual(rank_plural('subspecies'), 'subspecies')
+        self.assertEqual(rank_plural('superphylum'), 'superphyla')
+        self.assertEqual(rank_plural('infraorder'), 'infraorders')
+        self.assertEqual(rank_plural('class'), 'classes')
+        self.assertEqual(rank_plural('family'), 'families')
+        self.assertEqual(rank_plural('genus'), 'genera')
 
 
 """Constants"""

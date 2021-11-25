@@ -8,11 +8,11 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import sys
 from os import remove, makedirs, cpu_count
 from os.path import join, isfile, isdir, getsize, basename
 from shutil import which, rmtree
 from time import sleep
-import ftplib
 import gzip
 import tarfile
 from tempfile import mkdtemp
@@ -22,7 +22,7 @@ import pandas as pd
 from hgtector.util import (
     timestamp, load_configs, get_config, arg2bool, run_command,
     list_from_param, read_taxdump, contain_words, is_latin, is_capital,
-    taxid_at_rank, taxids_at_ranks, is_ancestral, find_lca)
+    taxid_at_rank, taxids_at_ranks, is_ancestral, find_lca, rank_plural)
 
 
 description = """build reference protein sequence and taxonomy database"""
@@ -52,8 +52,11 @@ arguments = [
     'taxon sampling',
     ['-s|--sample',  'sample up to this number of genomes per taxonomic '
                      'group at given rank (0 for all)', {'type': int}],
-    ['-r|--rank',    'taxonomic rank at which subsampling will be performed',
+    ['-r|--rank',    'taxonomic rank at which sampling will be performed',
                      {'default': 'species'}],
+    ['--above',      'sampling will also be performed on ranks from the '
+                     'designated one to phylum',
+                     {'action': 'store_true'}],
 
     'genome sampling',
     ['--genbank',    'also search GenBank if a genome is not found in RefSeq; '
@@ -63,10 +66,10 @@ arguments = [
                      {'action': 'store_true'}],
     ['--reference',  'include NCBI-defined reference genomes',
                      {'action': 'store_true'}],
-    ['--representative', 'include NCBI-defined representative genomes',
-                         {'action': 'store_true'}],
-    ['--typematerial', 'include NCBI-defined type material genomes',
-                       {'action': 'store_true'}],
+    ['--represent',  'include NCBI-defined representative genomes',
+                     {'action': 'store_true'}],
+    ['--typemater',  'include NCBI-defined type material genomes',
+                     {'action': 'store_true'}],
 
     'taxonomic filter',
     ['--capital',    'organism name must be capitalized',
@@ -77,6 +80,10 @@ arguments = [
                      {'choices': ['yes', 'no']}],
 
     'download',
+    ['--manual',     'export URLs of sampled genomes without downloading them'
+                     ', so the user may download them manually, then resume '
+                     'the database pipeline.', {'action': 'store_true'}],
+
     ['--overwrite',  'overwrite existing files with newly downloaded ones; '
                      'othewise use existing files whenever available, i.e., '
                      'resume an interrupted run', {'action': 'store_true'}],
@@ -95,6 +102,8 @@ arguments = [
     ['--tmpdir',     'temporary directory for diamond makedb']
 ]
 
+server = 'rsync://ftp.ncbi.nlm.nih.gov'
+
 
 class Database(object):
 
@@ -111,12 +120,6 @@ class Database(object):
         # read and validate arguments
         self.set_parameters(args)
 
-        # connect to NCBI FTP server
-        self.connect_server()
-
-        # create target directory
-        makedirs(self.output, exist_ok=True)
-
         # retrieve taxonomy database
         self.retrieve_taxdump()
 
@@ -129,11 +132,20 @@ class Database(object):
         # filter genomes
         self.filter_genomes()
 
+        # sort genomes by quality
+        self.sort_genomes()
+
         # identify taxonomy of genomes
-        self.identify_taxonomy()
+        self.filter_by_taxonomy()
 
         # sample genomes by taxonomy
         self.sample_by_taxonomy()
+
+        # sample genomes by quality
+        self.sample_by_quality()
+
+        # filter genomes to sampled one
+        self.filter_to_sampled()
 
         # download genomes
         self.download_genomes()
@@ -215,7 +227,7 @@ class Database(object):
             self.sample = 1
             self.rank = 'species'
             self.reference = True
-            self.representative = True
+            self.represent = True
 
             if self.diamond is None:
                 self.diamond = 'diamond'
@@ -233,38 +245,32 @@ class Database(object):
             if self.threads is None:
                 self.threads = 1
 
+        # create target directories
         makedirs(self.output, exist_ok=True)
-
-    def connect_server(self):
-        """Connect to the NCBI FTP server.
-        """
-        print('Connecting to the NCBI FTP server...', end='', flush=True)
-        makedirs(join(self.output, 'download'), exist_ok=True)
-        self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
-        self.ftp.login()
-        print(' done.')
+        self.down = join(self.output, 'download')
+        makedirs(self.down, exist_ok=True)
 
     def retrieve_taxdump(self):
-        """Retrieve NCBI taxdump."""
+        """Retrieve NCBI taxdump.
+        """
         fname = 'taxdump.tar.gz'
-        remote_file = f'/pub/taxonomy/{fname}'
-        local_file = join(self.output, 'download', fname)
+        rfile = f'pub/taxonomy/{fname}'
+        lfile = join(self.down, fname)
 
         # download taxdump
-        if not self.check_local_file(local_file, self.overwrite):
+        if not self.check_local_file(lfile, self.overwrite):
             print('Downloading NCBI taxonomy database...', end='', flush=True)
-            with open(local_file, 'wb') as f:
-                self.ftp.retrbinary('RETR ' + remote_file, f.write)
+            run_command(f'rsync -Ltq {server}/{rfile} {self.down}')
             print(' done.')
 
         # read taxdump
         print('Reading NCBI taxonomy database...', end='', flush=True)
-        with tarfile.open(local_file, 'r:gz') as f:
+        with tarfile.open(lfile, 'r:gz') as f:
             f.extract('names.dmp', self.tmpdir)
             f.extract('nodes.dmp', self.tmpdir)
         self.taxdump = read_taxdump(self.tmpdir)
         print(' done.')
-        print(f'Total number of TaxIDs: {len(self.taxdump)}.')
+        print(f'  Total number of TaxIDs: {len(self.taxdump)}.')
 
     def retrieve_summary(self, genbank=False):
         """Retrieve genome assembly summary.
@@ -273,27 +279,26 @@ class Database(object):
         def get_summary(target):
             key = target.lower()
             fname = f'assembly_summary_{key}.txt'
-            remote_file = f'/genomes/{key}/{fname}'
-            local_file = join(self.output, 'download', fname)
+            rfile = f'genomes/{key}/{fname}'
+            lfile = join(self.down, fname)
 
             # download summary
-            if not self.check_local_file(local_file, self.overwrite):
+            if not self.check_local_file(lfile, self.overwrite):
                 print(f'Downloading {target} assembly summary...', end='',
                       flush=True)
-                with open(local_file, 'wb') as f:
-                    self.ftp.retrbinary('RETR ' + remote_file, f.write)
+                run_command(f'rsync -Ltq {server}/{rfile} {self.down}')
                 print(' done.')
 
             # read summary
             print(f'Reading {target} assembly summary...', end='', flush=True)
-            df = pd.read_table(local_file, skiprows=1, low_memory=False)
+            df = pd.read_table(lfile, skiprows=1, low_memory=False)
             print(' done.')
             return df
 
         self.df = get_summary('RefSeq')
         if self.genbank:
             self.df = pd.concat([self.df, get_summary('GenBank')])
-        print(f'Total number of genomes: {self.df.shape[0]}.')
+        print(f'  Total number of genomes: {self.df.shape[0]}.')
 
     def retrieve_categories(self):
         """Retrieve genome categories.
@@ -306,44 +311,45 @@ class Database(object):
             self.cats = ['archaea', 'bacteria', 'fungi', 'protozoa']
         else:
             self.cats = cats.split(',')
-        print(f'Genome categories:  {", ".join(self.cats)}')
+        print(f'Genome categories: {", ".join(self.cats)}')
 
         def get_categories(target):
             key = target.lower()
 
             # validate categories
-            self.ftp.cwd(f'/genomes/{key}')
-            dirs = [x[0] for x in self.ftp.mlsd() if x[1]['type'] == 'dir']
+            ec, out = run_command(
+                f'rsync --list-only --no-motd {server}/genomes/{key}/')
+            cats = [line.rsplit(None, 1)[-1] for line in out if
+                    line.startswith('d') and not line.endswith('.')]
             for cat in self.cats:
-                if cat not in dirs:
+                if cat not in cats:
                     raise ValueError(
                         f'"{cat}" is not a valid {target} genome category.')
 
             # get genome list per category
             print(f'Downloading genome list per {target} category...')
-            dir_ = join(self.output, 'download', 'cats')
-            makedirs(dir_, exist_ok=True)
+            makedirs(join(self.down, 'cats'), exist_ok=True)
+            ldir = join(self.down, 'cats')
             fname = 'assembly_summary.txt'
-            asms = []
-            file_ = join(self.tmpdir, 'tmp.txt')
+            file_ = join(self.tmpdir, fname)
 
+            asms = []
             for cat in self.cats:
-                file = join(dir_, f'{key}_{cat}.txt')
-                islocal = self.check_local_file(file)
+                lfile = join(ldir, f'{key}_{cat}.txt')
 
                 # use local file
-                if islocal:
-                    with open(file, 'r') as f:
+                if self.check_local_file(lfile):
+                    with open(lfile, 'r') as f:
                         asms_ = f.read().splitlines()
 
                 # download remote file
                 else:
-                    with open(file_, 'wb') as f:
-                        self.ftp.retrbinary(f'RETR {cat}/{fname}', f.write)
+                    rfile = f'genomes/{key}/{cat}/{fname}'
+                    run_command(f'rsync -Ltq {server}/{rfile} {self.tmpdir}')
                     with open(file_, 'r') as f:
                         asms_ = [x.split('\t', 1)[0] for x in f.read().
                                  splitlines() if not x.startswith('#')]
-                    with open(file, 'w') as f:
+                    with open(lfile, 'w') as f:
                         f.write(''.join([x + '\n' for x in asms_]))
 
                 print(f'  {cat}: {len(asms_)}')
@@ -354,16 +360,12 @@ class Database(object):
             print('Done.')
             return asms
 
+        # filter genomes by category
         asmset = set(get_categories('RefSeq'))
         if self.genbank:
             asmset.update(get_categories('GenBank'))
-
-        # filter genomes by category
         self.df = self.df[self.df['# assembly_accession'].isin(asmset)]
-        print(f'Total number of genomes in categories: {self.df.shape[0]}.')
-
-        # close and reconnect later to avoid some problems
-        self.ftp.close()
+        print(f'  Total number of genomes in categories: {self.df.shape[0]}.')
 
     def filter_genomes(self):
         """Filter genomes based on genome metadata.
@@ -402,12 +404,37 @@ class Database(object):
                                self.df['genome'].isin(self.genoids)) !=
                               self.exclude]
             report_diff('Dropped {} genomes.')
+
+        # genomes without download link
+        self.df.query('ftp_path != "na"', inplace=True)
+        report_diff('Dropped {} genomes without download link.')
         print('Done.')
 
-    def identify_taxonomy(self):
-        """Identify taxonomy of genomes.
+    def sort_genomes(self):
+        """Sort genomes by quality as informed by metadata.
         """
-        print('Identifying taxonomy of genomes...')
+        # sort by reference > representative > type material > other
+        self.df['rc_seq'] = self.df.apply(
+            lambda x: 0 if x['refseq_category'] == 'reference genome'
+            else (1 if x['refseq_category'] == 'representative genome'
+                  else (2 if pd.notnull(x['relation_to_type_material'])
+                  else 3)), axis=1)
+
+        # sort by complete > scaffold > contig
+        self.df['al_seq'] = self.df['assembly_level'].map(
+            {'Chromosome': 0, 'Complete Genome': 0, 'Scaffold': 1,
+             'Contig': 2})
+
+        # sort genomes by three criteria
+        self.df.sort_values(by=['rc_seq', 'al_seq', 'genome'], inplace=True)
+
+        # clean up temporary columns
+        self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
+
+    def filter_by_taxonomy(self):
+        """Filter genomes by taxonomy.
+        """
+        print('Filtering genomes by taxonomy...')
         n = self.df.shape[0]
 
         def report_diff(msg):
@@ -448,9 +475,10 @@ class Database(object):
         report_diff('Dropped {} genomes without valid species taxId.')
 
         # drop genomes without Latinate species name
+        self.df['latin'] = self.df['species'].apply(
+            lambda x: is_latin(self.taxdump[x]['name']))
         if self.latin:
-            self.df = self.df[self.df['species'].apply(
-                lambda x: is_latin(self.taxdump[x]['name']))]
+            self.df.query('latin', inplace=True)
             report_diff('Dropped {} genomes without Latinate species name.')
         print('Done.')
 
@@ -466,123 +494,148 @@ class Database(object):
             report_diff('Dropped {} genomes.')
 
     def sample_by_taxonomy(self):
-        """Taxonomy-based sampling.
+        """Sample genomes at designated taxonomic rank.
         """
-        if not self.sample:
+        self.selected, n = set(), 0
+        rank, sample, latin = self.rank, self.sample, False
+        if sample is None:
             return
         print('Sampling genomes based on taxonomy...')
-        print(f'Up to {self.sample} genome(s) will be sampled per {self.rank}'
-              '.')
+
+        # Latinate species names
+        if rank == 'species_latin':
+            rank, latin = 'species', True
+        print(f'Up to {sample} genome(s) will be sampled per {rank}' +
+              (' (Latinate names only) ' if latin else '') + '.')
 
         # assign genomes to given rank
-        if self.rank not in self.df.columns:
-            self.df[self.rank] = self.df['taxid'].apply(
-                taxid_at_rank, rank=self.rank, taxdump=self.taxdump)
+        if rank not in self.df.columns:
+            self.df[rank] = self.df['taxid'].apply(
+                taxid_at_rank, rank=rank, taxdump=self.taxdump)
+        df_ = self.df.dropna(subset=[rank])
 
-        # sort by reference > representative > type material > other
-        self.df['rc_seq'] = self.df.apply(
-            lambda x: 0 if x['refseq_category'] == 'reference genome'
-            else (1 if x['refseq_category'] == 'representative genome'
-                  else (2 if pd.notnull(x['relation_to_type_material'])
-                  else 3)), axis=1)
-
-        # sort by complete > scaffold > contig
-        self.df['al_seq'] = self.df['assembly_level'].map(
-            {'Chromosome': 0, 'Complete Genome': 0, 'Scaffold': 1,
-             'Contig': 2})
-
-        # sort genomes by three criteria
-        self.df.sort_values(by=['rc_seq', 'al_seq', 'genome'], inplace=True)
+        # keep Latinate species names only
+        if latin:
+            df_ = df_.query('latin')
 
         # select up to given number of genomes of each taxonomic group
-        selected = set(self.df.groupby(self.rank).head(self.sample)['genome'])
-        if not selected:
-            raise ValueError(f'No genome is classified at rank "{self.rank}".')
+        self.selected = set(df_.groupby(rank).head(sample)['genome'])
+        n = df_[rank].unique().shape[0]
+        print(f'  Sampled {len(self.selected)} genomes from {n} '
+              f'{rank_plural(rank)}.')
 
-        # add reference / representative genomes
-        for key in 'reference', 'representative':
-            if getattr(self, key):
-                print(f'Add {key} genomes to selection.')
-                selected.update(self.df.query(
-                    f'refseq_category == "{key} genome"')['genome'].tolist())
+        # sample at ranks above the current one
+        if not self.above:
+            return
+
+        # determine ranks to sample at
+        ranks = ['phylum', 'class', 'order', 'family', 'genus', 'species']
+        if rank not in ranks:
+            raise ValueError(
+                f'Cannot determine taxonomic ranks above "{rank}", because it '
+                'is not among the six standard ranks: {", ".join(ranks)}.')
+        ranks = ranks[:ranks.index(rank)][::-1]
+        print(f'Sampling will also be performed on: {", ".join(ranks)}.')
+
+        for r in ranks:
+            self.df['tmp_rank'] = self.df['taxid'].apply(
+                taxid_at_rank, rank=r, taxdump=self.taxdump)
+            df_ = self.df.dropna(subset=['tmp_rank'])
+
+            # calculate number of genomes yet to be sampled per group
+            goal = pd.Series(sample, df_['tmp_rank'].unique())
+            done = df_.query('genome in @self.selected')[
+                'tmp_rank'].value_counts()
+            left = goal.subtract(done, fill_value=0)
+            left = left[left > 0].astype(int)
+
+            # sample specific number of genomes per group
+            s = []
+            for tid, num in left.items():
+                s.extend(df_.query(f'tmp_rank == "{tid}"').head(num)['genome'])
+            print(f'  Sampled {len(s)} more genomes from {left.shape[0]} '
+                  f'{rank_plural(r)}.')
+            self.selected.update(s)
+
+        print(f'  Sampled a total of {len(self.selected)} genomes at '
+              f'{rank} and above.')
+        self.df.drop(columns=['tmp_rank'], inplace=True)
+
+    def sample_by_quality(self):
+        """Sample genomes according to quality categories.
+        """
+        # add reference genomes
+        if self.reference:
+            df_ = self.df.query('refseq_category == "reference genome"')
+            print(f'Include {df_.shape[0]} reference genomes.')
+            self.selected.update(df_['genome'])
+
+        # add representative genomes
+        if self.represent:
+            df_ = self.df.query('refseq_category == "representative genome"')
+            print(f'Include {df_.shape[0]} representative genomes.')
+            self.selected.update(df_['genome'])
 
         # add type material genomes
-        if self.typematerial:
-            print('Add type material genomes to selection.')
-            selected.update(self.df[self.df[
-                'relation_to_type_material'].notna()]['genome'].tolist())
+        if self.typemater:
+            df_ = self.df[self.df['relation_to_type_material'].notna()]
+            print(f'Include {df_.shape[0]} type material genomes.')
+            self.selected.update(df_['genome'])
 
-        # filter genomes to selected
-        self.df.query('genome in @selected', inplace=True)
-        n = self.df.shape[0]
+    def filter_to_sampled(self):
+        """Filter genomes to sampled ones.
+        """
+        n = len(self.selected)
         if n == 0:
             raise ValueError('No genome is retained after sampling.')
-        print(f'Total number of sampled genomes: {n}.')
-
-        # sort by genome ID
+        self.df.query('genome in @self.selected', inplace=True)
         self.df.sort_values('genome', inplace=True)
-
-        # clean up temporary columns
-        self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
+        print(f'Total number of sampled genomes: {n}.')
 
     def download_genomes(self):
         """Download genomes from NCBI.
         """
-        # reconnect to avoid server timeout problem
-        self.ftp = ftplib.FTP('ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
-        self.ftp.login()
-        self.ftp.cwd('/genomes/all')
+        if self.manual:
+            fname = 'urls.txt'
+            self.df['ftp_path'].to_csv(
+                join(self.output, 'urls.txt'), header=False, index=False)
+            print(f'URLs of sampled genomes written to {fname}. You may '
+                  'manually download their protein sequence data to faa/, '
+                  'then restart the database building pipeline.')
+            sys.exit(0)
 
         print('Downloading non-redundant genomic data from NCBI...',
               flush=True)
-        dir_ = join(self.output, 'download', 'faa')
-        makedirs(dir_, exist_ok=True)
-        stems = {}
-        failures = []
+        ldir = join(self.down, 'faa')
+        makedirs(ldir, exist_ok=True)
+        failed = []
         for row in self.df.itertuples():
             g = row.genome
-            remote_dir = row.ftp_path.split('/', 5)[-1]
-            stem = remote_dir.rsplit('/', 1)[-1]
-            stems[g] = stem
+            rdir = row.ftp_path.split('/', 3)[-1]
+            stem = rdir.rsplit('/', 1)[-1]
             fname = f'{stem}_protein.faa.gz'
-            file = join(dir_, fname)
-            if self.check_local_file(file):
-                success = True
-            else:
-                success = False
-                for i in range(self.retries):
-                    try:
-                        with open(file, 'wb') as f:
-                            self.ftp.retrbinary(
-                                f'RETR {remote_dir}/{fname}', f.write)
-                        print('  ' + g, flush=True)
-                        success = True
-                    except ftplib.error_perm as resp:
-                        if str(resp).split()[0] == '550':
-                            break
-                    except ftplib.error_temp:
-                        sleep(self.delay)
-                        continue
-                    except EOFError:
-                        sleep(self.delay)
-                        self.ftp = ftplib.FTP(
-                            'ftp.ncbi.nlm.nih.gov', timeout=self.timeout)
-                        self.ftp.login()
-                        self.ftp.cwd('/genomes/all')
-                        continue
-                    else:
-                        break
-            if not success:
+            lfile = join(ldir, fname)
+            if self.check_local_file(lfile):
+                continue
+            for i in range(self.retries):
+                ec, _ = run_command(
+                    f'rsync -Ltq {server}/{rdir}/{fname} {ldir}')
+                if ec == 0:
+                    print('  ' + g, flush=True)
+                    break
+                else:
+                    sleep(self.delay)
+            if ec > 0:
                 print(f'WARNING: Cannot retrieve {fname}.')
-                failures.append(g)
+                failed.append(g)
         print('Done.')
 
         # drop genomes that cannot be retrieved
-        if len(failures):
+        if len(failed):
             print('Failed to retrieve the following genomes:')
-            print('  ' + ', '.join(failures))
-            failures = set(failures)
-            self.df = self.df[~self.df['genome'].isin(failures)]
+            print('  ' + ', '.join(failed))
+            failed = set(failed)
+            self.df.query('genome in @failures', inplace=True)
 
     def extract_genomes(self):
         """Extract proteins from genomes.
@@ -593,22 +646,29 @@ class Database(object):
         Write protein to genomes(s) map to genome.map.gz.
         """
         print('Extracting downloaded genomic data...', end='', flush=True)
-        dir_ = join(self.output, 'download', 'faa')
+        ldir = join(self.down, 'faa')
         prots = {}
-        cp = None
+        cp = None  # current protein accession
         fout = open(join(self.output, 'db.faa'), 'w')
 
         def write_prot():
-            if cp:
+            # some protein accessions may be duplicated
+            try:
                 fout.write(f'>{cp} {prots[cp]["name"]}\n{prots[cp]["seq"]}\n')
+            except KeyError:
+                return
+            else:
+                prots[cp]['aa'] = len(prots[cp]['seq'])
+                del prots[cp]['name']
+                del prots[cp]['seq']
 
         g2n, g2aa = {}, {}
         for row in self.df.itertuples():
             g, tid = row.genome, row.taxid
             g2n[g], g2aa[g] = 0, 0
             stem = row.ftp_path.rsplit('/', 1)[-1]
-            fp = join(dir_, f'{stem}_protein.faa.gz')
-            with gzip.open(fp, 'rb') as f:
+            lfile = join(ldir, f'{stem}_protein.faa.gz')
+            with gzip.open(lfile, 'rb') as f:
                 try:
                     content = f.read().decode().splitlines()
                 except (OSError, EOFError, TypeError):
@@ -617,7 +677,6 @@ class Database(object):
                     continue
             cp = None
             for line in content:
-                line = line.rstrip('\r\n')
                 if line.startswith('>'):
                     write_prot()
                     p, name = line[1:].split(None, 1)
@@ -626,7 +685,7 @@ class Database(object):
                         cp = None
                         prots[p]['gs'].add(g)
                         prots[p]['tids'].add(tid)
-                        g2aa[g] += len(prots[p]['seq'])
+                        g2aa[g] += prots[p]['aa']
                     else:
                         cp = p
                         prots[p] = {
@@ -645,11 +704,11 @@ class Database(object):
         self.p2tids = {k: v['tids'] for k, v in prots.items()}
 
         # report summary
-        print(f'Total number of genomes extracted: {len(g2n)}.')
-        print(f'Total number of unique proteins extracted: {len(prots)}.')
-        print('Number of proteins shared by multiple genomes: {}.'.format(
+        print(f'  Total number of genomes extracted: {len(g2n)}.')
+        print(f'  Total number of unique proteins extracted: {len(prots)}.')
+        print('  Number of proteins shared by multiple genomes: {}.'.format(
             sum([1 for k, v in prots.items() if len(v['gs']) > 1])))
-        print('Number of proteins shared by multiple TaxIDs: {}.'.format(
+        print('  Number of proteins shared by multiple TaxIDs: {}.'.format(
             sum([1 for k, v in prots.items() if len(v['tids']) > 1])))
 
         # write protein to genomes(s) map

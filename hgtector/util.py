@@ -945,3 +945,30 @@ def taxdump_from_text(text):
         x = line.split(',')
         res[x[0]] = {'name': x[1], 'parent': x[2], 'rank': x[3]}
     return res
+
+
+def rank_plural(rank):
+    """Convert taxonomic rank to plural form.
+
+    Parameters
+    ----------
+    rank : str
+        taxonomic rank
+
+    Returns
+    -------
+    str
+        taxonomic rank in plural form
+    """
+    if rank.endswith('phylum'):
+        return rank[:-2] + 'a'
+    elif rank.endswith('class'):
+        return rank + 'es'
+    elif rank.endswith('family'):
+        return rank[:-1] + 'ies'
+    elif rank.endswith('genus'):
+        return rank[:-2] + 'era'
+    elif rank.endswith('species'):
+        return rank
+    else:
+        return rank + 's'
