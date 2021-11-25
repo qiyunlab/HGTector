@@ -101,8 +101,8 @@ blast:
 remote:
 
   # remote search database
-  # options: nr, refseq_protein, swissprot, pdb, etc.
-  db: nr
+  # options: nr, refseq_select_prot, refseq_protein, swissprot, pdb, etc.
+  db: refseq_select_prot
 
   # remote search algorithm
   # options: blastp psiBlast deltaBlast kmerBlastp phiBlast, etc.
@@ -114,13 +114,13 @@ remote:
                     # typically cannot exceed 8,000 characters)
   retries: 5        # maximum number of retries per search
   delay: 60         # seconds between two search requests
-  timeout: 900      # seconds before program gives up waiting
+  timeout: 1800     # seconds before program gives up waiting
 
   # entrez query text
   entrez: all [filter] NOT(environmental samples[filter] OR metagenomes[orgn]) txid131567[orgn]
 
   # extra URL arguments for remote search
-  extrargs: "&FILTER=m%20S"
+  extrargs: "&WORD_SIZE=6&FILTER=m%20S"
 
 
 ## Fetch information from remote server

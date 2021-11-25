@@ -15,8 +15,8 @@ from shutil import which, rmtree
 from tempfile import mkdtemp
 from time import time, sleep
 from math import log
-from urllib.parse import quote
-from urllib.request import urlopen, HTTPError, URLError
+from urllib.parse import quote, urlencode
+from urllib.request import urlopen, Request, HTTPError, URLError
 
 from hgtector.util import (
     timestamp, load_configs, get_config, arg2bool, list_from_param, file2id,
@@ -1550,6 +1550,11 @@ class Search(object):
         dict of list of dict
             hit table per query sequence
 
+        Notes
+        -----
+        As of 2021, use of RESTful APIs to conduct BLAST searches is
+        deprecated by NCBI.
+
         .. _NCBI's official reference of RESTful APIs:
             https://ncbi.github.io/blast-cloud/dev/using-url-api.html
         .. _NCBI's official sample Perl script:
@@ -1559,24 +1564,29 @@ class Search(object):
             https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=
             BlastDocs&DOC_TYPE=DeveloperInfo
         .. _Instead, NCBI recommends setting up custom BLAST servers. See:
-            https://ncbi.github.io/blast-cloud/
+            https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&
+            DOC_TYPE=CloudBlast
         """
-        # generate query URL
-        query = ''.join([f'>{id_}\n{seq}\n' for id_, seq in seqs])
-        url = f'{self.server}?CMD=Put&PROGRAM=blastp&DATABASE={self.db}'
-        if self.algorithm:
-            url += '&BLAST_PROGRAMS=' + self.algorithm
-        if self.evalue:
-            url += '&EXPECT=' + str(self.evalue)
-        if self.maxseqs:
-            url += '&MAX_NUM_SEQ=' + str(self.maxseqs)
-        if self.entrez:
-            url += '&EQ_TEXT=' + quote(self.entrez)
-        if self.extrargs:
-            url += '&' + self.extrargs.lstrip('&')
-        url += '&QUERY=' + quote(query)
         print(f'Submitting {len(seqs)} queries for search.', end='',
               flush=True)
+        data = [('CMD', 'Put'),
+                ('PROGRAM', 'blastp'),
+                ('DATABASE', self.db),
+                ('WORD_SIZE', 6)]
+        if self.algorithm:
+            data.append(('BLAST_PROGRAMS', self.algorithm))
+        if self.evalue:
+            data.append(('EXPECT', self.evalue))
+        if self.maxseqs:
+            data.append(('MAX_NUM_SEQ', self.maxseqs))
+        if self.entrez:
+            data.append(('EQ_TEXT', self.entrez))
+        query = ''.join([f'>{id_}\n{seq}\n' for id_, seq in seqs])
+        data.append(('QUERY', query))
+        data = urlencode(data)
+        if self.extrargs:
+            data += '&' + self.extrargs.lstrip('&')
+        data = data.encode()
 
         trial = 0
         while True:
@@ -1589,7 +1599,8 @@ class Search(object):
             trial += 1
 
             # get request Id
-            with urlopen(url) as response:
+            req = Request(self.server, data=data)
+            with urlopen(req) as response:
                 res = response.read().decode('utf-8')
             m = re.search(r'^    RID = (.*$)', res, re.MULTILINE)
             if not m:
@@ -1597,14 +1608,17 @@ class Search(object):
                 continue
             rid = m.group(1)
             print(f' RID: {rid}.', end='', flush=True)
-            sleep(1)
+            sleep(10)
 
             # check status
-            url_ = f'{self.server}?CMD=Get&FORMAT_OBJECT=SearchInfo&RID={rid}'
+            data_ = urlencode([('CMD', 'Get'),
+                               ('FORMAT_OBJECT', 'SearchInfo'),
+                               ('RID', rid)]).encode()
+            req_ = Request(self.server, data=data_)
             starttime = time()
             success = False
             while True:
-                with urlopen(url_) as response:
+                with urlopen(req_) as response:
                     res = response.read().decode('utf-8')
                 m = re.search(r'\s+Status=(.+)', res, re.MULTILINE)
                 if not m:
@@ -1625,6 +1639,7 @@ class Search(object):
                     if 'ThereAreHits=yes' not in res:
                         print('WARNING: Remote search returned no result.')
                         break
+                    print(' Success.', end='', flush=True)
                     success = True
                     break
                 else:
@@ -1632,15 +1647,19 @@ class Search(object):
                     break
             if not success:
                 continue
-            sleep(1)
+            sleep(10)
 
             # retrieve result
-            url_ = (f'{self.server}?CMD=Get&ALIGNMENT_VIEW=Tabular'
-                    f'&FORMAT_TYPE=Text&RID={rid}')
+            data_ = [('CMD', 'Get'),
+                     ('ALIGNMENT_VIEW', 'Tabular'),
+                     ('FORMAT_TYPE', 'Text'),
+                     ('RID', rid)]
             if self.maxseqs:
-                url_ += (f'&MAX_NUM_SEQ={self.maxseqs}'
-                         f'&DESCRIPTIONS={self.maxseqs}')
-            with urlopen(url_) as response:
+                data_.extend([('MAX_NUM_SEQ',  self.maxseqs),
+                              ('DESCRIPTIONS', self.maxseqs)])
+            data_ = urlencode(data_).encode()
+            req_ = Request(self.server, data=data_)
+            with urlopen(req_) as response:
                 res = response.read().decode('utf-8')
             if '# blastp' not in res or '# Query: ' not in res:
                 print('WARNING: Invalid format of remote search results.')
