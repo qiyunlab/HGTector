@@ -432,7 +432,7 @@ class Database(object):
         self.df.drop(columns=['al_seq', 'rc_seq'], inplace=True)
 
     def filter_by_taxonomy(self):
-        """Identify taxonomy of genomes.
+        """Filter genomes by taxonomy.
         """
         print('Filtering genomes by taxonomy...')
         n = self.df.shape[0]

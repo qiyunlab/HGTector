@@ -1,6 +1,9 @@
 Database
 ========
 
+## Index
+- [Overview](#overview) | [Default protocol](#default-protocol) | [Pre-built database](#pre-built-database) | [Database files](#database-files) | [Considerations](#considerations) | [Command-line reference](#command-line-reference)
+
 ## Overview
 
 The `database` command is an automated workflow for sampling reference genomes, downloading non-redundant protein sequences, and building local databases for sequence homology search. It provides various options for flexible customization of the database, to address specific research goals including HGT prediction or other general purposes.
@@ -9,15 +12,17 @@ The `database` command is an automated workflow for sampling reference genomes, 
 hgtector database -o <output_dir> <parameters...>
 ```
 
+The workflow consists of the following steps:
+
+1. Download NCBI taxonomy database (taxdump).
+2. Download NCBI RefSeq assembly summary.
+3. Sample genomes based on various properties and taxonomic information.
+4. Download protein sequences associated with sampled genomes.
+5. Compile local databases using DIAMOND and/or BLAST.
+
 
 ## Default protocol
-
-HGTector provides a default protocol for database building.
-
-```bash
-hgtector database -o <output_dir> --default
-```
-
+Database files
 This will download all protein sequences of NCBI RefSeq genomes of **bacteria**, **archaea**, **fungi** and **protozoa**, keep _one genome per species_ that has a Latinate name, plus one genome per taxonomic group at higher ranks, regardless whether that genome has a Latinate species name, plus all NCBI-defined **reference**, **representative** and **type material** genomes (prioritized during taxonomy-based sampling, and added afterwards if not sampled). Finally it will attempt to compile the database using DIAMOND, if available. The command is equivalent to:
 
 ```bash
@@ -60,17 +65,6 @@ hgtector analyze -i sample.tsv -o . -t <db_dir>/taxdump
 The protein-to-TaxID map is already integrated into the compiled databases, so one does not need `taxon.map.gz` except for some special situations.
 
 Feel free to delete (e.g., `download/`) or compress the intermediate files (e.g., `db.faa`) to save disk space.
-
-
-## Procedures
-
-The workflow consists of the following steps:
-
-1. Download NCBI taxonomy database (taxdump).
-2. Download NCBI RefSeq assembly summary.
-3. Sample genomes based on various properties and taxonomic information.
-4. Download protein sequences associated with sampled genomes.
-5. Compile local databases using DIAMOND and/or BLAST.
 
 
 ## Considerations
@@ -207,8 +201,9 @@ Option | Default | Description
 
 Option | Default | Description
 --- | --- | ---
-`-s`, `--sample` | 0 | Sample up to this number of genomes per taxonomic group at the given rank. "0" is for all (disable sampling).
-`-r`, `--rank` | species | Taxonomic rank at which subsampling will be performed.
+`-s`, `--sample` | 0 | Sample up to this number of genomes per taxonomic group at the given rank. "0" is for all (disable sampling). Prior to sampling, genomes will be sorted by NCBI genome category: reference > representative > type material, then by assembly level: complete genome or chromosome > scaffolds > contigs. Sampling will start from the top of the list.
+`-r`, `--rank` | species | Taxonomic rank at which subsampling will be performed. Can be any taxonomic rank defined in the NCBI taxonomy database. A special case is "species_latin", which will sample from species that have Latinate names.
+`--above` | - | Sampling will also be performed on ranks from the one given by `-r` to phylum (low to high). They will not overlap the already sampled ones. For example, if two _E. coli_ genomes are already sampled, no more genome will be added when sampling in genus _Escherichia_. This flag is useful in the case of `-r species_latin`, because some ranks above species may be undersampled.
 
 ### Genome sampling
 
