@@ -635,7 +635,7 @@ class Database(object):
             print('Failed to retrieve the following genomes:')
             print('  ' + ', '.join(failed))
             failed = set(failed)
-            self.df.query('genome in @failures', inplace=True)
+            self.df.query('genome in @failed', inplace=True)
 
     def extract_genomes(self):
         """Extract proteins from genomes.
