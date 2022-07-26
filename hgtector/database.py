@@ -447,7 +447,8 @@ class Database(object):
         # remove non-capitalized organism names
         if self.capital:
             self.df = self.df[self.df['organism_name'].apply(is_capital)]
-            report_diff('Dropped {} genomes without captalized organism name.')
+            report_diff(
+                'Dropped {} genomes without capitalized organism name.')
 
         # block certain words in organism names
         if self.block:
@@ -623,6 +624,8 @@ class Database(object):
                 if ec == 0:
                     print('  ' + g, flush=True)
                     break
+                elif ec == 23:  # file not found
+                    break
                 else:
                     sleep(self.delay)
             if ec > 0:
@@ -635,7 +638,7 @@ class Database(object):
             print('Failed to retrieve the following genomes:')
             print('  ' + ', '.join(failed))
             failed = set(failed)
-            self.df.query('genome in @failed', inplace=True)
+            self.df.query('genome not in @failed', inplace=True)
 
     def extract_genomes(self):
         """Extract proteins from genomes.
