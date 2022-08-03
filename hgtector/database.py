@@ -866,9 +866,9 @@ class Database(object):
         # create temporary taxon map
         taxonmap = join(self.tmpdir, 'prot.accession2taxid')
         with open(taxonmap, 'w') as f:
-            f.write('accession\taccession.version\ttaxid\n')
+            f.write('accession\taccession.version\ttaxid\tgi\n')
             for p, tid in sorted(self.taxonmap.items()):
-                f.write(f'{p.rsplit(".", 1)[0]}\t{p}\t{tid}\n')
+                f.write(f'{p.rsplit(".", 1)[0]}\t{p}\t{tid}\tna\n')
 
         # build DIAMOND database
         makedirs(join(self.output, 'diamond'), exist_ok=True)
