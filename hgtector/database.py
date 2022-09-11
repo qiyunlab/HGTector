@@ -405,6 +405,13 @@ class Database(object):
                               self.exclude]
             report_diff('Dropped {} genomes.')
 
+            # further sampling / filtering will not occur
+            if not self.exclude:
+                self.capital = False
+                self.latin = False
+                self.block = ''
+                self.sample = 0
+
         # genomes without download link
         self.df.query('ftp_path != "na"', inplace=True)
         report_diff('Dropped {} genomes without download link.')
@@ -497,11 +504,14 @@ class Database(object):
     def sample_by_taxonomy(self):
         """Sample genomes at designated taxonomic rank.
         """
+        # don't sample; keep all
+        if not self.sample:
+            self.selected = set(self.df['genome'])
+            return
+
+        print('Sampling genomes based on taxonomy...')
         self.selected, n = set(), 0
         rank, sample, latin = self.rank, self.sample, False
-        if sample is None:
-            return
-        print('Sampling genomes based on taxonomy...')
 
         # Latinate species names
         if rank == 'species_latin':

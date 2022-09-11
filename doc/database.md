@@ -18,11 +18,17 @@ The workflow consists of the following steps:
 2. Download NCBI RefSeq assembly summary.
 3. Sample genomes based on various properties and taxonomic information.
 4. Download protein sequences associated with sampled genomes.
-5. Compile local databases using DIAMOND and/or BLAST.
+5. (Optional) compile local databases using DIAMOND and/or BLAST.
 
 
 ## Default protocol
-Database files
+
+A "default" database can be built using the following command:
+
+```bash
+hgtector database -o <output_dir> --default
+```
+
 This will download all protein sequences of NCBI RefSeq genomes of **bacteria**, **archaea**, **fungi** and **protozoa**, keep _one genome per species_ that has a Latinate name, plus one genome per taxonomic group at higher ranks, regardless whether that genome has a Latinate species name, plus all NCBI-defined **reference**, **representative** and **type material** genomes (prioritized during taxonomy-based sampling, and added afterwards if not sampled). Finally it will attempt to compile the database using DIAMOND, if available. The command is equivalent to:
 
 ```bash
