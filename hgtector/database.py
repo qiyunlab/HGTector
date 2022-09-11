@@ -405,6 +405,13 @@ class Database(object):
                               self.exclude]
             report_diff('Dropped {} genomes.')
 
+            # further sampling / filtering will not occur
+            if not self.exclude:
+                self.capital = False
+                self.latin = False
+                self.block = ''
+                self.sample = 0
+
         # genomes without download link
         self.df.query('ftp_path != "na"', inplace=True)
         report_diff('Dropped {} genomes without download link.')
