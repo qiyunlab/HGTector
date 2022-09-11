@@ -51,7 +51,8 @@ arguments = [
 
     'taxon sampling',
     ['-s|--sample',  'sample up to this number of genomes per taxonomic '
-                     'group at given rank (0 for all)', {'type': int}],
+                     'group at given rank (0 for none, omit for all)',
+                     {'type': int}],
     ['-r|--rank',    'taxonomic rank at which sampling will be performed',
                      {'default': 'species'}],
     ['--above',      'sampling will also be performed on ranks from the '
@@ -410,7 +411,7 @@ class Database(object):
                 self.capital = False
                 self.latin = False
                 self.block = ''
-                self.sample = 0
+                self.sample = None
 
         # genomes without download link
         self.df.query('ftp_path != "na"', inplace=True)
@@ -505,7 +506,7 @@ class Database(object):
         """Sample genomes at designated taxonomic rank.
         """
         # don't sample; keep all
-        if not self.sample:
+        if self.sample is None:
             self.selected = set(self.df['genome'])
             return
 
@@ -578,19 +579,19 @@ class Database(object):
         # add reference genomes
         if self.reference:
             df_ = self.df.query('refseq_category == "reference genome"')
-            print(f'Include {df_.shape[0]} reference genomes.')
+            print(f'Included {df_.shape[0]} reference genomes.')
             self.selected.update(df_['genome'])
 
         # add representative genomes
         if self.represent:
             df_ = self.df.query('refseq_category == "representative genome"')
-            print(f'Include {df_.shape[0]} representative genomes.')
+            print(f'Included {df_.shape[0]} representative genomes.')
             self.selected.update(df_['genome'])
 
         # add type material genomes
         if self.typemater:
             df_ = self.df[self.df['relation_to_type_material'].notna()]
-            print(f'Include {df_.shape[0]} type material genomes.')
+            print(f'Included {df_.shape[0]} type material genomes.')
             self.selected.update(df_['genome'])
 
     def filter_to_sampled(self):
