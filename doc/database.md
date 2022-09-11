@@ -90,6 +90,18 @@ hgtector database --genbank --sample 10 --rank phylum -o .
 This will include GenBank genomes, and select up to 10 genomes per phylum. This small database will maximize the inclusion of the 100+ mostly uncultivated, understudied candidate phyla which has less curated genomes. Useful for exploring deep branches of life.
 
 ```bash
+hgtector database -c plant -o .
+```
+
+This will download all plant genomes (instead of microbial genomes), without sampling.
+
+```bash
+hgtector database --reference --represent --typemater -o .
+```
+
+This will download all reference, representative, and type material microbial genomes, without sampling.
+
+```bash
 hgtector database -g gids.txt -o .
 ```
 
