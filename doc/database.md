@@ -2,7 +2,7 @@ Database
 ========
 
 ## Index
-- [Overview](#overview) | [Default protocol](#default-protocol) | [Pre-built database](#pre-built-database) | [Database files](#database-files) | [Considerations](#considerations) | [Command-line reference](#command-line-reference)
+- [Overview](#overview) | [Default protocol](#default-protocol) | [Pre-built databases](#pre-built-databases) | [Database files](#database-files) | [Considerations](#considerations) | [Command-line reference](#command-line-reference)
 
 ## Overview
 
@@ -36,15 +36,21 @@ hgtector database --output <output_dir> --cats microbe --sample 1 --rank species
 ```
 
 
-## Pre-built database
+## Pre-built databases
 
-A database built using the default protocol on 2021-11-21 is available for [download](https://www.dropbox.com/s/tszxy9etp52id3u/hgtdb_20211121.tar.xz?dl=0) \([MD5](https://www.dropbox.com/s/kdopz946pk088wr/hgtdb_20211121.tar.xz.md5?dl=0)\). It needs to be [compiled](#Manual-compiling) using choice of aligner.
+Databases built using the default protocol are available for download at either of the following two repositories. They need to be [compiled](#Manual-compiling) using choice of aligners prior to use.
 
-This database, sampled from NCBI RefSeq after release, 209 contains 68,977,351 unique protein sequences from 21,754 microbial genomes, representing 3 domains, 74 phyla, 145 classes, 337 orders, 783 families, 3,753 genera and 15,932 species.
+OneDrive for Business by Arizona State University:
 
-Building this database used a maximum of 63 GB memory. Searching this database using DIAMOND v2.0.13 requires ~7 GB memory.
+- https://arizonastateu-my.sharepoint.com/:f:/g/personal/qzhu44_asurite_asu_edu/ErLl2qExtFhAiS1J0sCpZqgBEebKHtBilj1IDlaitOVZXg
 
-A previous version of the database built on 2019-10-21 is available [here](https://www.dropbox.com/s/qdnfgzdcjadlm4i/hgtdb_20191021.tar.xz?dl=0).
+Dropbox of Dr. Qiyun Zhu:
+
+- https://www.dropbox.com/sh/tevabydz6palfih/AAB-TitXKNfQl5dmnZM1VfRca?dl=0
+
+The current release, built on 2023-01-02 (sampled after NCBI RefSeq release 215) contains 129,809,746 unique protein sequences from 40,310 microbial genomes, representing 3 domains, 75 phyla, 153 classes, 356 orders, 847 families, 4,095 genera and 40,309 species.
+
+Previous releases, as well as a small database for test purpose ("ref107") are also provided at the two repositories.
 
 
 ## Database files

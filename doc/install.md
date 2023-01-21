@@ -25,7 +25,7 @@ pip install git+https://github.com/qiyunlab/HGTector.git
 
 ### Option 2: Native installation
 
-Download this [repository](https://github.com/qiyunlab/HGTector/archive/master.zip). Unzip. Then execute:
+Download this [repository](https://github.com/qiyunlab/HGTector/archive/master.zip) or any of the [releases](https://github.com/qiyunlab/HGTector/releases). Unzip. Then execute:
 
 ```bash
 python setup.py install
@@ -49,9 +49,9 @@ conda install -c bioconda diamond blast
 
 HGTector has a command `database` for automated database construction. It defaults to the **NCBI** RefSeq microbial genomes and taxonomy. Meanwhile, we also provide instructions for using **GTDB** and custom databases. See [details](database.md).
 
-A standard database built using the default protocol on 2021-11-21 is available for [download](https://www.dropbox.com/s/tszxy9etp52id3u/hgtdb_20211121.tar.xz?dl=0) \([MD5](https://www.dropbox.com/s/kdopz946pk088wr/hgtdb_20211121.tar.xz.md5?dl=0)\), together with [instruction](database.md#Manual-compiling) for compiling.
+A standard database built using the default protocol on 2023-01-02 is available for download ([OneDrive](https://arizonastateu-my.sharepoint.com/:f:/g/personal/qzhu44_asurite_asu_edu/ErLl2qExtFhAiS1J0sCpZqgBEebKHtBilj1IDlaitOVZXg) or [Dropbox](https://www.dropbox.com/sh/tevabydz6palfih/AAB-TitXKNfQl5dmnZM1VfRca?dl=0)), together with [instruction](database.md#Manual-compiling) for compiling.
 
-A small, pre-compiled test database is also available for [download](https://www.dropbox.com/s/46v3uc708rvc5rc/ref107.tar.xz?dl=0).
+A small, pre-compiled test database is also available for download from the same websites.
 
 
 ## Upgrade

@@ -48,7 +48,7 @@ Build a reference [database](doc/database.md) using the default protocol:
 hgtector database -o db_dir --default
 ```
 
-Or [download](https://www.dropbox.com/s/tszxy9etp52id3u/hgtdb_20211121.tar.xz?dl=0) a pre-built database as of 2021-11-21, and [compile](doc/database.md#Manual-compiling) it.
+Or download a [pre-built database](doc/database.md#pre-built-databases) as of 2023-01-02, and [compile](doc/database.md#Manual-compiling) it.
 
 Prepare input file(s). They should be multi-Fasta files of amino acid sequences (faa). Each file represents the whole protein set of a complete or partial genome.
 
@@ -71,7 +71,7 @@ It is recommended that you read the [first run](doc/1strun.md), [second run](doc
 
 ## License
 
-Copyright (c) 2013-2021, [Qiyun Zhu](mailto:qiyunzhu@gmail.com) and [Katharina Dittmar](mailto:katharinad@gmail.com). Licensed under [BSD 3-clause](http://opensource.org/licenses/BSD-3-Clause). See full license [statement](LICENSE).
+Copyright (c) 2013-2023, [Qiyun Zhu](mailto:qiyunzhu@gmail.com) and [Katharina Dittmar](mailto:katharinad@gmail.com). Licensed under [BSD 3-clause](http://opensource.org/licenses/BSD-3-Clause). See full license [statement](LICENSE).
 
 
 ## Citation
