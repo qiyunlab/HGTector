@@ -1,7 +1,13 @@
 Change Log
 ==========
 
-## Version 2.0b3 (2021, ongoing)
+## Version 2.0b4 (ongoing)
+
+### Changed
+- Updated pre-built default database to 2023-01-02 (after NCBI RefSeq 215).
+
+
+## Version 2.0b3 (11/25/2021)
 
 ### Added
 - Predicted HGT list now includes potential donors. Users can optionally specify a taxonomic rank at which they will be reported.
@@ -12,7 +18,7 @@ Change Log
 - Added an option `--manual` to export URLs of sampled genomes during database construction, and let the user download them manually.
 
 ### Changed
-- Updated pre-built default database to 2021-11-21 (after NCBI RefSeq 209)
+- Updated pre-built default database to 2021-11-21 (after NCBI RefSeq 209).
 - Repository transferred from [DittmarLab](https://github.com/DittmarLab) to [qiyunlab](https://github.com/qiyunlab).
 - Updated recommended dependency versions, however the program should continue to be compatible with previous versions.
 - Minor tweaks with no visible impact on program behavior.
