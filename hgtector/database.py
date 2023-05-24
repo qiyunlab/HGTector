@@ -391,8 +391,8 @@ class Database(object):
         # typically not necessary, just in case
         self.df.rename(columns={'# assembly_accession': 'accession'},
                        inplace=True)
-        self.df['accnov'] = self.df['accession'].str.split('.', 1).str[0]
-        self.df['genome'] = 'G' + self.df['accnov'].str.split('_', 1).str[-1]
+        self.df['accnov'] = self.df['accession'].str.split('.', n=1).str[0]
+        self.df['genome'] = 'G' + self.df['accnov'].str.split('_', n=1).str[-1]
         self.df.drop_duplicates(subset=['genome'], inplace=True)
 
         # include/exclude genome Ids
