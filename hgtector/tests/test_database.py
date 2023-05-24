@@ -166,6 +166,7 @@ class DatabaseTests(TestCase):
         me.rank = None
         me.sample = None
         me.above = None
+        me.df = pd.DataFrame(None, columns=['genome'])
         self.assertIsNone(me.sample_by_taxonomy())
 
         # regular
@@ -352,7 +353,7 @@ class DatabaseTests(TestCase):
         me.compile = 'blast'
         me.compile_database()
         self.assertTrue(isdir(join(self.tmpdir, 'blast')))
-        for ext in ('phr', 'pin', 'pog', 'psd', 'psi', 'psq'):
+        for ext in ('phr', 'pin', 'pog', 'psq'):
             self.assertTrue(isfile(join(self.tmpdir, 'blast', f'db.{ext}')))
         rmtree(join(self.tmpdir, 'blast'))
 
@@ -367,7 +368,7 @@ class DatabaseTests(TestCase):
         me.compile = 'both'
         me.compile_database()
         self.assertTrue(isdir(join(self.tmpdir, 'blast')))
-        for ext in ('phr', 'pin', 'pog', 'psd', 'psi', 'psq'):
+        for ext in ('phr', 'pin', 'pog', 'psq'):
             self.assertTrue(isfile(join(self.tmpdir, 'blast', f'db.{ext}')))
         self.assertTrue(isdir(join(self.tmpdir, 'diamond')))
         self.assertTrue(isfile(join(self.tmpdir, 'diamond', 'db.dmnd')))
@@ -389,7 +390,7 @@ class DatabaseTests(TestCase):
             me.taxonmap = dict(x.split('\t') for x in f.read().splitlines())
         me.build_blast_db()
         self.assertTrue(isdir(join(self.tmpdir, 'blast')))
-        for ext in ('phr', 'pin', 'pog', 'psd', 'psi', 'psq'):
+        for ext in ('phr', 'pin', 'pog', 'psq'):
             self.assertTrue(isfile(join(self.tmpdir, 'blast', f'db.{ext}')))
         rmtree(join(self.tmpdir, 'blast'))
         remove(join(self.tmpdir, 'db.faa'))

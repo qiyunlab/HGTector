@@ -84,14 +84,12 @@ arguments = [
     ['--blastdbcmd', 'blastdbcmd executable'],
 
     'remote search behaviors',
-    ['--algorithm',  'remote search algorithm'],
     ['--retries',    'maximum number of retries per search',
                      {'type': int}],
     ['--delay',      'seconds between two search requests',
                      {'type': int}],
     ['--timeout',    'seconds before program gives up waiting',
                      {'type': int}],
-    ['--entrez',     'entrez query text'],
     ['--server',     'remote search server URL'],
 
     'self-alignment options',
@@ -300,7 +298,7 @@ class Search(object):
 
         # load remote search settings
         if self.method == 'remote':
-            for key in 'db', 'algorithm', 'delay', 'timeout', 'entrez':
+            for key in 'db', 'delay', 'timeout':
                 get_config(self, key, f'remote.{key}')
             get_config(self, 'server', 'server.search')
 
@@ -1572,16 +1570,11 @@ class Search(object):
               flush=True)
         data = [('CMD', 'Put'),
                 ('PROGRAM', 'blastp'),
-                ('DATABASE', self.db),
-                ('WORD_SIZE', 6)]
-        if self.algorithm:
-            data.append(('BLAST_PROGRAMS', self.algorithm))
+                ('DATABASE', self.db)]
         if self.evalue:
             data.append(('EXPECT', self.evalue))
         if self.maxseqs:
             data.append(('MAX_NUM_SEQ', self.maxseqs))
-        if self.entrez:
-            data.append(('EQ_TEXT', self.entrez))
         query = ''.join([f'>{id_}\n{seq}\n' for id_, seq in seqs])
         data.append(('QUERY', query))
         data = urlencode(data)
@@ -1599,8 +1592,10 @@ class Search(object):
                 sleep(self.delay)
             trial += 1
 
-            # get request Id
+            # submit query to server
             req = Request(self.server, data=data)
+
+            # get request Id
             with urlopen(req) as response:
                 res = response.read().decode('utf-8')
             m = re.search(r'^    RID = (.*$)', res, re.MULTILINE)
@@ -1609,7 +1604,9 @@ class Search(object):
                 continue
             rid = m.group(1)
             print(f' RID: {rid}.', end='', flush=True)
-            sleep(10)
+
+            # wait a bit
+            sleep(20)
 
             # check status
             data_ = urlencode([('CMD', 'Get'),
@@ -1621,6 +1618,9 @@ class Search(object):
             while True:
                 with urlopen(req_) as response:
                     res = response.read().decode('utf-8')
+                if res == '\n\n':
+                    sleep(self.delay)
+                    continue
                 m = re.search(r'\s+Status=(.+)', res, re.MULTILINE)
                 if not m:
                     print('WARNING: Failed to retrieve remote search status.')
@@ -1648,7 +1648,7 @@ class Search(object):
                     break
             if not success:
                 continue
-            sleep(10)
+            sleep(self.delay)
 
             # retrieve result
             data_ = [('CMD', 'Get'),
@@ -2171,7 +2171,7 @@ class Search(object):
                     sleep(self.delay)
                 trial += 1
 
-                # get request Id
+                # submit query and get request Id
                 with urlopen(url) as response:
                     res = response.read().decode('utf-8')
                 m = re.search(r'^    RID = (.*$)', res, re.MULTILINE)
@@ -2180,7 +2180,7 @@ class Search(object):
                     continue
                 rid = m.group(1)
                 print(f' RID: {rid}.', end='', flush=True)
-                sleep(1)
+                sleep(20)
 
                 # check status
                 url_ = (f'{self.aln_server}?CMD=Get&FORMAT_OBJECT=SearchInfo&'
@@ -2190,6 +2190,9 @@ class Search(object):
                 while True:
                     with urlopen(url_) as response:
                         res = response.read().decode('utf-8')
+                    if res == '\n\n':
+                        sleep(self.delay)
+                        continue
                     m = re.search(r'\s+Status=(.+)', res, re.MULTILINE)
                     if not m:
                         print('WARNING: Failed to retrieve remote self-'
@@ -2219,7 +2222,7 @@ class Search(object):
                         break
                 if not success:
                     continue
-                sleep(1)
+                sleep(self.delay)
 
                 # retrieve result
                 url_ = (f'{self.aln_server}?CMD=Get&ALIGNMENT_VIEW=Tabular&'

@@ -11,7 +11,7 @@ A small example is provided in the subdirectory [example](../example). The input
 
 Let's analyze this small example using HGTector.
 
-**Note**: Automatic remote BLAST search using URL API is inefficient as of 2021 and has been [deprecated](https://ncbi.github.io/blast-cloud/dev/api.html) by NCBI. Therefore this tutorial is for reference only. Unless you want to wait for long hours, please skip this tutorial and move on to the [second run](2ndrun.md).
+**Note**: Automatic remote BLAST search using URL API is inefficient as of 2023. Therefore the "search" step of this tutorial may take a few hours to complete. Unless you want to wait, feel free to skip this tutorial and move on to the [second run](2ndrun.md).
 
 
 ## Search
