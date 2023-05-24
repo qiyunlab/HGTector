@@ -104,11 +104,6 @@ remote:
   # options: nr, refseq_select_prot, refseq_protein, swissprot, pdb, etc.
   db: refseq_select_prot
 
-  # remote search algorithm
-  # options: blastp psiBlast deltaBlast kmerBlastp phiBlast, etc.
-  # recommended: kmerBlastp (a.k.a. Quick BLASTP)
-  algorithm: kmerBlastp
-
   queries: 0        # number of queries per run
   maxchars: 7000    # maximum number of characters per run (note: a valid URL
                     # typically cannot exceed 8,000 characters)
@@ -116,11 +111,14 @@ remote:
   delay: 60         # seconds between two search requests
   timeout: 1800     # seconds before program gives up waiting
 
-  # entrez query text
-  entrez: all [filter] NOT(environmental samples[filter] OR metagenomes[orgn]) txid131567[orgn]
-
   # extra URL arguments for remote search
-  extrargs: "&WORD_SIZE=6&FILTER=m%20S"
+  # the following default setting means:
+  # * word size is 6 (for amino acids)
+  # * filter out low-complexity regions
+  # * limit search to cellular organisms (TaxID: 131567)
+  # * exclude uncultured/environmental sample sequences
+  # * don't attempt to retrieve NCBI GI
+  extrargs: "&WORD_SIZE=6&FILTER=m%20S&ENTREZ_QUERY=txid131567+%5BORGN%5D&EXCLUDE_SEQ_UNCULT=on&NCBI_GI=false"
 
 
 ## Fetch information from remote server

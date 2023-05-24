@@ -199,11 +199,9 @@ Option | Default | Description
 
 Option | Default | Description
 --- | --- | ---
-`--algorithm` | kmerBlastp | Remote search algorithm (blastp, psiBlast, deltaBlast, kmerBlastp (a.k.a. Quick BLASTP), phiBlast, etc., see [here](https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins)).
 `--retries` | 5 | Maximum number of retries per search.
 `--delay` | 60 | Seconds between two search requests.
 `--timeout` | 900 | Seconds before program gives up waiting.
-`--entrez` | all [filter] NOT(environmental samples[filter] OR metagenomes[orgn]) txid131567[orgn] | Entrez query text.
 `--server` | [link](https://blast.ncbi.nlm.nih.gov/Blast.cgi) | Remote search server URL.
 
 ### Self-alignment options

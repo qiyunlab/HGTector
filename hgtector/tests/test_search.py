@@ -219,8 +219,6 @@ class SearchTests(TestCase):
         me.retries = 5
         me.delay = 60
         me.timeout = 1800
-        me.algorithm = 'kmerBlastp'
-        me.entrez = None
         obs = me.search_wf(seqs)
         self.assertEqual(len(obs['WP_000516135.1']), 5)
 
@@ -958,13 +956,11 @@ class SearchTests(TestCase):
         me.retries = 5
         me.delay = 60
         me.timeout = 1800
-        me.algorithm = 'kmerBlastp'
         me.evalue = 1e-10
         me.identity = 30
         me.coverage = 30
         me.maxseqs = 5
         me.extrargs = None
-        me.entrez = None
 
         # single query sequence
         seqs = [('WP_000516135.1',
@@ -991,8 +987,6 @@ class SearchTests(TestCase):
                  'MLLALLSSTDNFCLSSTELSERLDVSRTYITRACDSLEKFGFIKRMESKEDRRSKN'
                  'IYLTSDGNLYLQRTTRIYGRYLKKYGATLQMMKSKHLK')]
         me.maxseqs = 3
-        me.entrez = 'all [filter] NOT(metagenomes[orgn])'
-        me.extrargs = 'BLAST_SPEC=MicrobialGenomes'
         obs = me.remote_search(seqs)
         self.assertEqual(len(obs['NP_052663.1']), 3)
         self.assertEqual(len(obs['NP_052627.1']), 3)
