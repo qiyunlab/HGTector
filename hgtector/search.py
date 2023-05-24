@@ -1168,7 +1168,8 @@ class Search(object):
     """sequence query functions"""
 
     def blast_seqinfo(self, ids):
-        """Retrieve information of given sequence Ids from local BLAST database.
+        """Retrieve information of given sequence Ids from local BLAST
+        database.
 
         Parameters
         ----------
@@ -2082,7 +2083,7 @@ class Search(object):
         if ec:
             raise ValueError(f'blastp failed with error code {ec}.')
         remove(tmpin)
-        return(self.parse_self_m8(out))
+        return self.parse_self_m8(out)
 
     def diamond_selfaln(self, seqs):
         """Run DIAMOND to align sequences to themselves.
@@ -2108,8 +2109,7 @@ class Search(object):
             self.diamond, 'makedb',
             '--in', tmpin,
             '--db', tmpdb,
-            '--threads', str(self.threads),
-            '--tmpdir', self.tmpdir))
+            '--threads', str(self.threads)))
         ec, out = run_command(cmd, merge=False)
         if ec:
             raise ValueError(f'diamond failed with error code {ec}.')
@@ -2130,7 +2130,7 @@ class Search(object):
 
         remove(tmpin)
         remove(tmpdb)
-        return(self.parse_self_m8(out))
+        return self.parse_self_m8(out)
 
     def remote_selfaln(self, seqs):
         """Perform BLAST search through a remote server.

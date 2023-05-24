@@ -890,8 +890,7 @@ class Database(object):
             '--taxonmap', taxonmap,
             '--taxonnodes', join(self.output, 'taxdump', 'nodes.dmp'),
             '--taxonnames', join(self.output, 'taxdump', 'names.dmp'),
-            '--db', join(self.output, 'diamond', 'db'),
-            '--tmpdir', self.tmpdir))
+            '--db', join(self.output, 'diamond', 'db')))
         print('Build DIAMOND database...', flush=True)
         ec, out = run_command(cmd)
         if ec:
