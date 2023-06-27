@@ -9,7 +9,8 @@
 # ----------------------------------------------------------------------------
 
 import re
-from os import remove, makedirs, cpu_count
+import sys
+from os import remove, makedirs, sched_getaffinity
 from os.path import join, isdir, isfile
 from shutil import which, rmtree
 from tempfile import mkdtemp
@@ -76,7 +77,7 @@ arguments = [
     ['--tax-block',   'ignore taxon names containing those words'],
 
     'local search behaviors',
-    ['-p|--threads', 'number of threads (0 for all CPU cores)',
+    ['-p|--threads', 'number of threads (0 for all available cores)',
                      {'type': int}],
     ['--tmpdir',     'temporary directory'],
     ['--diamond',    'diamond executable'],
@@ -112,7 +113,6 @@ arguments = [
     ['--fetch-server',  'remote fetch server URL'],
 ]
 
-
 class Search(object):
 
     def __init__(self):
@@ -131,6 +131,14 @@ class Search(object):
         # read and validate input data
         self.input_wf()
 
+	# check requested threads if set vs available ones.
+        m=len(sched_getaffinity(0))
+        if self.threads and self.threads > m:
+            print("WARNING threads limited to %d (requested %d)" %(m,self.threads), file=sys. stderr)
+            self.threads = m
+        elif self.threads == 0:
+            self.threads = m
+	
         # perform homology search for each sample
         for sid, sample in sorted(self.data.items()):
             if 'done' in sample:
@@ -301,23 +309,6 @@ class Search(object):
             for key in 'db', 'delay', 'timeout':
                 get_config(self, key, f'remote.{key}')
             get_config(self, 'server', 'server.search')
-
-        # determine number of threads
-        if self.method in ('diamond', 'blast') and not self.threads:
-
-            # use all available CPUs if threads is set to zero or left empty
-            self.threads = cpu_count()
-
-            # do single-threading if CPU count not working
-            if self.threads is None:
-                print('WARNING: Cannot determine number of CPUs. Will do '
-                      'single-threading instead.')
-                self.threads = 1
-
-            # apply BLAST CPU number cap
-            if self.method == 'blast' and self.threads > 8:
-                print('WARNING: BLAST can only use a maximum of 8 CPUs.')
-                self.threads = 8
 
         # check / create temporary directory
         if self.method in ('diamond', 'blast'):

@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------------
 
 import sys
-from os import remove, makedirs, cpu_count
+from os import remove, makedirs, sched_getaffinity
 from os.path import join, isfile, isdir, getsize, basename
 from shutil import which, rmtree
 from time import sleep
@@ -242,7 +242,7 @@ class Database(object):
 
         # determine number of CPUs to use
         if self.compile in ('diamond', 'both') and not self.threads:
-            self.threads = cpu_count()
+            self.threads = len(os.sched_getaffinity(0))
             if self.threads is None:
                 self.threads = 1
 
