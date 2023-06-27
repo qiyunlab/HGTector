@@ -480,7 +480,11 @@ class Search(object):
                 except KeyError:
                     pass
                 if db:
+                    # check monolithic indexes
                     if all(isfile(f'{db}.{x}') for x in ('phr', 'pin', 'psq')):
+                        return db
+                    # check splitted indexes. just check *.00.suffix ones
+                    elif all(isfile(f'{db}.00.{x}') for x in ('phr', 'pin', 'psq')):
                         return db
                     elif self.method == 'blast':
                         raise ValueError(f'Invalid BLAST database: {db}.')
