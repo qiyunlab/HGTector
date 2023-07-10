@@ -242,7 +242,7 @@ class Database(object):
 
         # determine number of CPUs to use
         if self.compile in ('diamond', 'both') and not self.threads:
-            self.threads = len(os.sched_getaffinity(0))
+            self.threads = len(sched_getaffinity(0))
             if self.threads is None:
                 self.threads = 1
 

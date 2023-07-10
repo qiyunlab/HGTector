@@ -9,7 +9,6 @@
 # ----------------------------------------------------------------------------
 
 import re
-import sys
 from os import remove, makedirs, sched_getaffinity
 from os.path import join, isdir, isfile
 from shutil import which, rmtree
@@ -113,6 +112,7 @@ arguments = [
     ['--fetch-server',  'remote fetch server URL'],
 ]
 
+
 class Search(object):
 
     def __init__(self):
@@ -131,14 +131,15 @@ class Search(object):
         # read and validate input data
         self.input_wf()
 
-	# check requested threads if set vs available ones.
-        m=len(sched_getaffinity(0))
+        # check requested threads if set vs available ones
+        m = len(sched_getaffinity(0))
         if self.threads and self.threads > m:
-            print("WARNING threads limited to %d (requested %d)" %(m,self.threads), file=sys. stderr)
+            print(
+                f'WARNING: Threads limited to {m} (requested {self.threads}).')
             self.threads = m
         elif self.threads == 0:
             self.threads = m
-	
+
         # perform homology search for each sample
         for sid, sample in sorted(self.data.items()):
             if 'done' in sample:
@@ -484,7 +485,8 @@ class Search(object):
                     if all(isfile(f'{db}.{x}') for x in ('phr', 'pin', 'psq')):
                         return db
                     # check splitted indexes. just check *.00.suffix ones
-                    elif all(isfile(f'{db}.00.{x}') for x in ('phr', 'pin', 'psq')):
+                    elif all(isfile(f'{db}.00.{x}')
+                             for x in ('phr', 'pin', 'psq')):
                         return db
                     elif self.method == 'blast':
                         raise ValueError(f'Invalid BLAST database: {db}.')
