@@ -59,7 +59,7 @@ class DatabaseTests(TestCase):
 
     def test_filter_genomes(self):
         me = Database()
-        header = ('# assembly_accession', 'assembly_level', 'ftp_path')
+        header = ('assembly_accession', 'assembly_level', 'ftp_path')
         data = (('GCF_000000001.1', 'Chromosome', ''),
                 ('GCF_000000002.1', 'Complete Genome', ''),
                 ('GCF_000000003.2', 'Scaffold', ''),
