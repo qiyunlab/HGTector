@@ -8,8 +8,9 @@
 # The full license is in the file LICENSE, distributed with this software.
 # ----------------------------------------------------------------------------
 
+import os
 import re
-from os import remove, makedirs, sched_getaffinity
+from os import remove, makedirs
 from os.path import join, isdir, isfile
 from shutil import which, rmtree
 from tempfile import mkdtemp
@@ -131,8 +132,13 @@ class Search(object):
         # read and validate input data
         self.input_wf()
 
+        # check available threads
+        try:
+            m = len(os.sched_getaffinity(0))
+        except AttributeError:
+            m = os.cpu_count()
+
         # check requested threads if set vs available ones
-        m = len(sched_getaffinity(0))
         if self.threads and self.threads > m:
             print(
                 f'WARNING: Threads limited to {m} (requested {self.threads}).')
